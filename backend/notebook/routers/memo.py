@@ -27,7 +27,7 @@ SIZE_PER_PAGE = 50
 async def create_memo(
     memo: CreatedMemo,
     session: Annotated[AsyncSession, Depends(get_session)],
-    current_user: Annotated[User, Depends(get_current_user)],
+    current_user: Annotated[User, Depends(AdminRoleChecker)],  # Admin หรือ SuperAdmin เท่านั้น
 ) -> Memo | None:
 
     data = memo.dict()

@@ -17,7 +17,14 @@ router = APIRouter(prefix="/users", tags=["users"])
 async def create(
     user_info: RegisteredUser,
     session: Annotated[AsyncSession, Depends(models.get_session)],
+    current_user: Annotated[User, Depends(deps.get_current_active_superuser)],
 ) -> User:
+
+    if user_info.username.lower() == "superadmin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Cannot create or modify SuperAdmin account.",
+        )
 
     result = await session.exec(
         select(DBUser).where(DBUser.username == user_info.username)
@@ -35,8 +42,32 @@ async def create(
     await user.set_password(user_info.password)
     session.add(user)
     await session.commit()
+    await session.refresh(user)
 
-    return user
+    return User.from_orm(user)
+
+
+@router.delete("/{user_id}")
+async def delete_user(
+    user_id: int,
+    session: Annotated[AsyncSession, Depends(models.get_session)],
+    current_user: Annotated[User, Depends(deps.get_current_active_superuser)],
+):
+    user = await session.get(DBUser, user_id)
+
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found.")
+
+    if user.username.lower() == "superadmin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Cannot delete SuperAdmin account.",
+        )
+
+    await session.delete(user)
+    await session.commit()
+
+    return {"message": "User deleted successfully"}
 
 
 @router.get("/me")
@@ -51,7 +82,6 @@ def get_me(
 async def get(
     user_id: int,
     session: Annotated[AsyncSession, Depends(models.get_session)],
-    # current_user: User = Depends(deps.get_current_user),
 ) -> User:
 
     user = await session.get(DBUser, user_id)
