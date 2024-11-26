@@ -16,9 +16,9 @@
 
 {
   "email": "6410110238@psu.ac.th",
-  "username": "AdminTheeravee",
-  "first_name": "Pea2",
-  "last_name": "Kub2",
+  "username": "admin1",
+  "first_name": "admin",
+  "last_name": "Pea",
   "password": "Th-238238"
 }
 
