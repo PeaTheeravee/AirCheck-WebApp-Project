@@ -27,20 +27,20 @@ async def create(
             detail="Cannot create or modify SuperAdmin account.",
         )
 
-    # ตรวจสอบว่าชื่อผู้ใช้ซ้ำหรือไม่
-    result = await session.exec(select(DBUser).where(DBUser.username == user_info.username))
+    # ตรวจสอบว่ามี email, username, first_name หรือ last_name ซ้ำหรือไม่
+    result = await session.exec(
+        select(DBUser).where(
+            (DBUser.email == user_info.email) |
+            (DBUser.username == user_info.username) |
+            (DBUser.first_name == user_info.first_name) |
+            (DBUser.last_name == user_info.last_name)
+        )
+    )
     user = result.one_or_none()
     if user:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="This username already exists.",
-        )
-
-
-    if user:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="This username is exists.",
+            detail="A user with the same email, username, first_name, or last_name already exists.",
         )
 
     # สร้างผู้ใช้ใหม่โดยตั้ง role เป็น "admin"

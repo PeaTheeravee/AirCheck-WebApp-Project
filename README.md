@@ -17,9 +17,15 @@
 {
   "email": "6410110238@psu.ac.th",
   "username": "admin1",
-  "first_name": "admin",
+  "first_name": "Admin",
   "last_name": "Pea",
   "password": "Th-238238"
+}
+{
+  "email": "6410110238@email.local",
+  "username": "admin1",
+  "first_name": "Admin",
+  "last_name": "Pea"
 }
 
 superadmin = DBUser(
