@@ -62,7 +62,7 @@ class RegisteredUser(BaseUser):
 
 
 class UpdatedUser(BaseUser):
-    roles: list[str]
+    pass
 
 
 class Token(BaseModel):
@@ -89,6 +89,7 @@ class DBUser(BaseUser, SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
 
     password: str
+    role: str = Field(default="admin")
 
     register_date: datetime.datetime = Field(default_factory=datetime.datetime.now)
     updated_date: datetime.datetime = Field(default_factory=datetime.datetime.now)

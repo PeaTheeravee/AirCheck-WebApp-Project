@@ -19,18 +19,23 @@ async def create(
     session: Annotated[AsyncSession, Depends(models.get_session)],
     current_user: Annotated[User, Depends(deps.get_current_active_superuser)],
 ) -> User:
-
+    
+    # ป้องกันการสร้างบัญชี SuperAdmin
     if user_info.username.lower() == "superadmin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Cannot create or modify SuperAdmin account.",
         )
 
-    result = await session.exec(
-        select(DBUser).where(DBUser.username == user_info.username)
-    )
-
+    # ตรวจสอบว่าชื่อผู้ใช้ซ้ำหรือไม่
+    result = await session.exec(select(DBUser).where(DBUser.username == user_info.username))
     user = result.one_or_none()
+    if user:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="This username already exists.",
+        )
+
 
     if user:
         raise HTTPException(
@@ -38,7 +43,15 @@ async def create(
             detail="This username is exists.",
         )
 
-    user = DBUser.from_orm(user_info)
+    # สร้างผู้ใช้ใหม่โดยตั้ง role เป็น "admin"
+    user = DBUser(
+        username=user_info.username,
+        email=user_info.email,
+        first_name=user_info.first_name,
+        last_name=user_info.last_name,
+        password=user_info.password,
+        role="admin",  # กำหนดบทบาทเป็น admin
+    )
     await user.set_password(user_info.password)
     session.add(user)
     await session.commit()

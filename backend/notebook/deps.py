@@ -61,7 +61,7 @@ async def get_current_active_user(
 async def get_current_active_superuser(
     current_user: typing.Annotated[User, Depends(get_current_user)],
 ) -> User:
-    if "superadmin" not in current_user.roles:
+    if current_user.role != "superadmin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="The user doesn't have enough privileges"
         )

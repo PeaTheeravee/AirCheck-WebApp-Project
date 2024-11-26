@@ -39,7 +39,7 @@ def create_app():
                         first_name="Super",
                         last_name="Admin",
                         password="superadminpassword",
-                        roles=["superadmin"],
+                        role="superadmin",
                     )
                     await superadmin.set_password("superadminpassword")
                     session.add(superadmin)
