@@ -160,20 +160,58 @@ async def update(
     user_id: int,
     session: Annotated[AsyncSession, Depends(models.get_session)],
     user_update: UpdatedUser,
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_active_superuser), # SuperAdmin เท่านั้น
 ) -> User:
 
+    # ดึงข้อมูลผู้ใช้ที่ต้องการอัปเดต
     db_user = await session.get(DBUser, user_id)
-
     if not db_user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Not found this user",
         )
 
-    user = user_update.dict()
+    # ตรวจสอบว่าข้อมูล email ซ้ำหรือไม่
+    if user_update.email:
+        result = await session.exec(select(DBUser).where(DBUser.email == user_update.email, DBUser.id != user_id))
+        if result.one_or_none():
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="A user with the same email already exists.",
+            )
 
-    db_user.sqlmodel_update(user)
+    # ตรวจสอบว่าข้อมูล username ซ้ำหรือไม่
+    if user_update.username:
+        result = await session.exec(select(DBUser).where(DBUser.username == user_update.username, DBUser.id != user_id))
+        if result.one_or_none():
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="A user with the same username already exists.",
+            )
+
+    # ตรวจสอบว่าข้อมูล first_name ซ้ำหรือไม่
+    if user_update.first_name:
+        result = await session.exec(select(DBUser).where(DBUser.first_name == user_update.first_name, DBUser.id != user_id))
+        if result.one_or_none():
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="A user with the same first_name already exists.",
+            )
+
+    # ตรวจสอบว่าข้อมูล last_name ซ้ำหรือไม่
+    if user_update.last_name:
+        result = await session.exec(select(DBUser).where(DBUser.last_name == user_update.last_name, DBUser.id != user_id))
+        if result.one_or_none():
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="A user with the same last_name already exists.",
+            )
+
+    # อัปเดตข้อมูลที่ส่งมา
+    user_data = user_update.dict(exclude_unset=True)
+    for key, value in user_data.items():
+        setattr(db_user, key, value)
+
     session.add(db_user)
     await session.commit()
     await session.refresh(db_user)
