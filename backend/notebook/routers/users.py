@@ -13,6 +13,7 @@ from .. import models
 router = APIRouter(prefix="/users", tags=["users"])
 
 
+
 @router.post("/create")
 async def create(
     user_info: RegisteredUser,
@@ -76,6 +77,7 @@ async def create(
     return User.from_orm(user)
 
 
+
 @router.delete("/{user_id}")
 async def delete_user(
     user_id: int,
@@ -99,12 +101,14 @@ async def delete_user(
     return {"message": "User deleted successfully"}
 
 
+
 @router.get("/me")
 def get_me(
     current_user: User = Depends(deps.get_current_user)
 ) -> User:
 
     return current_user
+
 
 
 @router.get("/{user_id}")
@@ -123,36 +127,53 @@ async def get(
     return user
 
 
+
 @router.put("/{user_id}/change_password")
 async def change_password(
     user_id: int,
     password_update: ChangedPassword,
     session: Annotated[AsyncSession, Depends(models.get_session)],
     current_user: User = Depends(deps.get_current_user),
-) -> dict(): # type: ignore
+) -> dict:
 
+    # ดึงข้อมูลผู้ใช้ที่ต้องการเปลี่ยนรหัสผ่าน
     user = await session.get(DBUser, user_id)
-
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Not found this user",
+            detail="User not found.",
         )
 
-    if not await user.verify_password(password_update.current_password):
+    # กรณีที่ผู้ใช้เป็น admin: เปลี่ยนรหัสผ่านได้เฉพาะของตัวเอง
+    if current_user.role == "admin" and current_user.id != user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admins can only change their own password.",
+        )
+
+    # กรณีที่ผู้ใช้เป็น superadmin: สามารถเปลี่ยนรหัสผ่านของ admin ได้
+    if current_user.role == "superadmin" and user.role != "admin" and current_user.id != user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="SuperAdmins can only change passwords for themselves or Admins.",
+        )
+
+    # ตรวจสอบรหัสผ่านเดิม (เฉพาะถ้าเปลี่ยนรหัสผ่านตัวเอง)
+    if current_user.id == user.id and not await user.verify_password(password_update.current_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect password",
+            detail="Incorrect current password.",
         )
 
+    # ตั้งค่ารหัสผ่านใหม่
     await user.set_password(password_update.new_password)
-
-
     session.add(user)
     await session.commit()
     await session.refresh(user)
 
     return {"message": "Password updated successfully"}
+
+
 
 @router.put("/{user_id}/update")
 async def update(
