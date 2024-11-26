@@ -27,20 +27,36 @@ async def create(
             detail="Cannot create or modify SuperAdmin account.",
         )
 
-    # ตรวจสอบว่ามี email, username, first_name หรือ last_name ซ้ำหรือไม่
-    result = await session.exec(
-        select(DBUser).where(
-            (DBUser.email == user_info.email) |
-            (DBUser.username == user_info.username) |
-            (DBUser.first_name == user_info.first_name) |
-            (DBUser.last_name == user_info.last_name)
-        )
-    )
-    user = result.one_or_none()
-    if user:
+    # ตรวจสอบว่ามี email ซ้ำหรือไม่
+    email_check = await session.exec(select(DBUser).where(DBUser.email == user_info.email))
+    if email_check.one_or_none():
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="A user with the same email, username, first_name, or last_name already exists.",
+            detail="A user with the same email already exists.",
+        )
+
+    # ตรวจสอบว่ามี username ซ้ำหรือไม่
+    username_check = await session.exec(select(DBUser).where(DBUser.username == user_info.username))
+    if username_check.one_or_none():
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="A user with the same username already exists.",
+        )
+
+    # ตรวจสอบว่ามี first_name ซ้ำหรือไม่
+    first_name_check = await session.exec(select(DBUser).where(DBUser.first_name == user_info.first_name))
+    if first_name_check.one_or_none():
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="A user with the same first_name already exists.",
+        )
+
+    # ตรวจสอบว่ามี last_name ซ้ำหรือไม่
+    last_name_check = await session.exec(select(DBUser).where(DBUser.last_name == user_info.last_name))
+    if last_name_check.one_or_none():
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="A user with the same last_name already exists.",
         )
 
     # สร้างผู้ใช้ใหม่โดยตั้ง role เป็น "admin"
