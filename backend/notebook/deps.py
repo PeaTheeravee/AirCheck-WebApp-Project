@@ -60,8 +60,8 @@ async def get_current_user(
 async def get_current_active_user(
     current_user: typing.Annotated[User, Depends(get_current_user)]
 ) -> User:
-    if current_user.status != "active":
-        raise HTTPException(status_code=400, detail="Inactive user")
+    if current_user.status not in ["active"]: 
+        raise HTTPException(status_code=400, detail="User is not active.")
     return current_user
 
 

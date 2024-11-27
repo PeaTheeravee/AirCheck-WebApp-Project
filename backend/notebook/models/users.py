@@ -90,6 +90,7 @@ class DBUser(BaseUser, SQLModel, table=True):
 
     password: str
     role: str = Field(default="admin")
+    status: str = Field(default="inactive")
 
     register_date: datetime.datetime = Field(default_factory=datetime.datetime.now)
     updated_date: datetime.datetime = Field(default_factory=datetime.datetime.now)

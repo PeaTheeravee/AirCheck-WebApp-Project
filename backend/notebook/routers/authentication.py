@@ -35,6 +35,11 @@ async def login(
     access_token_expires = datetime.timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     refresh_token_expires = datetime.timedelta(minutes=settings.REFRESH_TOKEN_EXPIRE_MINUTES)
 
+    # อัปเดต status เป็น 'active'
+    user.status = "active"
+    session.add(user)
+    await session.commit()
+    
     return Token(
         access_token=security.create_access_token(
             data={"sub": user.id}, expires_delta=access_token_expires
@@ -53,10 +58,28 @@ async def login(
 @router.post("/logout")
 async def logout(
     token: Annotated[str, Depends(security.oauth2_scheme)],
+    session: Annotated[models.AsyncSession, Depends(models.get_session)],
 ):
     if token in blacklist_tokens:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token already invalidated.")
     blacklist_tokens.add(token)
+
+    # ดึงข้อมูลผู้ใช้จาก token
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[security.ALGORITHM])
+        user_id: int = payload.get("sub")
+        if not user_id:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token.")
+    except jwt.JWTError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token.")
+    
+    # เปลี่ยน status ของผู้ใช้เป็น inactive
+    user = await session.get(DBUser, user_id)
+    if user:
+        user.status = "inactive"
+        session.add(user)
+        await session.commit()
+
     return {"message": "Successfully logged out."}
 
 
