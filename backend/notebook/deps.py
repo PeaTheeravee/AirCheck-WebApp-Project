@@ -12,16 +12,26 @@ from . import models
 from . import security
 from . import config
 
-
+# ตัวจัดการ token
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
-
 settings = config.get_settings()
+
+# Token blacklist (สำหรับ logout)
+blacklist_tokens = set()
 
 
 async def get_current_user(
     token: typing.Annotated[str, Depends(oauth2_scheme)],
     session: typing.Annotated[models.AsyncSession, Depends(models.get_session)],
 ) -> User:
+    # ตรวจสอบ token ที่อาจถูก blacklist
+    if token in blacklist_tokens:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token is invalid.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -32,9 +42,6 @@ async def get_current_user(
             token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
         )
         user_id: int = payload.get("sub")
-
-        print("payload", payload)
-        print("user_id", user_id)
 
         if user_id is None:
             raise credentials_exception
@@ -76,9 +83,9 @@ class RoleChecker:
         self,
         user: typing.Annotated[User, Depends(get_current_active_user)],
     ):
-        for role in user.roles:
-            if role in self.allowed_roles:
-                return
-        raise HTTPException(status_code=403, detail="Role not permitted")
-    
+        if user.role not in self.allowed_roles:
+            raise HTTPException(status_code=403, detail="Role not permitted")
+        return user
+
+
 AdminRoleChecker = RoleChecker("admin", "superadmin")
