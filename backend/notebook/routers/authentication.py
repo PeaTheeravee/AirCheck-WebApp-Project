@@ -46,6 +46,7 @@ async def login(
         expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES,
         expires_at=datetime.datetime.now() + access_token_expires,
         issued_at=datetime.datetime.now(),
+        scope=user.role,  # ใช้ role เป็น scope
     )
 
 

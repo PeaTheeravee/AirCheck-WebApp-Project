@@ -71,7 +71,7 @@ class Token(BaseModel):
     token_type: str
     expires_in: int
     expires_at: datetime.datetime
-    scope: str
+    scope: str = ""
     issued_at: datetime.datetime
 
 
