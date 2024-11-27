@@ -192,6 +192,7 @@ async def update(
             detail="Not found this user",
         )
 
+    # ตรวจสอบเฉพาะผู้ใช้อื่น (DBUser.id != user_id) เพื่อไม่ให้ตรวจสอบข้อมูลของตัวเอง
     # ตรวจสอบว่าข้อมูล email ซ้ำหรือไม่
     if user_update.email:
         result = await session.exec(select(DBUser).where(DBUser.email == user_update.email, DBUser.id != user_id))
