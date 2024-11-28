@@ -88,9 +88,7 @@ async def refresh_token(
     token: Annotated[str, Depends(security.oauth2_scheme)],
     session: Annotated[models.AsyncSession, Depends(models.get_session)],
 ):
-    if token in blacklist_tokens:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token is invalid.")
-    
+    # ตรวจสอบการ decode token ว่าถูกต้องหรือไม่
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[security.ALGORITHM])
         user_id: int = payload.get("sub")
@@ -101,9 +99,27 @@ async def refresh_token(
     except jwt.JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token.")
 
+    # ดึงข้อมูลผู้ใช้จากฐานข้อมูล
     user = await session.get(DBUser, user_id)
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found.")
+    
+    # ตรวจสอบสถานะของผู้ใช้ ต้องเป็น "active" เท่านั้น
+    if user.status != "active":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, 
+            detail="User is not active. Please login again."
+        )
 
+    # ตรวจสอบว่า token ถูกใส่ใน blacklist หรือไม่
+    if token in blacklist_tokens:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token is invalid.")
+
+    # กำหนดเวลาให้ token ใหม่
     access_token_expires = datetime.timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    return {"access_token": security.create_access_token({"sub": user.id}, expires_delta=access_token_expires)}
+
+    # สร้าง access token ใหม่
+    new_access_token = security.create_access_token({"sub": user.id}, expires_delta=access_token_expires)
+
+    # คืนค่า access token ใหม่
+    return {"access_token": new_access_token, "token_type": "bearer"}
