@@ -8,10 +8,10 @@ from sqlmodel import Field, SQLModel
 class BaseDetect(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    DeviceID: str
-    Humidity : float | None = 0
-    Temperature : float | None = 0
-    Timestamp: Optional[datetime]
+    device_id: int
+    humidity : float | None = 0
+    temperature : float | None = 0
+    timestamp: Optional[datetime]
 
 
 class CreatedDetect(BaseDetect):
