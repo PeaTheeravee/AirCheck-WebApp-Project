@@ -4,8 +4,7 @@ from sqlmodel import SQLModel, Field, Relationship
 
 from . import users
 
-
-class BaseMemo(BaseModel):
+class BaseDevice(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     title: str
@@ -14,20 +13,20 @@ class BaseMemo(BaseModel):
     user_id: int | None = 1
 
 
-class CreatedMemo(BaseMemo):
+class CreatedDevice(BaseDevice):
     pass
 
 
-class UpdatedMemo(BaseMemo):
+class UpdatedDevice(BaseDevice):
     pass
 
 
-class Memo(BaseMemo):
+class Device(BaseDevice):
     id: int
 
 
-class DBMemo(BaseMemo, SQLModel, table=True):
-    __tablename__ = "memos"
+class DBDevice(BaseDevice, SQLModel, table=True):
+    __tablename__ = "devices"
 
     id: int = Field(default=None, primary_key=True)
 
@@ -35,9 +34,9 @@ class DBMemo(BaseMemo, SQLModel, table=True):
     user: users.DBUser | None = Relationship()
 
 
-class MemoList(BaseModel):
+class DeviceList(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-    memos: list[Memo]
+    devices: list[Device]
     page: int
     page_count: int
     size_per_page: int
