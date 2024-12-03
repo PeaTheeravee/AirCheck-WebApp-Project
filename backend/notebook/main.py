@@ -3,15 +3,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import select
 from sqlalchemy.ext.asyncio import AsyncSession  # Import AsyncSession
 
-from . import models
-from . import routers
-from . import config
+from . import models, routers, config
 from .models.users import DBUser
+from .deps import get_current_user, get_current_active_user, AdminRoleChecker
 
 def create_app():
     settings = config.get_settings()
     app = FastAPI()
 
+    # เพิ่ม middleware สำหรับ CORS
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
@@ -20,11 +20,15 @@ def create_app():
         allow_headers=["*"],
     )
 
+    # Initial database
     models.init_db(settings)
+    
+    # เรียกใช้งาน router ที่มีการตรวจสอบการเข้าถึง
     routers.init_router(app)
 
     @app.on_event("startup")
     async def on_startup():
+        # สร้าง database และผู้ใช้ superadmin ถ้ายังไม่มี
         await models.create_all()
 
         async for session in models.get_session():  # ใช้ async for เพื่อดึง session
@@ -46,4 +50,3 @@ def create_app():
                     await session.commit()
 
     return app
-
