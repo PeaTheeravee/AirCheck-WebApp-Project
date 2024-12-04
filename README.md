@@ -2,6 +2,7 @@
 1. cd backend
 2. poetry shell
 3. .\scripts\run-api
+http://172.27.128.1:8000/docs (FastAPI)
 
 วิธี clone
 1. git clone

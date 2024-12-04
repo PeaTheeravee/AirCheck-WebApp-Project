@@ -4,7 +4,7 @@ from fastapi.security import OAuth2PasswordBearer
 from . import config
 import jwt
 from notebook.models.blacklist_token import BlacklistToken
-from notebook.models import models
+from notebook.models import AsyncSession
 
 ALGORITHM = "HS256"
 settings = config.get_settings()
@@ -36,7 +36,7 @@ def create_refresh_token(data: dict, expires_delta: timedelta | None = None) -> 
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
 
-def refresh_access_token(refresh_token: str, session: models.AsyncSession):
+def refresh_access_token(refresh_token: str, session: AsyncSession):
     try:
         payload = jwt.decode(refresh_token, settings.SECRET_KEY, algorithms=[ALGORITHM])
         user_id: int = payload.get("sub")
@@ -78,7 +78,7 @@ def is_token_expired(token: str) -> bool:
         return False
 
 # ฟังก์ชันสำหรับลบ token ที่หมดอายุจากฐานข้อมูล
-async def delete_expired_tokens(session: models.AsyncSession):
+async def delete_expired_tokens(session: AsyncSession):
     expired_tokens = await session.query(BlacklistToken).filter(BlacklistToken.expired_at < datetime.utcnow()).all()
     for token in expired_tokens:
         await session.delete(token)
