@@ -51,6 +51,13 @@ def refresh_access_token(refresh_token: str, session: models.AsyncSession):
 
         # สร้าง access token ใหม่
         new_access_token = create_access_token(data={"sub": user_id})
+
+        # บันทึก refresh token ใน blacklist และตั้งค่า expired_at
+        expired_at = datetime.utcnow() + timedelta(minutes=settings.REFRESH_TOKEN_EXPIRE_MINUTES)
+        new_blacklisted_token = BlacklistToken(token=refresh_token, expired_at=expired_at)
+        session.add(new_blacklisted_token)
+        session.commit()
+
         return new_access_token
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh token has expired")

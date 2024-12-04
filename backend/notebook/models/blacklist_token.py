@@ -6,7 +6,13 @@ class BlacklistToken(SQLModel, table=True):
     token: str  # ตัวแปรสำหรับเก็บ token ที่ถูกบล็อค
     created_at: datetime = Field(default_factory=datetime.utcnow)  # เวลาที่บล็อค token
     expired_at: datetime  # เวลาที่ token หมดอายุ
-    
+
     def is_expired(self) -> bool:
-        #ตรวจสอบว่า token หมดอายุแล้วหรือยัง
+        # ตรวจสอบว่า token หมดอายุแล้วหรือยัง
         return datetime.utcnow() > self.expired_at
+
+    @classmethod
+    def create(cls, token: str, expired_at: datetime) -> "BlacklistToken":
+        # ฟังก์ชันสำหรับสร้าง BlacklistToken
+        return cls(token=token, expired_at=expired_at)
+
