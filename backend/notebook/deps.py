@@ -7,13 +7,12 @@ from notebook.models.users import *
 from . import models
 from . import security
 from . import config
+from notebook.models.blacklist_token import BlacklistToken
+from datetime import datetime
 
 # ตัวจัดการ token แบบ OAuth2
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
 settings = config.get_settings()
-
-# ตัวแปรเก็บ blacklist ของ token (ใช้สำหรับการ logout)
-blacklist_tokens = set()
 
 # ฟังก์ชันสำหรับตรวจสอบ token และรีเฟรช token
 async def get_current_user(
@@ -21,7 +20,8 @@ async def get_current_user(
     session: typing.Annotated[models.AsyncSession, Depends(models.get_session)],  # รับ session จากฐานข้อมูล
 ) -> User:
     # ตรวจสอบว่า token มีอยู่ใน blacklist หรือไม่
-    if token in blacklist_tokens:
+    blacklisted_token = await session.query(BlacklistToken).filter(BlacklistToken.token == token).first()
+    if blacklisted_token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token is invalid.",  # ถ้า token ถูก blacklist จะส่งข้อความนี้
@@ -101,3 +101,12 @@ class RoleChecker:
 
 # ตัวอย่างการใช้ RoleChecker: ใช้กับ role "admin" และ "superadmin"
 AdminRoleChecker = RoleChecker("admin", "superadmin")
+
+# ฟังก์ชันสำหรับลบ token ที่หมดอายุจากฐานข้อมูล
+async def delete_expired_tokens(session: models.AsyncSession):
+    expired_tokens = await session.query(BlacklistToken).filter(BlacklistToken.expired_at < datetime.utcnow()).all()
+    for token in expired_tokens:
+        await session.delete(token)
+    await session.commit()
+
+
