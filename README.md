@@ -15,13 +15,7 @@ http://172.27.128.1:8000/docs (FastAPI)
 6. docker run --name D2-PGadmin -p 5050:80 -e PGADMIN_DEFAULT_EMAIL=6410110238@psu.ac.th -e PGADMIN_DEFAULT_PASSWORD=147896325 -d dpage/pgadmin4
 7. .\scripts\run-api  
 
-{
-  "email": "6410110238@psu.ac.th",
-  "username": "adminTheeravee",
-  "first_name": "Admin",
-  "last_name": "PeaKub",
-  "password": "238238"
-}
+
 {
   "email": "admin@email.local",
   "username": "admin",
@@ -29,6 +23,15 @@ http://172.27.128.1:8000/docs (FastAPI)
   "last_name": "Lastname",
   "password": "password"
 }
+{
+  "email": "6410110238@psu.ac.th",
+  "username": "adminTheeravee",
+  "first_name": "Admin",
+  "last_name": "PeaKub",
+  "password": "238238"
+}
+
+
 
 superadmin = DBUser(
   username="superadmin",
@@ -36,5 +39,13 @@ superadmin = DBUser(
   first_name="Super",
   last_name="Admin",
   password="superadminpassword",
+  roles=["superadmin"],
+)
+superadmin = DBUser(
+  username="superadmin",
+  email="superadmin@localhost",
+  first_name="Super",
+  last_name="Admin",
+  password="superadminpassword22",
   roles=["superadmin"],
 )

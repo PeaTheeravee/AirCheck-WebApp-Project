@@ -7,7 +7,6 @@ from notebook.models.users import *
 from . import models
 from . import security
 from . import config
-from notebook.models.blacklist_token import BlacklistToken
 from datetime import datetime
 from sqlalchemy.future import select  # นำเข้า select สำหรับ AsyncSession
 
@@ -20,17 +19,6 @@ async def get_current_user(
     token: typing.Annotated[str, Depends(oauth2_scheme)],  # รับ token จาก headers
     session: typing.Annotated[models.AsyncSession, Depends(models.get_session)],  # รับ session จากฐานข้อมูล
 ) -> User:
-    # ตรวจสอบว่า token มีอยู่ใน blacklist หรือไม่
-    result = await session.execute(select(BlacklistToken).filter(BlacklistToken.token == token))
-    blacklisted_token = result.scalar_one_or_none()  # ใช้ scalar_one_or_none() เพื่อดึงผลลัพธ์
-
-    if blacklisted_token:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token is invalid.",  # ถ้า token ถูก blacklist จะส่งข้อความนี้
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",  # ข้อความเมื่อ token ไม่ถูกต้อง
@@ -104,14 +92,3 @@ class RoleChecker:
 
 # ตัวอย่างการใช้ RoleChecker: ใช้กับ role "admin" และ "superadmin"
 AdminRoleChecker = RoleChecker("admin", "superadmin")
-
-# ฟังก์ชันสำหรับลบ token ที่หมดอายุจากฐานข้อมูล
-async def delete_expired_tokens(session: models.AsyncSession):
-    result = await session.execute(select(BlacklistToken).filter(BlacklistToken.expired_at < datetime.utcnow()))
-    expired_tokens = result.scalars().all()  # ดึงข้อมูลทั้งหมดที่ตรงเงื่อนไข
-
-    for token in expired_tokens:
-        await session.delete(token)
-    await session.commit()
-
-

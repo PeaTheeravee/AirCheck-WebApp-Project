@@ -6,7 +6,6 @@ import datetime
 import jwt
 
 from notebook.models.users import *
-from notebook.models.blacklist_token import BlacklistToken  # นำเข้า BlacklistToken
 from .. import config, models, security
 
 router = APIRouter(tags=["authentication"])
@@ -59,16 +58,6 @@ async def logout(
     token: Annotated[str, Depends(security.oauth2_scheme)],
     session: Annotated[models.AsyncSession, Depends(models.get_session)],
 ):
-    # ตรวจสอบว่า token อยู่ใน blacklist หรือไม่
-    blacklisted_token = await session.exec(select(BlacklistToken).where(BlacklistToken.token == token))
-    if blacklisted_token.one_or_none():
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token already invalidated.")
-
-    # บันทึก token ที่ถูก logout ลงใน blacklist
-    blacklist_token = BlacklistToken(token=token, expired_at=datetime.datetime.utcnow() + datetime.timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
-    session.add(blacklist_token)
-    await session.commit()
-
     # ดึงข้อมูลผู้ใช้จาก token
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[security.ALGORITHM])
@@ -88,3 +77,4 @@ async def logout(
         await session.commit()
 
     return {"message": "Successfully logged out."}
+
