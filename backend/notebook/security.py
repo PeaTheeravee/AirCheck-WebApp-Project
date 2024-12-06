@@ -78,10 +78,10 @@ def is_token_expired(token: str) -> bool:
         return False
 
 # ฟังก์ชันสำหรับลบ token ที่หมดอายุจากฐานข้อมูล
-async def delete_expired_tokens(session: AsyncSession):
-    expired_tokens = await session.query(BlacklistToken).filter(BlacklistToken.expired_at < datetime.utcnow()).all()
-    for token in expired_tokens:
-        await session.delete(token)
-    await session.commit()
+#async def delete_expired_tokens(session: AsyncSession):
+#   expired_tokens = await session.query(BlacklistToken).filter(BlacklistToken.expired_at < datetime.utcnow()).all()
+#    for token in expired_tokens:
+#        await session.delete(token)
+#    await session.commit()
 
 
