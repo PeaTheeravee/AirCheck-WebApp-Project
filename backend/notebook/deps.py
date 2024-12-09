@@ -53,7 +53,6 @@ async def get_current_user(
                 "WWW-Authenticate": "Bearer",
                 "new-access-token": new_token  # ส่ง access token ใหม่กลับ
             }
-
         )
     except jwt.JWTError as e:
         raise credentials_exception

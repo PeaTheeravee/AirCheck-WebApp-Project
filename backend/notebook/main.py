@@ -1,11 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import select
-from sqlalchemy.ext.asyncio import AsyncSession  # Import AsyncSession
 
 from . import models, routers, config
 from .models.users import DBUser
-from .deps import get_current_user, get_current_active_user, AdminRoleChecker
 
 def create_app():
     settings = config.get_settings()

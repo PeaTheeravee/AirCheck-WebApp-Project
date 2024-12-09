@@ -2,19 +2,19 @@ import datetime
 
 import pydantic
 
-from pydantic import BaseModel, EmailStr, ConfigDict
+from pydantic import BaseModel, ConfigDict
 
 from sqlmodel import SQLModel, Field
 
 from passlib.context import CryptContext
 
+# สร้าง Context สำหรับการจัดการรหัสผ่าน
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 class BaseUser(BaseModel):
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
-    email: str = pydantic.Field(example="admin@email.local")
     username: str = pydantic.Field(example="admin")
     first_name: str = pydantic.Field(example="Firstname")
     last_name: str = pydantic.Field(example="Lastname")
@@ -43,18 +43,13 @@ class UserList(BaseModel):
 
 
 class Login(BaseModel):
-    email: EmailStr
+    username: str
     password: str
 
 
 class ChangedPassword(BaseModel):
     current_password: str
     new_password: str
-
-
-class ResetedPassword(BaseModel):
-    email: EmailStr
-    citizen_id: str
 
 
 class RegisteredUser(BaseUser):
@@ -106,7 +101,6 @@ class DBUser(BaseUser, SQLModel, table=True):
         self.password = pwd_context.hash(plain_password)
 
     async def verify_password(self, plain_password):
-        print(plain_password, self.password)
         return pwd_context.verify(plain_password, self.password)
 
     async def is_use_citizen_id_as_password(self):
