@@ -1,17 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select
-
 from typing import Annotated
-
 from notebook.models.users import *
-
 from .. import deps
 from .. import models
 
 router = APIRouter(prefix="/users", tags=["users"])
-
 
 
 @router.post("/create")
@@ -20,6 +15,10 @@ async def create(
     session: Annotated[AsyncSession, Depends(models.get_session)],
     current_user: Annotated[User, Depends(deps.get_current_active_superuser)],
 ) -> User:
+    
+    # ตรวจสอบสถานะของผู้ใช้ก่อน
+    if current_user.status != "active":
+        raise HTTPException(status_code=400, detail="The user is not active.")
     
     # ป้องกันการสร้างบัญชี SuperAdmin
     if user_info.username.lower() == "superadmin":
@@ -77,13 +76,17 @@ async def create(
     return User.from_orm(user)
 
 
-
 @router.delete("/{user_id}")
 async def delete_user(
     user_id: int,
     session: Annotated[AsyncSession, Depends(models.get_session)],
     current_user: Annotated[User, Depends(deps.get_current_active_superuser)],
 ):
+    
+    # ตรวจสอบสถานะของผู้ใช้ก่อน
+    if current_user.status != "active":
+        raise HTTPException(status_code=400, detail="The user is not active.")
+    
     user = await session.get(DBUser, user_id)
 
     if not user:
@@ -101,14 +104,15 @@ async def delete_user(
     return {"message": "User deleted successfully"}
 
 
-
 @router.get("/me")
 def get_me(
     current_user: User = Depends(deps.get_current_user)
 ) -> User:
-
+    
+    # ตรวจสอบสถานะของผู้ใช้ก่อน
+    if current_user.status != "active":
+        raise HTTPException(status_code=400, detail="The user is not active.")
     return current_user
-
 
 
 @router.get("/{user_id}")
@@ -127,7 +131,6 @@ async def get(
     return user
 
 
-
 @router.put("/{user_id}/change_password")
 async def change_password(
     user_id: int,
@@ -136,6 +139,10 @@ async def change_password(
     current_user: User = Depends(deps.get_current_user),
 ) -> dict:
 
+    # ตรวจสอบสถานะของผู้ใช้ก่อน
+    if current_user.status != "active":
+        raise HTTPException(status_code=400, detail="The user is not active.")
+    
     # ดึงข้อมูลผู้ใช้ที่ต้องการเปลี่ยนรหัสผ่าน
     user = await session.get(DBUser, user_id)
     if not user:
@@ -174,7 +181,6 @@ async def change_password(
     return {"message": "Password updated successfully"}
 
 
-
 @router.put("/{user_id}/update")
 async def update(
     request: Request,
@@ -184,6 +190,10 @@ async def update(
     current_user: User = Depends(deps.get_current_active_superuser), # SuperAdmin เท่านั้น
 ) -> User:
 
+    # ตรวจสอบสถานะของผู้ใช้ก่อน
+    if current_user.status != "active":
+        raise HTTPException(status_code=400, detail="The user is not active.")
+    
     # ดึงข้อมูลผู้ใช้ที่ต้องการอัปเดต
     db_user = await session.get(DBUser, user_id)
     if not db_user:
