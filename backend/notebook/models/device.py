@@ -7,10 +7,10 @@ from . import users
 class BaseDevice(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    title: str
-    content: str
-
-    user_id: int | None = 1
+    device_id: int  # ID ของอุปกรณ์ที่กำหนดเอง
+    device_name: str  # ชื่ออุปกรณ์
+    location: str  # ตำแหน่งของอุปกรณ์
+    user_id: int | None = None  # ใครเป็นผู้เพิ่มอุปกรณ์
 
 
 class CreatedDevice(BaseDevice):

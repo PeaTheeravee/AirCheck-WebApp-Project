@@ -1,10 +1,8 @@
 from datetime import datetime
-
 from typing import Optional
 from pydantic import BaseModel, ConfigDict
 from sqlmodel import Field, SQLModel
 
-#สำหรับเก็บค่าจากเซ็นเซอร์วัดอุณหภูมิ(temperature)และความชื้นรุ่น(humidity) คือ BaseDetect
 class BaseDetect(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

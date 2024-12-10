@@ -1,11 +1,11 @@
 from typing import Annotated
 
-from sqlalchemy import delete
+from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 
-from fastapi import APIRouter, HTTPException, Depends, Query
+from fastapi import APIRouter, HTTPException, Depends
 
-from sqlmodel import Session, select, func
+from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from notebook.models import *
@@ -26,10 +26,17 @@ SIZE_PER_PAGE = 50
 async def create_device(
     device: CreatedDevice,
     session: Annotated[AsyncSession, Depends(get_session)],
-    current_user: Annotated[User, Depends(AdminRoleChecker)],  # Admin หรือ SuperAdmin เท่านั้น
+    current_user: Annotated[User, Depends(get_current_user)],  # ระบุผู้ใช้ที่เพิ่มอุปกรณ์
 ) -> Device | None:
 
+    # ตรวจสอบว่า device_id ซ้ำหรือไม่
+    existing_device = await session.exec(select(DBDevice).where(DBDevice.device_id == device.device_id))
+    if existing_device.one_or_none():
+        raise HTTPException(status_code=400, detail="This device_id already exists.")
+
+    # เพิ่มข้อมูลผู้ใช้ในอุปกรณ์
     data = device.dict()
+    data['user_id'] = current_user.id
 
     dbdevice = DBDevice(**data)
     session.add(dbdevice)
@@ -47,16 +54,13 @@ async def read_devices(
 
     result = await session.exec(select(DBDevice).offset((page - 1) * SIZE_PER_PAGE).limit(SIZE_PER_PAGE))
     devices = result.all()
-        
+
     page_count = int(
         math.ceil(
             (await session.exec(select(func.count(DBDevice.id)))).first()
             / SIZE_PER_PAGE
         )
     )
-
-    print("page_count", page_count)
-    print("devices", devices)
 
     return DeviceList.from_orm(
         dict(devices=devices, page_count=page_count, page=page, size_per_page=SIZE_PER_PAGE)
@@ -86,13 +90,17 @@ async def update_device(
     data = device.dict()
 
     db_device = await session.get(DBDevice, device_id)
-    db_device.sqlmodel_update(data)
-    
+    if not db_device:
+        raise HTTPException(status_code=404, detail="Device not found.")
+
+    for key, value in data.items():
+        setattr(db_device, key, value)
+
     session.add(db_device)
     await session.commit()
     await session.refresh(db_device)
 
-    return device.from_orm(db_device)
+    return Device.from_orm(db_device)
 
 
 @router.delete("/{device_id}/delete")
@@ -102,7 +110,6 @@ async def delete_device(
     current_user: Annotated[User, Depends(get_current_user)],
 ) -> dict:
     try:
-
         # ลบข้อมูลในตาราง devices
         db_device = await session.get(DBDevice, device_id)
         if db_device:
