@@ -17,14 +17,12 @@ http://172.27.128.1:8000/docs (FastAPI)
 
 
 {
-  "email": "admin@email.local",
   "username": "admin",
   "first_name": "Firstname",
   "last_name": "Lastname",
   "password": "password"
 }
 {
-  "email": "6410110238@psu.ac.th",
   "username": "adminTheeravee",
   "first_name": "Admin",
   "last_name": "PeaKub",
@@ -35,7 +33,6 @@ http://172.27.128.1:8000/docs (FastAPI)
 
 superadmin = DBUser(
   username="superadmin",
-  email="superadmin@localhost",
   first_name="Super",
   last_name="Admin",
   password="superadminpassword",
@@ -43,7 +40,6 @@ superadmin = DBUser(
 )
 superadmin = DBUser(
   username="superadmin",
-  email="superadmin@localhost",
   first_name="Super",
   last_name="Admin",
   password="superadminpassword22",

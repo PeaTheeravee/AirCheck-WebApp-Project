@@ -59,19 +59,6 @@ async def read_devices(
     )
 
 
-@router.get("/api-key/{api_key}")
-async def get_device_by_api_key(
-    api_key: str,
-    session: Annotated[AsyncSession, Depends(get_session)],
-    current_user: Annotated[User, Depends(get_current_user)],
-) -> Device:
-    device = await session.exec(select(DBDevice).where(DBDevice.api_key == api_key))
-    device = device.one_or_none()
-    if not device:
-        raise HTTPException(status_code=404, detail="Device not found.")
-    return Device.from_orm(device)
-
-
 @router.put("/update/{api_key}")
 async def update_device_by_api_key(
     api_key: str,
