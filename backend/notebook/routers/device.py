@@ -8,11 +8,9 @@ from fastapi import APIRouter, HTTPException, Depends
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from notebook.models import *
+from notebook.models import get_session
 from notebook.models.device import *
-
 from notebook.models.users import *
-
 from notebook.deps import *
 
 import math
@@ -28,12 +26,6 @@ async def create_device(
     session: Annotated[AsyncSession, Depends(get_session)],
     current_user: Annotated[User, Depends(get_current_user)],  # ระบุผู้ใช้ที่เพิ่มอุปกรณ์
 ) -> Device | None:
-
-    # ตรวจสอบว่า device_id ซ้ำหรือไม่
-    existing_device = await session.exec(select(DBDevice).where(DBDevice.device_id == device.device_id))
-    if existing_device.one_or_none():
-        raise HTTPException(status_code=400, detail="This device_id already exists.")
-
     # เพิ่มข้อมูลผู้ใช้ในอุปกรณ์
     data = device.dict()
     data['user_id'] = current_user.id
@@ -67,59 +59,59 @@ async def read_devices(
     )
 
 
-@router.get("/{device_id}")
-async def read_device(
-    device_id: int, session: Annotated[AsyncSession, Depends(get_session)]
+@router.get("/api-key/{api_key}")
+async def get_device_by_api_key(
+    api_key: str,
+    session: Annotated[AsyncSession, Depends(get_session)],
+    current_user: Annotated[User, Depends(get_current_user)],
 ) -> Device:
+    device = await session.exec(select(DBDevice).where(DBDevice.api_key == api_key))
+    device = device.one_or_none()
+    if not device:
+        raise HTTPException(status_code=404, detail="Device not found.")
+    return Device.from_orm(device)
 
-    db_device = await session.get(DBDevice, device_id)
-    if db_device:
-        return Device.from_orm(db_device)
 
-    raise HTTPException(status_code=404, detail="Item not found")
-
-
-@router.put("/{device_id}/update")
-async def update_device(
-    device_id: int,
+@router.put("/update/{api_key}")
+async def update_device_by_api_key(
+    api_key: str,
     device: UpdatedDevice,
     session: Annotated[AsyncSession, Depends(get_session)],
     current_user: Annotated[User, Depends(get_current_user)],
 ) -> Device:
+    device_in_db = await session.exec(select(DBDevice).where(DBDevice.api_key == api_key))
+    device_in_db = device_in_db.one_or_none()
 
-    data = device.dict()
-
-    db_device = await session.get(DBDevice, device_id)
-    if not db_device:
+    if not device_in_db:
         raise HTTPException(status_code=404, detail="Device not found.")
 
+    data = device.dict()
     for key, value in data.items():
-        setattr(db_device, key, value)
+        setattr(device_in_db, key, value)
 
-    session.add(db_device)
+    session.add(device_in_db)
     await session.commit()
-    await session.refresh(db_device)
+    await session.refresh(device_in_db)
 
-    return Device.from_orm(db_device)
+    return Device.from_orm(device_in_db)
 
 
-@router.delete("/{device_id}/delete")
-async def delete_device(
-    device_id: int,
+@router.delete("/delete/{api_key}")
+async def delete_device_by_api_key(
+    api_key: str,
     session: Annotated[AsyncSession, Depends(get_session)],
     current_user: Annotated[User, Depends(get_current_user)],
 ) -> dict:
+    device = await session.exec(select(DBDevice).where(DBDevice.api_key == api_key))
+    device = device.one_or_none()
+
+    if not device:
+        raise HTTPException(status_code=404, detail="Device not found.")
+
     try:
-        # ลบข้อมูลในตาราง devices
-        db_device = await session.get(DBDevice, device_id)
-        if db_device:
-            await session.delete(db_device)
-            await session.commit()
-
-            return dict(message="delete success")
-        else:
-            return dict(message="device not found")
-
+        await session.delete(device)
+        await session.commit()
+        return {"message": "Device deleted successfully."}
     except IntegrityError as e:
         await session.rollback()
-        return dict(message=f"Failed to delete due to integrity error: {str(e)}")
+        return {"message": f"Failed to delete device due to integrity error: {str(e)}"}

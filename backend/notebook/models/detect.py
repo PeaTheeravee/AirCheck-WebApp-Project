@@ -6,9 +6,9 @@ from sqlmodel import Field, SQLModel
 class BaseDetect(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    device_id: int
-    humidity : float | None = 0
-    temperature : float | None = 0
+    api_key: str  # ใช้ API Key แทน device_id
+    humidity: float | None = 0
+    temperature: float | None = 0
     timestamp: Optional[datetime]
 
 
@@ -24,9 +24,13 @@ class Detect(BaseDetect):
     id: int
 
 
-class DBDetect(Detect, SQLModel, table=True):
+class DBDetect(SQLModel, table=True):
     __tablename__ = "detects"
     id: int = Field(default=None, primary_key=True)
+    api_key: str = Field(default=None, index=True)  # ใช้ API Key สำหรับเชื่อมโยงกับอุปกรณ์
+    humidity: float | None = 0
+    temperature: float | None = 0
+    timestamp: Optional[datetime]
 
 
 class DetectList(BaseModel):
