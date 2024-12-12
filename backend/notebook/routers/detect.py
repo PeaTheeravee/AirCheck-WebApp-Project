@@ -2,9 +2,11 @@ from typing import Annotated
 from fastapi import APIRouter, HTTPException, Depends
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
+
 from notebook.models import get_session
 from notebook.models.device import DBDevice
 from notebook.models.detect import *
+from notebook.models.score import DBScore
 from notebook.deps import *
 
 router = APIRouter(prefix="/detects", tags=["detects"])
@@ -25,9 +27,24 @@ async def create_detect(
 
     # หากพบ API Key ในระบบ ให้สร้าง detect ใหม่
     dbdata = DBDetect(**detect.dict())  # ใช้ข้อมูลที่มี API Key โดยตรง
-
     session.add(dbdata)
     await session.commit()
     await session.refresh(dbdata)
+
+    # คำนวณ score และบันทึกในตาราง score
+    score_humidity = dbdata.humidity + 20
+    score_temperature = dbdata.temperature + 40
+
+    score_entry = DBScore(
+        api_key=dbdata.api_key,
+        device_name=device.device_name,
+        humidity=dbdata.humidity,
+        temperature=dbdata.temperature,
+        timestamp=dbdata.timestamp,
+        score_humidity=score_humidity,
+        score_temperature=score_temperature,
+    )
+    session.add(score_entry)
+    await session.commit()
 
     return Detect.from_orm(dbdata)
