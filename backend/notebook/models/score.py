@@ -12,8 +12,10 @@ class BaseScore(BaseModel):
     humidity: float  # ข้อมูลความชื้นจาก Detect
     temperature: float  # ข้อมูลอุณหภูมิจาก Detect
     timestamp: Optional[datetime]  # เวลาที่ตรวจวัด
-    score_humidity: float  # คะแนนที่คำนวณจาก Humidity
-    score_temperature: float  # คะแนนที่คำนวณจาก Temperature
+    humidity_IAQI: float  # คะแนน IAQI ที่คำนวณจาก Humidity
+    temperature_IAQI: float  # คะแนน IAQI ที่คำนวณจาก Temperature
+    humidity_quality_level: str  # ระดับคุณภาพอากาศสำหรับ Humidity
+    temperature_quality_level: str  # ระดับคุณภาพอากาศสำหรับ Temperature
 
 
 class CreatedScore(BaseScore):
@@ -36,5 +38,7 @@ class DBScore(SQLModel, table=True):
     humidity: float  # ความชื้นจาก Detect
     temperature: float  # อุณหภูมิจาก Detect
     timestamp: Optional[datetime]  # เวลาที่ตรวจวัด
-    score_humidity: float  # คะแนนจาก Humidity
-    score_temperature: float  # คะแนนจาก Temperature
+    humidity_IAQI: float  # คะแนน IAQI ที่คำนวณจาก Humidity
+    temperature_IAQI: float  # คะแนน IAQI ที่คำนวณจาก Temperature
+    humidity_quality_level: str  # ระดับคุณภาพอากาศ Humidity
+    temperature_quality_level: str  # ระดับคุณภาพอากาศ Temperature
