@@ -49,45 +49,45 @@ def calculate_iaqi(value, pollutant):
 def get_quality_level(value, pollutant):
     levels = {
         'PM2.5': [
-            {'range': (0.0, 25.0), 'level': 'ดี'},
-            {'range': (25.1, 35.0), 'level': 'ปานกลาง'},
-            {'range': (35.1, float('inf')), 'level': 'อันตราย'}
+            {'range': (0.0, 25.0), 'level': 'ดี', 'fix': '---------'},
+            {'range': (25.1, 35.0), 'level': 'ปานกลาง', 'fix': 'เปิดหน้าต่างหรือประตูระบายอากาศชั่วคราว และทำความสะอาดพื้นด้วยผ้าชุบน้ำ'},
+            {'range': (35.1, float('inf')), 'level': 'อันตราย', 'fix': 'ทำความสะอาดแผ่นกรองแอร์และลดจำนวนคนในห้อง'}
         ],
         'PM10': [
-            {'range': (0.0, 50.0), 'level': 'ดี'},
-            {'range': (50.1, 75.0), 'level': 'ปานกลาง'},
-            {'range': (75.1, float('inf')), 'level': 'อันตราย'}
+            {'range': (0.0, 50.0), 'level': 'ดี', 'fix': '---------'},
+            {'range': (50.1, 75.0), 'level': 'ปานกลาง', 'fix': 'ทำความสะอาดพื้นและโต๊ะทำงานบ่อยขึ้น'},
+            {'range': (75.1, float('inf')), 'level': 'อันตราย', 'fix': 'เปิดประตูระบายอากาศและจำกัดกิจกรรมที่ก่อฝุ่น'}
         ],
         'CO2': [
-            {'range': (0.0, 1000.0), 'level': 'ดี'},
-            {'range': (1000.1, 1200.0), 'level': 'ปานกลาง'},
-            {'range': (1200.1, float('inf')), 'level': 'อันตราย'}
+            {'range': (0.0, 1000.0), 'level': 'ดี', 'fix': '---------'},
+            {'range': (1000.1, 1200.0), 'level': 'ปานกลาง', 'fix': 'เปิดประตูหรือหน้าต่างเป็นช่วงเวลา และพักเบรกนอกห้อง'},
+            {'range': (1200.1, float('inf')), 'level': 'อันตราย', 'fix': 'เพิ่มการถ่ายเทอากาศและลดจำนวนคนในห้อง'}
         ],
         'Temperature': [
-            {'range': (24.0, 26.0), 'level': 'ดี'},
-            {'range': (22.0, 23.99), 'level': 'ปานกลาง'},
-            {'range': (26.01, 28.0), 'level': 'ปานกลาง'},
-            {'range': (float('-inf'), 21.99), 'level': 'อันตราย'},
-            {'range': (28.01, float('inf')), 'level': 'อันตราย'}
+            {'range': (24.0, 26.0), 'level': 'ดี', 'fix': '---------'},
+            {'range': (22.0, 23.99), 'level': 'ปานกลาง', 'fix': 'ปรับแอร์ให้เหมาะสมและใช้พัดลมช่วยกระจายความเย็น'},
+            {'range': (26.01, 28.0), 'level': 'ปานกลาง', 'fix': 'ลดการตั้งอุณหภูมิแอร์และใช้พัดลมช่วย'},
+            {'range': (float('-inf'), 21.99), 'level': 'อันตราย', 'fix': 'ตรวจสอบเครื่องปรับอากาศและตั้งค่าให้เหมาะสม'},
+            {'range': (28.01, float('inf')), 'level': 'อันตราย', 'fix': 'ปิดแอร์บางช่วงและระบายความร้อนจากห้อง'}
         ],
         'Humidity': [
-            {'range': (50.0, 65.0), 'level': 'ดี'},
-            {'range': (45.0, 49.99), 'level': 'ปานกลาง'},
-            {'range': (65.01, 70.0), 'level': 'ปานกลาง'},
-            {'range': (float('-inf'), 44.99), 'level': 'อันตราย'},
-            {'range': (70.01, float('inf')), 'level': 'อันตราย'}
+            {'range': (50.0, 65.0), 'level': 'ดี', 'fix': '---------'},
+            {'range': (45.0, 49.99), 'level': 'ปานกลาง', 'fix': 'วางผ้าชุบน้ำหรือถังน้ำในห้องเพื่อเพิ่มความชื้น'},
+            {'range': (65.01, 70.0), 'level': 'ปานกลาง', 'fix': 'เปิดโหมด Dry บนเครื่องปรับอากาศเพื่อลดความชื้น'},
+            {'range': (float('-inf'), 44.99), 'level': 'อันตราย', 'fix': 'เพิ่มความชื้นด้วยการใช้ผ้าชุบน้ำและหลีกเลี่ยงการใช้แอร์โหมดเย็น'},
+            {'range': (70.01, float('inf')), 'level': 'อันตราย', 'fix': 'ลดความชื้นโดยเปิดโหมด Dry และตรวจหาจุดรั่วซึมของความชื้น'}
         ]
     }
 
     if pollutant not in levels:
-        return 'ไม่ทราบ'
+        return None, None
 
     for level in levels[pollutant]:
         low, high = level['range']
         if low <= value <= high:
-            return level['level']
+            return level['level'], level['fix']
 
-    return 'ไม่ทราบ'
+    return None, None
 
 
 @router.post("/create")
@@ -110,13 +110,13 @@ async def create_detect(
 
     # คำนวณ IAQI และระดับคุณภาพ
     pm2_5_iaqi = calculate_iaqi(dbdata.pm2_5, "PM2.5")
-    pm2_5_quality = get_quality_level(dbdata.pm2_5, "PM2.5")
+    pm2_5_quality, pm2_5_fix = get_quality_level(dbdata.pm2_5, "PM2.5")
     pm10_iaqi = calculate_iaqi(dbdata.pm10, "PM10")
-    pm10_quality = get_quality_level(dbdata.pm10, "PM10")
+    pm10_quality, pm10_fix = get_quality_level(dbdata.pm10, "PM10")
     co2_iaqi = calculate_iaqi(dbdata.co2, "CO2")
-    co2_quality = get_quality_level(dbdata.co2, "CO2")
-    humidity_quality = get_quality_level(dbdata.humidity, "Humidity")
-    temperature_quality = get_quality_level(dbdata.temperature, "Temperature")
+    co2_quality, co2_fix = get_quality_level(dbdata.co2, "CO2")
+    humidity_quality, humidity_fix = get_quality_level(dbdata.humidity, "Humidity")
+    temperature_quality, temperature_fix = get_quality_level(dbdata.temperature, "Temperature")
 
     score_entry = DBScore(
         api_key=dbdata.api_key,
@@ -124,12 +124,17 @@ async def create_detect(
         timestamp=dbdata.timestamp,
         pm2_5_IAQI=pm2_5_iaqi,
         pm2_5_quality_level=pm2_5_quality,
+        pm2_5_fix=pm2_5_fix,
         pm10_IAQI=pm10_iaqi,
         pm10_quality_level=pm10_quality,
+        pm10_fix=pm10_fix,
         co2_IAQI=co2_iaqi,
         co2_quality_level=co2_quality,
+        co2_fix=co2_fix,
         humidity_quality_level=humidity_quality,
+        humidity_fix=humidity_fix,
         temperature_quality_level=temperature_quality,
+        temperature_fix=temperature_fix,
     )
     session.add(score_entry)
     await session.commit()

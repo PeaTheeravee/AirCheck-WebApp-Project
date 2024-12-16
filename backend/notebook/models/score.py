@@ -12,12 +12,17 @@ class BaseScore(BaseModel):
     timestamp: Optional[datetime]  # เวลาที่ตรวจวัด
     pm2_5_IAQI: float  # คะแนน IAQI ที่คำนวณจาก PM2.5
     pm2_5_quality_level: str  # ระดับคุณภาพอากาศสำหรับ PM2.5
+    pm2_5_fix: str  # คำแนะนำสำหรับ PM2.5
     pm10_IAQI: float  # คะแนน IAQI ที่คำนวณจาก PM10
     pm10_quality_level: str  # ระดับคุณภาพอากาศสำหรับ PM10
+    pm10_fix: str  # คำแนะนำสำหรับ PM10
     co2_IAQI: float  # คะแนน IAQI ที่คำนวณจาก CO2
     co2_quality_level: str  # ระดับคุณภาพอากาศสำหรับ CO2
+    co2_fix: str  # คำแนะนำสำหรับ CO2
     humidity_quality_level: str  # ระดับคุณภาพอากาศสำหรับ Humidity
+    humidity_fix: str  # คำแนะนำสำหรับ Humidity
     temperature_quality_level: str  # ระดับคุณภาพอากาศสำหรับ Temperature
+    temperature_fix: str  # คำแนะนำสำหรับ Temperature
 
 
 class CreatedScore(BaseScore):
@@ -40,9 +45,14 @@ class DBScore(SQLModel, table=True):
     timestamp: Optional[datetime]  # เวลาที่ตรวจวัด
     pm2_5_IAQI: float  # คะแนน IAQI ที่คำนวณจาก PM2.5
     pm2_5_quality_level: str  # ระดับคุณภาพอากาศ PM2.5
+    pm2_5_fix: str  # คำแนะนำสำหรับ PM2.5
     pm10_IAQI: float  # คะแนน IAQI ที่คำนวณจาก PM10
     pm10_quality_level: str  # ระดับคุณภาพอากาศ PM10
+    pm10_fix: str  # คำแนะนำสำหรับ PM10
     co2_IAQI: float  # คะแนน IAQI ที่คำนวณจาก CO2
     co2_quality_level: str  # ระดับคุณภาพอากาศ CO2
+    co2_fix: str  # คำแนะนำสำหรับ CO2
     humidity_quality_level: str  # ระดับคุณภาพอากาศ Humidity
+    humidity_fix: str  # คำแนะนำสำหรับ Humidity
     temperature_quality_level: str  # ระดับคุณภาพอากาศ Temperature
+    temperature_fix: str  # คำแนะนำสำหรับ Temperature
