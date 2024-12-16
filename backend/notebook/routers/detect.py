@@ -16,33 +16,79 @@ SIZE_PER_PAGE = 50
 def calculate_iaqi(value, pollutant):
     # กำหนดตาราง Breakpoints และระดับคุณภาพ
     standards = {
-        'Temperature': [
-            {'range': (24, 26), 'IAQI': (0, 50), 'level': 'ดี'},
-            {'range': (21, 23.99), 'IAQI': (51, 100), 'level': 'ปานกลาง'},
-            {'range': (26.01, 28), 'IAQI': (51, 100), 'level': 'ปานกลาง'},
-            {'range': (float('-inf'), 20.99), 'IAQI': (101, 500), 'level': 'อันตราย'},
-            {'range': (28.01, float('inf')), 'IAQI': (101, 500), 'level': 'อันตราย'}
+        'PM2.5': [
+            {'range': (0.0, 25.0), 'IAQI': (0, 50)},
+            {'range': (25.1, 35.0), 'IAQI': (51, 100)},
+            {'range': (35.1, float('inf')), 'IAQI': (101, 500)}
         ],
-        'Humidity': [
-            {'range': (50, 60), 'IAQI': (0, 50), 'level': 'ดี'},
-            {'range': (40, 49.99), 'IAQI': (51, 100), 'level': 'ปานกลาง'},
-            {'range': (60.01, 65), 'IAQI': (51, 100), 'level': 'ปานกลาง'},
-            {'range': (float('-inf'), 39.99), 'IAQI': (101, 500), 'level': 'อันตราย'},
-            {'range': (65.01, float('inf')), 'IAQI': (101, 500), 'level': 'อันตราย'}
+        'PM10': [
+            {'range': (0.0, 50.0), 'IAQI': (0, 50)},
+            {'range': (50.1, 75.0), 'IAQI': (51, 100)},
+            {'range': (75.1, float('inf')), 'IAQI': (101, 500)}
+        ],
+        'CO2': [
+            {'range': (0.0, 1000.0), 'IAQI': (0, 50)},
+            {'range': (1000.1, 1200.0), 'IAQI': (51, 100)},
+            {'range': (1200.1, float('inf')), 'IAQI': (101, 500)}
         ]
     }
 
-    for standard in standards.get(pollutant, []):
+    if pollutant not in standards:
+        return None
+
+    for standard in standards[pollutant]:
         low, high = standard['range']
         if low <= value <= high:
             iaqi_low, iaqi_high = standard['IAQI']
             iaqi = ((value - low) / (high - low)) * (iaqi_high - iaqi_low) + iaqi_low
-            return {
-                'IAQI': round(iaqi, 2),
-                'level': standard['level']
-            }
+            return round(iaqi, 2)
 
-    return {'error': 'ค่าที่วัดได้อยู่นอกช่วงมาตรฐาน'}
+    return None
+
+
+def get_quality_level(value, pollutant):
+    levels = {
+        'PM2.5': [
+            {'range': (0.0, 25.0), 'level': 'ดี'},
+            {'range': (25.1, 35.0), 'level': 'ปานกลาง'},
+            {'range': (35.1, float('inf')), 'level': 'อันตราย'}
+        ],
+        'PM10': [
+            {'range': (0.0, 50.0), 'level': 'ดี'},
+            {'range': (50.1, 75.0), 'level': 'ปานกลาง'},
+            {'range': (75.1, float('inf')), 'level': 'อันตราย'}
+        ],
+        'CO2': [
+            {'range': (0.0, 1000.0), 'level': 'ดี'},
+            {'range': (1000.1, 1200.0), 'level': 'ปานกลาง'},
+            {'range': (1200.1, float('inf')), 'level': 'อันตราย'}
+        ],
+        'Temperature': [
+            {'range': (24.0, 26.0), 'level': 'ดี'},
+            {'range': (22.0, 23.99), 'level': 'ปานกลาง'},
+            {'range': (26.01, 28.0), 'level': 'ปานกลาง'},
+            {'range': (float('-inf'), 21.99), 'level': 'อันตราย'},
+            {'range': (28.01, float('inf')), 'level': 'อันตราย'}
+        ],
+        'Humidity': [
+            {'range': (50.0, 65.0), 'level': 'ดี'},
+            {'range': (45.0, 49.99), 'level': 'ปานกลาง'},
+            {'range': (65.01, 70.0), 'level': 'ปานกลาง'},
+            {'range': (float('-inf'), 44.99), 'level': 'อันตราย'},
+            {'range': (70.01, float('inf')), 'level': 'อันตราย'}
+        ]
+    }
+
+    if pollutant not in levels:
+        return 'ไม่ทราบ'
+
+    for level in levels[pollutant]:
+        low, high = level['range']
+        if low <= value <= high:
+            return level['level']
+
+    return 'ไม่ทราบ'
+
 
 @router.post("/create")
 async def create_detect(
@@ -62,23 +108,28 @@ async def create_detect(
     await session.commit()
     await session.refresh(dbdata)
 
-    # คำนวณ IAQI และบันทึกในตาราง score
-    temperature_result = calculate_iaqi(dbdata.temperature, "Temperature")
-    humidity_result = calculate_iaqi(dbdata.humidity, "Humidity")
-
-    if 'error' in temperature_result or 'error' in humidity_result:
-        raise HTTPException(status_code=400, detail="Calculation error: Out of standard range.")
+    # คำนวณ IAQI และระดับคุณภาพ
+    pm2_5_iaqi = calculate_iaqi(dbdata.pm2_5, "PM2.5")
+    pm2_5_quality = get_quality_level(dbdata.pm2_5, "PM2.5")
+    pm10_iaqi = calculate_iaqi(dbdata.pm10, "PM10")
+    pm10_quality = get_quality_level(dbdata.pm10, "PM10")
+    co2_iaqi = calculate_iaqi(dbdata.co2, "CO2")
+    co2_quality = get_quality_level(dbdata.co2, "CO2")
+    humidity_quality = get_quality_level(dbdata.humidity, "Humidity")
+    temperature_quality = get_quality_level(dbdata.temperature, "Temperature")
 
     score_entry = DBScore(
         api_key=dbdata.api_key,
         device_name=device.device_name,
-        humidity=dbdata.humidity,
-        temperature=dbdata.temperature,
         timestamp=dbdata.timestamp,
-        temperature_IAQI=temperature_result['IAQI'],
-        humidity_IAQI=humidity_result['IAQI'],
-        temperature_quality_level=temperature_result['level'],
-        humidity_quality_level=humidity_result['level'],
+        pm2_5_IAQI=pm2_5_iaqi,
+        pm2_5_quality_level=pm2_5_quality,
+        pm10_IAQI=pm10_iaqi,
+        pm10_quality_level=pm10_quality,
+        co2_IAQI=co2_iaqi,
+        co2_quality_level=co2_quality,
+        humidity_quality_level=humidity_quality,
+        temperature_quality_level=temperature_quality,
     )
     session.add(score_entry)
     await session.commit()

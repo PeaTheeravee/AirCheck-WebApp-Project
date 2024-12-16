@@ -9,11 +9,13 @@ class BaseScore(BaseModel):
 
     api_key: str  # ใช้ API Key อ้างอิงอุปกรณ์
     device_name: str  # ชื่ออุปกรณ์ที่มาจากตาราง Device
-    humidity: float  # ข้อมูลความชื้นจาก Detect
-    temperature: float  # ข้อมูลอุณหภูมิจาก Detect
     timestamp: Optional[datetime]  # เวลาที่ตรวจวัด
-    humidity_IAQI: float  # คะแนน IAQI ที่คำนวณจาก Humidity
-    temperature_IAQI: float  # คะแนน IAQI ที่คำนวณจาก Temperature
+    pm2_5_IAQI: float  # คะแนน IAQI ที่คำนวณจาก PM2.5
+    pm2_5_quality_level: str  # ระดับคุณภาพอากาศสำหรับ PM2.5
+    pm10_IAQI: float  # คะแนน IAQI ที่คำนวณจาก PM10
+    pm10_quality_level: str  # ระดับคุณภาพอากาศสำหรับ PM10
+    co2_IAQI: float  # คะแนน IAQI ที่คำนวณจาก CO2
+    co2_quality_level: str  # ระดับคุณภาพอากาศสำหรับ CO2
     humidity_quality_level: str  # ระดับคุณภาพอากาศสำหรับ Humidity
     temperature_quality_level: str  # ระดับคุณภาพอากาศสำหรับ Temperature
 
@@ -35,10 +37,12 @@ class DBScore(SQLModel, table=True):
     id: int = Field(default=None, primary_key=True)
     api_key: str = Field(index=True)  # อ้างอิง API Key ของอุปกรณ์
     device_name: str  # ชื่ออุปกรณ์
-    humidity: float  # ความชื้นจาก Detect
-    temperature: float  # อุณหภูมิจาก Detect
     timestamp: Optional[datetime]  # เวลาที่ตรวจวัด
-    humidity_IAQI: float  # คะแนน IAQI ที่คำนวณจาก Humidity
-    temperature_IAQI: float  # คะแนน IAQI ที่คำนวณจาก Temperature
+    pm2_5_IAQI: float  # คะแนน IAQI ที่คำนวณจาก PM2.5
+    pm2_5_quality_level: str  # ระดับคุณภาพอากาศ PM2.5
+    pm10_IAQI: float  # คะแนน IAQI ที่คำนวณจาก PM10
+    pm10_quality_level: str  # ระดับคุณภาพอากาศ PM10
+    co2_IAQI: float  # คะแนน IAQI ที่คำนวณจาก CO2
+    co2_quality_level: str  # ระดับคุณภาพอากาศ CO2
     humidity_quality_level: str  # ระดับคุณภาพอากาศ Humidity
     temperature_quality_level: str  # ระดับคุณภาพอากาศ Temperature
