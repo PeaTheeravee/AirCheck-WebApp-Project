@@ -72,9 +72,9 @@ async def update_device_by_api_key(
     if not device_in_db:
         raise HTTPException(status_code=404, detail="Device not found.")
 
-    data = device.dict()
-    for key, value in data.items():
-        setattr(device_in_db, key, value)
+    # อัปเดตเฉพาะ device_name และ location
+    device_in_db.device_name = device.device_name
+    device_in_db.location = device.location
 
     session.add(device_in_db)
     await session.commit()

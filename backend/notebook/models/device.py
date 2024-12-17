@@ -18,7 +18,8 @@ class CreatedDevice(BaseDevice):
 
 
 class UpdatedDevice(BaseDevice):
-    pass
+    device_name: str  # ชื่ออุปกรณ์
+    location: str  # ตำแหน่งของอุปกรณ์
 
 
 class Device(BaseDevice):
