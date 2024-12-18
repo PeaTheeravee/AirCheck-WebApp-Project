@@ -15,17 +15,6 @@ async def create(
     session: Annotated[AsyncSession, Depends(models.get_session)],
     current_user: Annotated[User, Depends(deps.get_current_active_superuser)],
 ) -> User:
-    
-    # ตรวจสอบสถานะของผู้ใช้ก่อน
-    if current_user.status != "active":
-        raise HTTPException(status_code=400, detail="The user is not active.")
-    
-    # ป้องกันการสร้างบัญชี SuperAdmin
-    if user_info.username.lower() == "superadmin":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Cannot create or modify SuperAdmin account.",
-        )
 
     # ตรวจสอบว่ามี username ซ้ำหรือไม่
     username_check = await session.exec(select(DBUser).where(DBUser.username == user_info.username))
@@ -73,11 +62,6 @@ async def delete_user(
     session: Annotated[AsyncSession, Depends(models.get_session)],
     current_user: Annotated[User, Depends(deps.get_current_active_superuser)],
 ):
-    
-    # ตรวจสอบสถานะของผู้ใช้ก่อน
-    if current_user.status != "active":
-        raise HTTPException(status_code=400, detail="The user is not active.")
-    
     user = await session.get(DBUser, user_id)
 
     if not user:
@@ -97,12 +81,8 @@ async def delete_user(
 
 @router.get("/me")
 def get_me(
-    current_user: User = Depends(deps.get_current_user)
+    current_user: User = Depends(deps.get_current_active_user)  # ตรวจสอบ user.status == "active"
 ) -> User:
-    
-    # ตรวจสอบสถานะของผู้ใช้ก่อน
-    if current_user.status != "active":
-        raise HTTPException(status_code=400, detail="The user is not active.")
     return current_user
 
 
@@ -127,12 +107,8 @@ async def change_password(
     user_id: int,
     password_update: ChangedPassword,
     session: Annotated[AsyncSession, Depends(models.get_session)],
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_active_user),
 ) -> dict:
-
-    # ตรวจสอบสถานะของผู้ใช้ก่อน
-    if current_user.status != "active":
-        raise HTTPException(status_code=400, detail="The user is not active.")
     
     # ดึงข้อมูลผู้ใช้ที่ต้องการเปลี่ยนรหัสผ่าน
     user = await session.get(DBUser, user_id)
@@ -178,12 +154,8 @@ async def update(
     user_id: int,
     session: Annotated[AsyncSession, Depends(models.get_session)],
     user_update: UpdatedUser,
-    current_user: User = Depends(deps.get_current_active_superuser), # SuperAdmin เท่านั้น
+    current_user: User = Depends(deps.get_current_active_superuser),
 ) -> User:
-
-    # ตรวจสอบสถานะของผู้ใช้ก่อน
-    if current_user.status != "active":
-        raise HTTPException(status_code=400, detail="The user is not active.")
     
     # ดึงข้อมูลผู้ใช้ที่ต้องการอัปเดต
     db_user = await session.get(DBUser, user_id)

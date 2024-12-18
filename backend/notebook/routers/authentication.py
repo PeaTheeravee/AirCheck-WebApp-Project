@@ -1,84 +1,55 @@
+from tkinter.tix import Form
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import select
 from typing import Annotated
-import datetime
-import jwt
 
 from notebook.models.users import *
-from .. import config, models, security
+from .. import models
 
 router = APIRouter(tags=["authentication"])
-
-settings = config.get_settings()
-blacklist_tokens = set()  # เก็บ token ที่ logout แล้ว
 
 
 @router.post("/token")
 async def login(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    username: Annotated[str, Form()],  # ใช้ Form สำหรับ username
+    password: Annotated[str, Form()],  # ใช้ Form สำหรับ password
     session: Annotated[models.AsyncSession, Depends(models.get_session)],
-) -> Token:
-    result = await session.exec(select(DBUser).where(DBUser.username == form_data.username))
+) -> dict:
+    # ตรวจสอบ username และ password
+    result = await session.exec(select(DBUser).where(DBUser.username == username))
     user = result.one_or_none()
 
-    if not user:
-        result = await session.exec(select(DBUser).where(DBUser.email == form_data.username))
-        user = result.one_or_none()
-
-    if not user or not await user.verify_password(form_data.password):
+    if not user or not await user.verify_password(password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password.",
         )
 
-    access_token_expires = datetime.timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    refresh_token_expires = datetime.timedelta(minutes=settings.REFRESH_TOKEN_EXPIRE_MINUTES)
-
-    # อัปเดต status เป็น 'active'
+    # ปรับ user.status เป็น "active"
     user.status = "active"
     session.add(user)
     await session.commit()
-    
-    return Token(
-        access_token=security.create_access_token(
-            data={"sub": user.id}, expires_delta=access_token_expires
-        ),
-        refresh_token=security.create_refresh_token(
-            data={"sub": user.id}, expires_delta=refresh_token_expires
-        ),
-        token_type="Bearer",
-        expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES,
-        expires_at=datetime.datetime.now() + access_token_expires,
-        issued_at=datetime.datetime.now(),
-        scope=user.role,  # ใช้ role เป็น scope
-    )
+
+    return {"message": "Login successful.", "role": user.role}
 
 
 @router.post("/logout")
 async def logout(
-    token: Annotated[str, Depends(security.oauth2_scheme)],
+    user_id: int,
     session: Annotated[models.AsyncSession, Depends(models.get_session)],
 ):
-    if token in blacklist_tokens:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token already invalidated.")
-    blacklist_tokens.add(token)
-
-    # ดึงข้อมูลผู้ใช้จาก token
-    try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[security.ALGORITHM])
-        user_id: int = payload.get("sub")
-        if not user_id:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token.")
-    except jwt.JWTError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token.")
-    
-    # เปลี่ยน status ของผู้ใช้เป็น inactive
+    # ดึงข้อมูลผู้ใช้
     user = await session.get(DBUser, user_id)
-    if user:
-        user.status = "inactive"
-        session.add(user)
-        await session.commit()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found.",
+        )
+
+    # ปรับ user.status เป็น "inactive"
+    user.status = "inactive"
+    session.add(user)
+    await session.commit()
 
     return {"message": "Successfully logged out."}
-

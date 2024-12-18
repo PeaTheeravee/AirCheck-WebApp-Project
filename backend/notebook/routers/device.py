@@ -24,7 +24,7 @@ SIZE_PER_PAGE = 50
 async def create_device(
     device: CreatedDevice,
     session: Annotated[AsyncSession, Depends(get_session)],
-    current_user: Annotated[User, Depends(get_current_user)],  # ระบุผู้ใช้ที่เพิ่มอุปกรณ์
+    current_user: Annotated[User, Depends(get_current_active_user)],  # ตรวจสอบ user.status == "active"
 ) -> Device | None:
     # เพิ่มข้อมูลผู้ใช้ในอุปกรณ์
     data = device.dict()
@@ -64,7 +64,7 @@ async def update_device_by_api_key(
     api_key: str,
     device: UpdatedDevice,
     session: Annotated[AsyncSession, Depends(get_session)],
-    current_user: Annotated[User, Depends(get_current_user)],
+    current_user: Annotated[User, Depends(get_current_active_user)],  # ตรวจสอบ user.status == "active"
 ) -> Device:
     device_in_db = await session.exec(select(DBDevice).where(DBDevice.api_key == api_key))
     device_in_db = device_in_db.one_or_none()
@@ -87,7 +87,7 @@ async def update_device_by_api_key(
 async def delete_device_by_api_key(
     api_key: str,
     session: Annotated[AsyncSession, Depends(get_session)],
-    current_user: Annotated[User, Depends(get_current_user)],
+    current_user: Annotated[User, Depends(get_current_active_user)],  # ตรวจสอบ user.status == "active"
 ) -> dict:
     device = await session.exec(select(DBDevice).where(DBDevice.api_key == api_key))
     device = device.one_or_none()
