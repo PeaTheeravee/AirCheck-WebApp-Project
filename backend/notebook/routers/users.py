@@ -56,13 +56,13 @@ async def create(
     return User.from_orm(user)
 
 
-@router.delete("/{user_id}")
+@router.delete("/{target_user_id}")
 async def delete_user(
-    user_id: int,
+    target_user_id: int,
     session: Annotated[AsyncSession, Depends(models.get_session)],
     current_user: Annotated[User, Depends(deps.get_current_active_superuser)],
 ):
-    user = await session.get(DBUser, user_id)
+    user = await session.get(DBUser, target_user_id)
 
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found.")
@@ -88,11 +88,11 @@ def get_me(
 
 @router.get("/{user_id}")
 async def get(
-    user_id: int,
+    target_user_id: int,
     session: Annotated[AsyncSession, Depends(models.get_session)],
 ) -> User:
 
-    user = await session.get(DBUser, user_id)
+    user = await session.get(DBUser, target_user_id)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -102,16 +102,16 @@ async def get(
     return user
 
 
-@router.put("/{user_id}/change_password")
+@router.put("/{target_user_id}/change_password")
 async def change_password(
-    user_id: int,
+    target_user_id: int,
     password_update: ChangedPassword,
     session: Annotated[AsyncSession, Depends(models.get_session)],
     current_user: User = Depends(deps.get_current_active_user),
 ) -> dict:
-    
+
     # ดึงข้อมูลผู้ใช้ที่ต้องการเปลี่ยนรหัสผ่าน
-    user = await session.get(DBUser, user_id)
+    user = await session.get(DBUser, target_user_id)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -148,17 +148,16 @@ async def change_password(
     return {"message": "Password updated successfully"}
 
 
-@router.put("/{user_id}/update")
+@router.put("/{target_user_id}/update")
 async def update(
-    request: Request,
-    user_id: int,
+    target_user_id: int,
     session: Annotated[AsyncSession, Depends(models.get_session)],
     user_update: UpdatedUser,
     current_user: User = Depends(deps.get_current_active_superuser),
 ) -> User:
     
     # ดึงข้อมูลผู้ใช้ที่ต้องการอัปเดต
-    db_user = await session.get(DBUser, user_id)
+    db_user = await session.get(DBUser, target_user_id)
     if not db_user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -167,7 +166,7 @@ async def update(
 
     # ตรวจสอบว่าข้อมูล username ซ้ำหรือไม่
     if user_update.username:
-        result = await session.exec(select(DBUser).where(DBUser.username == user_update.username, DBUser.id != user_id))
+        result = await session.exec(select(DBUser).where(DBUser.username == user_update.username, DBUser.id != target_user_id))
         if result.one_or_none():
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
@@ -176,7 +175,7 @@ async def update(
 
     # ตรวจสอบว่าข้อมูล first_name ซ้ำหรือไม่
     if user_update.first_name:
-        result = await session.exec(select(DBUser).where(DBUser.first_name == user_update.first_name, DBUser.id != user_id))
+        result = await session.exec(select(DBUser).where(DBUser.first_name == user_update.first_name, DBUser.id != target_user_id))
         if result.one_or_none():
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
@@ -185,7 +184,7 @@ async def update(
 
     # ตรวจสอบว่าข้อมูล last_name ซ้ำหรือไม่
     if user_update.last_name:
-        result = await session.exec(select(DBUser).where(DBUser.last_name == user_update.last_name, DBUser.id != user_id))
+        result = await session.exec(select(DBUser).where(DBUser.last_name == user_update.last_name, DBUser.id != target_user_id))
         if result.one_or_none():
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,

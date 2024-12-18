@@ -15,6 +15,8 @@ http://172.27.128.1:8000/docs (FastAPI)
 6. docker run --name D2-PGadmin -p 5050:80 -e PGADMIN_DEFAULT_EMAIL=6410110238@psu.ac.th -e PGADMIN_DEFAULT_PASSWORD=147896325 -d dpage/pgadmin4
 7. .\scripts\run-api  
 
+target_user_id คือ บัญชีที่เราจะไปกระทำ
+user_id คือ บัญชีเราที่ Login
 
 {
   "username": "admin",
