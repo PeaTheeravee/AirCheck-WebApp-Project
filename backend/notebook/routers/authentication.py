@@ -41,10 +41,11 @@ async def logout(
     # ดึงข้อมูลผู้ใช้
     user = await session.get(DBUser, user_id)
 
-    if not user:
+    # ตรวจสอบสถานะผู้ใช้
+    if user.status != "active":
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found.",
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The user has not logged in yet.",
         )
 
     # ปรับ user.status เป็น "inactive"

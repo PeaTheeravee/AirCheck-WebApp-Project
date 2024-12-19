@@ -42,6 +42,7 @@ class DBDetect(SQLModel, table=True):
 class DetectList(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     detects: list[Detect]
-    page: int
-    page_size: int
-    size_per_page: int
+    #ถ้าข้อมูลอาจมีจำนวนมากในอนาคต ควรเพิ่ม Pagination 
+    #page: int
+    #page_size: int
+    #size_per_page: int

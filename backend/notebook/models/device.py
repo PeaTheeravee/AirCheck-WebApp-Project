@@ -42,6 +42,7 @@ class DBDevice(SQLModel, table=True):
 class DeviceList(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     devices: list[Device]
-    page: int
-    page_count: int
-    size_per_page: int
+    #ถ้าข้อมูลอาจมีจำนวนมากในอนาคต ควรเพิ่ม Pagination 
+    #page: int
+    #page_size: int
+    #size_per_page: int

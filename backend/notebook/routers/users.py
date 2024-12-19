@@ -79,6 +79,21 @@ async def delete_user(
     return {"message": "User deleted successfully"}
 
 
+@router.get("/all")
+async def get_all_users(
+    session: Annotated[AsyncSession, Depends(models.get_session)],
+    current_user: Annotated[User, Depends(deps.get_current_active_superuser)],  # ตรวจสอบว่าเป็น SuperAdmin
+) -> list[User]:
+ 
+    result = await session.exec(select(DBUser))
+    users = result.all()
+
+    if not users:
+        raise HTTPException(status_code=404, detail="No users found.")
+
+    return [User.from_orm(user) for user in users]
+
+
 @router.get("/me")
 def get_me(
     current_user: User = Depends(deps.get_current_active_user)  # ตรวจสอบ user.status == "active"
@@ -90,9 +105,11 @@ def get_me(
 async def get(
     target_user_id: int,
     session: Annotated[AsyncSession, Depends(models.get_session)],
+    current_user: Annotated[User, Depends(deps.get_current_active_user)],  # ตรวจสอบ user.status == "active"
 ) -> User:
 
     user = await session.get(DBUser, target_user_id)
+    
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -125,14 +142,14 @@ async def change_password(
             detail="Admins can only change their own password.",
         )
 
-    # กรณีที่ผู้ใช้เป็น superadmin: สามารถเปลี่ยนรหัสผ่านของ admin ได้
-    if current_user.role == "superadmin" and user.role != "admin" and current_user.id != user.id:
+    # ตรวจสอบว่ารหัสผ่านใหม่ไม่เหมือนกับรหัสผ่านเดิม
+    if password_update.current_password == password_update.new_password:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="SuperAdmins can only change passwords for themselves or Admins.",
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The new password must not be the same as your old password.",
         )
 
-    # ตรวจสอบรหัสผ่านเดิม (เฉพาะถ้าเปลี่ยนรหัสผ่านตัวเอง)
+    # ตรวจสอบรหัสผ่านเดิม (เฉพาะถ้าเปลี่ยนรหัสผ่านตัวเอง คือ superadmin ไม่จำเป็นต้องรู้รหัสผ่าน admin ก็สามารถเปลี่ยนรหัสผ่านได้)
     if current_user.id == user.id and not await user.verify_password(password_update.current_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -141,11 +158,15 @@ async def change_password(
 
     # ตั้งค่ารหัสผ่านใหม่
     await user.set_password(password_update.new_password)
+
+    # ตั้ง user.status เป็น "inactive"
+    user.status = "inactive"
+    
     session.add(user)
     await session.commit()
     await session.refresh(user)
 
-    return {"message": "Password updated successfully"}
+    return {"message": "Password updated successfully, and user must login again"}
 
 
 @router.put("/{target_user_id}/update")
@@ -164,6 +185,7 @@ async def update(
             detail="Not found this user",
         )
 
+    # จะไม่มีการ check การซ้ำกับบัญชีของ target_user_id (บัญชีที่เราจะไปกระทำ)
     # ตรวจสอบว่าข้อมูล username ซ้ำหรือไม่
     if user_update.username:
         result = await session.exec(select(DBUser).where(DBUser.username == user_update.username, DBUser.id != target_user_id))

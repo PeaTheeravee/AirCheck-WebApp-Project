@@ -56,3 +56,11 @@ class DBScore(SQLModel, table=True):
     humidity_fix: str  # คำแนะนำสำหรับ Humidity
     temperature_quality_level: str  # ระดับคุณภาพอากาศ Temperature
     temperature_fix: str  # คำแนะนำสำหรับ Temperature
+
+class ScoreList(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    scores: list[Score]
+    #ถ้าข้อมูลอาจมีจำนวนมากในอนาคต ควรเพิ่ม Pagination 
+    #page: int
+    #page_size: int
+    #size_per_page: int

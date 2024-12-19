@@ -140,3 +140,32 @@ async def create_detect(
     await session.commit()
 
     return Detect.from_orm(dbdata)
+
+
+@router.get("/all")
+async def get_all_detects(
+    session: Annotated[AsyncSession, Depends(get_session)],
+) -> list[Detect]:
+
+    result = await session.exec(select(DBDetect))
+    detects = result.all()
+
+    if not detects:
+        raise HTTPException(status_code=404, detail="No detection data found.")
+
+    return [Detect.from_orm(det) for det in detects]
+
+
+@router.get("/{api_key}")
+async def get_detects_by_api_key(
+    api_key: str,
+    session: Annotated[AsyncSession, Depends(get_session)],
+) -> Detect:
+
+    result = await session.exec(select(DBDetect).where(DBDetect.api_key == api_key))
+    detect = result.one_or_none()
+
+    if not detect:
+        raise HTTPException(status_code=404, detail=f"No detection data found for API Key: {api_key}.")
+
+    return Detect.from_orm(detect)
