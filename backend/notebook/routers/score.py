@@ -39,6 +39,28 @@ async def get_scores_by_api_key(
     return [Score.from_orm(sco) for sco in score]
 
 
+#สำหรับดูปีเเละเดือน เพื่อใช้ประกอบการตัดสินใจ สำหรับ /delete_by_month/{api_key} ของตารางdetect - ตารางscore
+@router.get("/timestamps/{api_key}")
+async def get_timestamps_by_api_key(
+    api_key: str,
+    session: Annotated[AsyncSession, Depends(get_session)],
+) -> list[str]:
+    # ดึงข้อมูล timestamp ตาม API Key
+    result = await session.exec(select(DBScore.timestamp).where(DBScore.api_key == api_key))
+    timestamps = result.all()
+
+    if not timestamps:
+        raise HTTPException(status_code=404, detail="No timestamps found for the provided API Key.")
+
+    # แปลงเป็นปีและเดือนเท่านั้น
+    year_months = [ts.strftime("%Y-%m") for ts in timestamps if ts]
+
+    # ลบข้อมูลที่ซ้ำกัน
+    unique_year_months = sorted(set(year_months))
+
+    return unique_year_months
+
+
 #เมื่อต้องการลบข้อมูลอุปกรณ์
 @router.delete("/delete/{api_key}")
 async def delete_scores_by_api_key(
