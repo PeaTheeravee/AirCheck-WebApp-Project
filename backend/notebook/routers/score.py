@@ -44,6 +44,7 @@ async def get_scores_by_api_key(
 async def get_timestamps_by_api_key(
     api_key: str,
     session: Annotated[AsyncSession, Depends(get_session)],
+    current_user: Annotated[User, Depends(get_current_active_user)],  # ตรวจสอบ user.status == "active"
 ) -> list[str]:
     # ดึงข้อมูล timestamp ตาม API Key
     result = await session.exec(select(DBScore.timestamp).where(DBScore.api_key == api_key))
