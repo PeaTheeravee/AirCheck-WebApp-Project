@@ -8,6 +8,8 @@ from fastapi import APIRouter, HTTPException, Depends
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
+from notebook.models.detect import DBDetect
+from notebook.models.score import DBScore
 from notebook import deps
 from notebook.models import get_session
 from notebook.models.device import *
@@ -27,6 +29,13 @@ async def create_device(
     session: Annotated[AsyncSession, Depends(get_session)],
     current_user: Annotated[User, Depends(get_current_active_user)],  # ตรวจสอบ user.status == "active"
 ) -> Device | None:
+    # ตรวจสอบว่า device_name มีอยู่แล้วในระบบหรือไม่
+    existing_device = await session.exec(select(DBDevice).where(DBDevice.device_name == device.device_name))
+    if existing_device.one_or_none():
+        raise HTTPException(
+            status_code=400, detail="There is already a device with the same name."
+        )
+
     # เพิ่มข้อมูลผู้ใช้ในอุปกรณ์
     data = device.dict()
     data['user_id'] = current_user.id
@@ -83,6 +92,15 @@ async def update_device_by_api_key(
     if not dbdevice:
         raise HTTPException(status_code=404, detail="Device not found.")
 
+    # ตรวจสอบว่า device_name มีอยู่แล้วในระบบหรือไม่ (ยกเว้นอุปกรณ์ตัวเอง)
+    existing_device = await session.exec(
+        select(DBDevice).where(DBDevice.device_name == device.device_name, DBDevice.id != dbdevice.id)
+    )
+    if existing_device.one_or_none():
+        raise HTTPException(
+            status_code=400, detail="There is already a device with the same name."
+        )
+
     # อัปเดตเฉพาะ device_name และ location
     dbdevice.device_name = device.device_name
     dbdevice.location = device.location
@@ -106,10 +124,23 @@ async def delete_device_by_api_key(
     if not dbdevice:
         raise HTTPException(status_code=404, detail="Device not found.")
 
-    try:
-        await session.delete(dbdevice)
-        await session.commit()
-        return {"message": "Device deleted successfully."}
-    except IntegrityError as e:
-        await session.rollback()
-        return {"message": f"Failed to delete device due to integrity error: {str(e)}"}
+    # ตรวจสอบความสัมพันธ์กับตาราง score และ detect
+    score_check = await session.exec(select(DBScore).where(DBScore.api_key == api_key))
+    if score_check.first():
+        raise HTTPException(
+            status_code=400,
+            detail="Cannot delete this device because it is referenced in the scores table."
+        )
+
+    detect_check = await session.exec(select(DBDetect).where(DBDetect.api_key == api_key))
+    if detect_check.first():
+        raise HTTPException(
+            status_code=400,
+            detail="Cannot delete this device because it is referenced in the detects table."
+        )
+
+    # ลบข้อมูล
+    await session.delete(dbdevice)
+    await session.commit()
+
+    return {"message": "Device deleted successfully."}
