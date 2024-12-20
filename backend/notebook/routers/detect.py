@@ -169,3 +169,71 @@ async def get_detects_by_api_key(
         raise HTTPException(status_code=404, detail=f"No detection data found for API Key: {api_key}.")
 
     return Detect.from_orm(detect)
+
+
+#เมื่อต้องการลบข้อมูลอุปกรณ์
+@router.delete("/delete/{api_key}")
+async def delete_detect_by_api_key(
+    api_key: str,
+    session: Annotated[AsyncSession, Depends(get_session)],
+    current_user: Annotated[User, Depends(get_current_active_user)],  # ตรวจสอบ user.status == "active"
+):
+    # ตรวจสอบว่า API Key มีการอ้างอิงใน detect หรือไม่
+    result = await session.exec(select(DBDetect).where(DBDetect.api_key == api_key))
+    detects = result.all()
+
+    if not detects:
+        raise HTTPException(status_code=404, detail="No detection data found for the provided API Key.")
+
+    # ลบข้อมูลทั้งหมดที่เกี่ยวข้องกับ API Key
+    for detect in detects:
+        await session.delete(detect)
+    
+    await session.commit()
+
+    return {"message": "All detection data associated with the API Key has been deleted successfully."}
+
+
+@router.delete("/delete_by_month/{api_key}")
+async def delete_detects_by_month(
+    api_key: str,
+    months_to_delete: int,
+    session: Annotated[AsyncSession, Depends(get_session)],
+    current_user: Annotated[User, Depends(get_current_active_user)],  # ตรวจสอบ user.status == "active"
+):
+    # ดึงข้อมูล detect ตาม API Key และจัดเรียงข้อมูลตาม timestamp
+    result = await session.exec(
+        select(DBDetect).where(DBDetect.api_key == api_key).order_by(DBDetect.timestamp.asc())
+    )
+    detects = result.all()
+
+    if not detects:
+        raise HTTPException(status_code=404, detail="No detection data found for the provided API Key.")
+
+    # จัดกลุ่มข้อมูลตามเดือน
+    grouped_by_month = {}
+    for detect in detects:
+        month_key = detect.timestamp.strftime("%Y-%m") if detect.timestamp else None
+        if month_key not in grouped_by_month:
+            grouped_by_month[month_key] = []
+        grouped_by_month[month_key].append(detect)
+
+    # ตรวจสอบว่ามีเดือนเพียงพอที่จะลบหรือไม่
+    if len(grouped_by_month) < months_to_delete:
+        raise HTTPException(
+            status_code=400,
+            detail="Not enough months of detection data to delete the specified number of months."
+        )
+
+    # ลบข้อมูลจากเดือนที่เก่าสุด
+    months_deleted = 0
+    for month in sorted(grouped_by_month.keys()):
+        for detect in grouped_by_month[month]:
+            await session.delete(detect)
+        months_deleted += 1
+        if months_deleted >= months_to_delete:
+            break
+
+    await session.commit()
+
+    return {"message": f"Deleted {months_deleted} months of detection data successfully."}
