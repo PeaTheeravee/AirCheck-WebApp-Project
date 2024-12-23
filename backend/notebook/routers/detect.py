@@ -121,15 +121,15 @@ async def get_all_detects(
 async def get_detects_by_api_key(
     api_key: str,
     session: Annotated[AsyncSession, Depends(get_session)],
-) -> Detect:
+) -> list[Detect]:
 
     result = await session.exec(select(DBDetect).where(DBDetect.api_key == api_key))
-    detect = result.one_or_none()
+    detect = result.all()
 
     if not detect:
         raise HTTPException(status_code=404, detail=f"No detection data found for API Key: {api_key}.")
 
-    return Detect.from_orm(detect)
+    return [Detect.from_orm(det) for det in detect]
 
 
 #เมื่อต้องการลบข้อมูลอุปกรณ์
