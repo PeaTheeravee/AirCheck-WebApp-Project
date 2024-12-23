@@ -13,39 +13,6 @@ router = APIRouter(prefix="/detects", tags=["detects"])
 
 SIZE_PER_PAGE = 50
 
-def calculate_iaqi(value, pollutant):
-    # กำหนดตาราง Breakpoints และระดับคุณภาพ
-    standards = {
-        'PM2.5': [
-            {'range': (0.0, 25.0), 'IAQI': (0, 50)},
-            {'range': (25.1, 35.0), 'IAQI': (51, 100)},
-            {'range': (35.1, float('inf')), 'IAQI': (101, 500)}
-        ],
-        'PM10': [
-            {'range': (0.0, 50.0), 'IAQI': (0, 50)},
-            {'range': (50.1, 75.0), 'IAQI': (51, 100)},
-            {'range': (75.1, float('inf')), 'IAQI': (101, 500)}
-        ],
-        'CO2': [
-            {'range': (0.0, 1000.0), 'IAQI': (0, 50)},
-            {'range': (1000.1, 1200.0), 'IAQI': (51, 100)},
-            {'range': (1200.1, float('inf')), 'IAQI': (101, 500)}
-        ]
-    }
-
-    if pollutant not in standards:
-        return None
-
-    for standard in standards[pollutant]:
-        low, high = standard['range']
-        if low <= value <= high:
-            iaqi_low, iaqi_high = standard['IAQI']
-            iaqi = ((value - low) / (high - low)) * (iaqi_high - iaqi_low) + iaqi_low
-            return round(iaqi, 2)
-
-    return None
-
-
 def get_quality_level(value, pollutant):
     levels = {
         'PM2.5': [
@@ -80,14 +47,14 @@ def get_quality_level(value, pollutant):
     }
 
     if pollutant not in levels:
-        return None, None
+        return 'ไม่ทราบ'
 
     for level in levels[pollutant]:
         low, high = level['range']
         if low <= value <= high:
             return level['level'], level['fix']
 
-    return None, None
+    return 'ไม่ทราบ'
 
 
 @router.post("/create")
@@ -108,12 +75,9 @@ async def create_detect(
     await session.commit()
     await session.refresh(dbdata)
 
-    # คำนวณ IAQI และระดับคุณภาพ
-    pm2_5_iaqi = calculate_iaqi(dbdata.pm2_5, "PM2.5")
+    # คำนวณระดับคุณภาพ
     pm2_5_quality, pm2_5_fix = get_quality_level(dbdata.pm2_5, "PM2.5")
-    pm10_iaqi = calculate_iaqi(dbdata.pm10, "PM10")
     pm10_quality, pm10_fix = get_quality_level(dbdata.pm10, "PM10")
-    co2_iaqi = calculate_iaqi(dbdata.co2, "CO2")
     co2_quality, co2_fix = get_quality_level(dbdata.co2, "CO2")
     humidity_quality, humidity_fix = get_quality_level(dbdata.humidity, "Humidity")
     temperature_quality, temperature_fix = get_quality_level(dbdata.temperature, "Temperature")
@@ -122,13 +86,10 @@ async def create_detect(
         api_key=dbdata.api_key,
         device_name=device.device_name,
         timestamp=dbdata.timestamp,
-        pm2_5_IAQI=pm2_5_iaqi,
         pm2_5_quality_level=pm2_5_quality,
         pm2_5_fix=pm2_5_fix,
-        pm10_IAQI=pm10_iaqi,
         pm10_quality_level=pm10_quality,
         pm10_fix=pm10_fix,
-        co2_IAQI=co2_iaqi,
         co2_quality_level=co2_quality,
         co2_fix=co2_fix,
         humidity_quality_level=humidity_quality,
