@@ -4,6 +4,10 @@
 3. .\scripts\run-api
 http://172.27.128.1:8000/docs (FastAPI)
 
+วิธีรันฝั่งfrontend
+1. cd frontend
+2. npm start
+
 วิธี clone
 1. git clone
 ในbackend
