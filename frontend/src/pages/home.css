@@ -1,1 +1,26 @@
-/* home.css */
+.home-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+}
+
+.profile-icon {
+    background-color: #007BFF; /* พื้นหลังปุ่ม */
+    color: white;             /* สีของไอคอน */
+    border: none;             /* เอาเส้นขอบออก */
+    border-radius: 50%;       /* ทำให้ปุ่มเป็นวงกลม */
+    padding: 12px;            /* เพิ่มพื้นที่ในปุ่ม */
+    cursor: pointer;
+    margin-right: 20px;       /* ระยะห่างจากขอบขวา */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* เงาให้ปุ่มดูมีมิติ */
+    transition: background-color 0.3s ease, box-shadow 0.3s ease; /* เอฟเฟกต์ */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile-icon:hover {
+    background-color: #0056b3; /* สีเมื่อ hover */
+    box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.2); /* เพิ่มเงาเข้มขึ้น */
+}
