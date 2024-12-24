@@ -1,4 +1,4 @@
-from tkinter.tix import Form
+from fastapi import Form
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import select
 from typing import Annotated
@@ -11,8 +11,8 @@ router = APIRouter(tags=["authentication"])
 
 @router.post("/token")
 async def login(
-    username: Annotated[str, Form()],  # ใช้ Form สำหรับ username
-    password: Annotated[str, Form()],  # ใช้ Form สำหรับ password
+    username: Annotated[str, Form()],  # ใช้ Form ที่ถูกต้อง
+    password: Annotated[str, Form()],  # ใช้ Form ที่ถูกต้อง
     session: Annotated[models.AsyncSession, Depends(models.get_session)],
 ) -> dict:
     # ตรวจสอบ username และ password

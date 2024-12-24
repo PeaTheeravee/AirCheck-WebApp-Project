@@ -12,7 +12,7 @@ const Home = () => {
                 <h1>Welcome to My Application!</h1>
                 <button
                     className="profile-icon"
-                    onClick={() => navigate("/adminhome")}
+                    onClick={() => navigate("/login")}
                 >
                     <AccountCircleIcon fontSize="large" />
                 </button>
