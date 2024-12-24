@@ -1,0 +1,28 @@
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #282c34;
+    color: white;
+}
+
+.profile-icon {
+    background-color: #007bff; /* สีพื้นหลัง */
+    color: white; /* สีไอคอน */
+    border: none; /* เอาขอบออก */
+    border-radius: 50%; /* ปุ่มทรงกลม */
+    padding: 12px;
+    cursor: pointer;
+    margin-right: 20px; /* ระยะห่าง */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile-icon:hover {
+    background-color: #0056b3; /* สีเมื่อ hover */
+    box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.2); /* เงาเมื่อ hover */
+}

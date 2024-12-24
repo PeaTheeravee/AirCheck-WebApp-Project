@@ -24,7 +24,8 @@ const Login = () => {
             });
 
             if (!response.ok) {
-                throw new Error("Incorrect username or password");
+                const errorData = await response.json(); // ดึงข้อความจาก detail
+                throw new Error(errorData.detail || "Unknown error occurred");
             }
 
             const data = await response.json();
@@ -34,7 +35,7 @@ const Login = () => {
                 setError("Access denied. Only superadmins are allowed.");
             }
         } catch (err) {
-            setError(err.message);
+            setError(err.message); // แสดงข้อความ error จาก Backend
         }
     };
 
