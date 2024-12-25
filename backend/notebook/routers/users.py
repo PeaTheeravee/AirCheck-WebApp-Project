@@ -13,7 +13,7 @@ router = APIRouter(prefix="/users", tags=["users"])
 async def create(
     user_info: RegisteredUser,
     session: Annotated[AsyncSession, Depends(models.get_session)],
-    current_user: Annotated[User, Depends(deps.get_current_active_superuser)],
+    current_user: Annotated[User, Depends(deps.get_current_active_superuser)], # ตรวจสอบว่าเป็น SuperAdmin
 ) -> User:
 
     # ตรวจสอบว่ามี username ซ้ำหรือไม่
@@ -60,7 +60,7 @@ async def create(
 async def delete_user(
     target_user_id: int,
     session: Annotated[AsyncSession, Depends(models.get_session)],
-    current_user: Annotated[User, Depends(deps.get_current_active_superuser)],
+    current_user: Annotated[User, Depends(deps.get_current_active_superuser)], # ตรวจสอบว่าเป็น SuperAdmin
 ):
     user = await session.get(DBUser, target_user_id)
 
@@ -124,11 +124,10 @@ async def get(
 async def change_password(
     password_update: ChangedPassword,
     session: Annotated[AsyncSession, Depends(models.get_session)],
-    response: Response,  # เพิ่ม response เพื่อจัดการคุกกี้
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(deps.get_current_active_user), # ตรวจสอบ user.status == "active"
 ) -> dict:
 
-    # ตรวจสอบว่ารหัสผ่านใหม่ไม่เหมือนกับรหัสผ่านเดิม
+    # ตรวจสอบว่ารหัสผ่านใหม่เหมือนกับรหัสผ่านเดิมไหม
     if password_update.current_password == password_update.new_password:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -150,10 +149,7 @@ async def change_password(
     session.add(current_user)
     await session.commit()
 
-    # ลบคุกกี้ user_id หลังจากเปลี่ยนรหัสผ่าน
-    response.delete_cookie("user_id")
-
-    return {"message": "Password updated successfully, and user must login again"}
+    return {"message": "Password updated successfully. Please login again."}
 
 
 # สำหรับการเปลี่ยนรหัสผ่านของคนอื่น (โดย superadmin)
@@ -162,8 +158,7 @@ async def change_password_for_others(
     target_user_id: int,
     password_update: ChangedPassword,
     session: Annotated[AsyncSession, Depends(models.get_session)],
-    response: Response,  # เพิ่ม response เพื่อจัดการคุกกี้
-    current_user: User = Depends(deps.get_current_active_superuser),  # ตรวจสอบว่าเป็น superadmin
+    current_user: User = Depends(deps.get_current_active_superuser), # ตรวจสอบว่าเป็น SuperAdmin
 ) -> dict:
 
     # ดึงข้อมูลผู้ใช้ที่ต้องการเปลี่ยนรหัสผ่าน
@@ -174,14 +169,14 @@ async def change_password_for_others(
             detail="User not found.",
         )
 
-    # ตรวจสอบว่ารหัสผ่านใหม่ไม่เหมือนกับรหัสผ่านเดิม
+    # ตรวจสอบว่ารหัสผ่านใหม่เหมือนกับรหัสผ่านเดิมไหม
     if password_update.current_password == password_update.new_password:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="The new password must not be the same as your old password.",
+            detail="The new password must not be the same as the current password.",
         )
 
-    # เปลี่ยนรหัสผ่านของผู้ใช้
+    # ตั้งค่ารหัสผ่านใหม่ของคนที่ superadmin ไปเปลี่ยนรหัส
     await user.set_password(password_update.new_password)
 
     # ตั้ง user.status เป็น "inactive" ของคนที่ superadmin ไปเปลี่ยนรหัส
@@ -189,10 +184,7 @@ async def change_password_for_others(
     session.add(user)
     await session.commit()
 
-    # ลบคุกกี้ user_id หลังจากเปลี่ยนรหัสผ่าน (user_id ในที่นี้หมายถึง คุกกี้ของ target_user_id [ผู้ที่ถูกเปลี่ยนรหัส] ไม่ใช่ของ superadmin)
-    response.delete_cookie("user_id")
-
-    return {"message": "Password updated successfully for the target user, and they must login again"}
+    return {"message": "Password updated successfully for the target user. They must login again."}
 
 
 @router.put("/{target_user_id}/update")
@@ -200,7 +192,7 @@ async def update(
     target_user_id: int,
     session: Annotated[AsyncSession, Depends(models.get_session)],
     user_update: UpdatedUser,
-    current_user: User = Depends(deps.get_current_active_superuser),
+    current_user: User = Depends(deps.get_current_active_superuser), # ตรวจสอบว่าเป็น SuperAdmin
 ) -> User:
     
     # ดึงข้อมูลผู้ใช้ที่ต้องการอัปเดต
