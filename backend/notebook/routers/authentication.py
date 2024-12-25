@@ -1,19 +1,20 @@
-from fastapi import Form
+from fastapi import Form, Response, Request
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import select
 from typing import Annotated
+from fastapi.responses import JSONResponse
 
 from notebook.models.users import *
 from .. import models
 
 router = APIRouter(tags=["authentication"])
 
-
 @router.post("/token")
 async def login(
-    username: Annotated[str, Form()],  # ใช้ Form ที่ถูกต้อง
-    password: Annotated[str, Form()],  # ใช้ Form ที่ถูกต้อง
+    username: Annotated[str, Form()],
+    password: Annotated[str, Form()],
     session: Annotated[models.AsyncSession, Depends(models.get_session)],
+    response: Response  # เพิ่ม response เพื่อจัดการคุกกี้
 ) -> dict:
     # ตรวจสอบ username และ password
     result = await session.exec(select(DBUser).where(DBUser.username == username))
@@ -30,19 +31,32 @@ async def login(
     session.add(user)
     await session.commit()
 
+    # เก็บ user_id ในคุกกี้
+    response.set_cookie(key="user_id", value=str(user.id), httponly=True)
+
     return {"message": "Login successful.", "role": user.role}
 
 
 @router.post("/logout")
 async def logout(
-    user_id: int,
+    request: Request,  # ใช้ Request เพื่อดึงคุกกี้
     session: Annotated[models.AsyncSession, Depends(models.get_session)],
+    response: Response  # เพิ่ม response เพื่อจัดการคุกกี้
 ):
-    # ดึงข้อมูลผู้ใช้
-    user = await session.get(DBUser, user_id)
+    # ดึง user_id จากคุกกี้
+    user_id_str = request.cookies.get("user_id")
+    if not user_id_str:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User not logged in.")
+    
+    # แปลง user_id ให้เป็น int
+    try:
+        user_id = int(user_id_str)
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid user ID.")
 
-    # ตรวจสอบสถานะผู้ใช้
-    if user.status != "active":
+    user = await session.get(DBUser, user_id)
+    
+    if not user or user.status != "active":
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="The user has not logged in yet.",
@@ -52,5 +66,8 @@ async def logout(
     user.status = "inactive"
     session.add(user)
     await session.commit()
+
+    # ลบคุกกี้ user_id
+    response.delete_cookie("user_id")
 
     return {"message": "Successfully logged out."}
