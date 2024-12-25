@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select
 from typing import Annotated
@@ -119,12 +119,51 @@ async def get(
     return user
 
 
-@router.put("/{target_user_id}/change_password")
+# สำหรับการเปลี่ยนรหัสผ่านของตัวเอง
+@router.put("/change_password")
 async def change_password(
+    password_update: ChangedPassword,
+    session: Annotated[AsyncSession, Depends(models.get_session)],
+    response: Response,  # เพิ่ม response เพื่อจัดการคุกกี้
+    current_user: User = Depends(deps.get_current_active_user),
+) -> dict:
+
+    # ตรวจสอบว่ารหัสผ่านใหม่ไม่เหมือนกับรหัสผ่านเดิม
+    if password_update.current_password == password_update.new_password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The new password must not be the same as your old password.",
+        )
+
+    # ตรวจสอบรหัสผ่านเดิม
+    if not await current_user.verify_password(password_update.current_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect current password.",
+        )
+
+    # ตั้งค่ารหัสผ่านใหม่
+    await current_user.set_password(password_update.new_password)
+
+    # ตั้ง user.status เป็น "inactive" ของตัวเอง
+    current_user.status = "inactive"
+    session.add(current_user)
+    await session.commit()
+
+    # ลบคุกกี้ user_id หลังจากเปลี่ยนรหัสผ่าน
+    response.delete_cookie("user_id")
+
+    return {"message": "Password updated successfully, and user must login again"}
+
+
+# สำหรับการเปลี่ยนรหัสผ่านของคนอื่น (โดย superadmin)
+@router.put("/{target_user_id}/change_password")
+async def change_password_for_others(
     target_user_id: int,
     password_update: ChangedPassword,
     session: Annotated[AsyncSession, Depends(models.get_session)],
-    current_user: User = Depends(deps.get_current_active_user),
+    response: Response,  # เพิ่ม response เพื่อจัดการคุกกี้
+    current_user: User = Depends(deps.get_current_active_superuser),  # ตรวจสอบว่าเป็น superadmin
 ) -> dict:
 
     # ดึงข้อมูลผู้ใช้ที่ต้องการเปลี่ยนรหัสผ่าน
@@ -135,13 +174,6 @@ async def change_password(
             detail="User not found.",
         )
 
-    # กรณีที่ผู้ใช้เป็น admin: เปลี่ยนรหัสผ่านได้เฉพาะของตัวเอง
-    if current_user.role == "admin" and current_user.id != user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Admins can only change their own password.",
-        )
-
     # ตรวจสอบว่ารหัสผ่านใหม่ไม่เหมือนกับรหัสผ่านเดิม
     if password_update.current_password == password_update.new_password:
         raise HTTPException(
@@ -149,24 +181,18 @@ async def change_password(
             detail="The new password must not be the same as your old password.",
         )
 
-    # ตรวจสอบรหัสผ่านเดิม (เฉพาะถ้าเปลี่ยนรหัสผ่านตัวเอง คือ superadmin ไม่จำเป็นต้องรู้รหัสผ่าน admin ก็สามารถเปลี่ยนรหัสผ่านได้)
-    if current_user.id == user.id and not await user.verify_password(password_update.current_password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect current password.",
-        )
-
-    # ตั้งค่ารหัสผ่านใหม่
+    # เปลี่ยนรหัสผ่านของผู้ใช้
     await user.set_password(password_update.new_password)
 
-    # ตั้ง user.status เป็น "inactive"
+    # ตั้ง user.status เป็น "inactive" ของคนที่ superadmin ไปเปลี่ยนรหัส
     user.status = "inactive"
-    
     session.add(user)
     await session.commit()
-    await session.refresh(user)
 
-    return {"message": "Password updated successfully, and user must login again"}
+    # ลบคุกกี้ user_id หลังจากเปลี่ยนรหัสผ่าน (user_id ในที่นี้หมายถึง คุกกี้ของ target_user_id [ผู้ที่ถูกเปลี่ยนรหัส] ไม่ใช่ของ superadmin)
+    response.delete_cookie("user_id")
+
+    return {"message": "Password updated successfully for the target user, and they must login again"}
 
 
 @router.put("/{target_user_id}/update")

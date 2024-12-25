@@ -9,7 +9,7 @@ from .. import models
 
 router = APIRouter(tags=["authentication"])
 
-@router.post("/token")
+@router.post("/login")
 async def login(
     username: Annotated[str, Form()],
     password: Annotated[str, Form()],
