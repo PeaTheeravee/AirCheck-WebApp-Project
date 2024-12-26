@@ -131,7 +131,7 @@ async def change_password(
     if password_update.current_password == password_update.new_password:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="The new password must not be the same as your old password.",
+            detail="The new password must not be the same as the current password.",
         )
 
     # ตรวจสอบรหัสผ่านเดิม
