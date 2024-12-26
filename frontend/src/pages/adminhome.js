@@ -79,7 +79,7 @@ const AdminHome = () => {
             }
 
             alert("Logged out successfully.");
-            navigate("/");
+            navigate("/login");
         } catch (err) {
             setError(err.message);
         }
