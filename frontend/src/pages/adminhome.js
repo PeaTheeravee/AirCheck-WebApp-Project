@@ -58,7 +58,6 @@ const AdminHome = () => {
                         <p><strong>Username:</strong> {userData.username}</p>
                         <p><strong>First Name:</strong> {userData.first_name}</p>
                         <p><strong>Last Name:</strong> {userData.last_name}</p>
-                        <p><strong>Role:</strong> {userData.role}</p>
                     </div>
                 ) : (
                     <p>Loading...</p>

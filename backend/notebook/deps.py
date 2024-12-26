@@ -1,3 +1,5 @@
+#import logging
+#logger = logging.getLogger(__name__)
 from fastapi import Depends, HTTPException, Request, status
 from typing import Annotated
 from notebook.models.users import *
@@ -10,6 +12,7 @@ async def get_current_active_user(
 ) -> User:
     # ดึง user_id จากคุกกี้
     user_id = request.cookies.get("user_id")
+    #logger.info(f"Cookie user_id: {user_id}")
     if not user_id:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not logged in.")
     

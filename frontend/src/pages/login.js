@@ -17,6 +17,7 @@ const Login = () => {
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded",
                 },
+                credentials: "include", 
                 body: new URLSearchParams({
                     username: username,
                     password: password,

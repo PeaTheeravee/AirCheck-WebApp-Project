@@ -1,3 +1,5 @@
+#import logging
+#logger = logging.getLogger(__name__)
 from fastapi import Form, Response, Request
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import select
@@ -33,6 +35,8 @@ async def login(
 
     # เก็บ user_id ในคุกกี้
     response.set_cookie(key="user_id", value=str(user.id), httponly=True)
+    #response.set_cookie(key="user_id", value=str(user.id), httponly=True, secure=False, samesite="Lax")
+    #logger.info(f"Set cookie user_id: {user.id}")  # เพิ่ม Logging หลังตั้งคุกกี้
 
     return {"message": "Login successful.", "role": user.role}
 

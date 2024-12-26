@@ -2,6 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import select
 
+#import logging
+#logging.basicConfig(level=logging.INFO)
+
 from . import models, routers, config
 from .models.users import DBUser
 
