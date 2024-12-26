@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from "react";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle"; // ไอคอนรูปคน
-import Popup from "../components/Popup"; // Import Popup Component
-import "./adminhome.css"; // ใช้สไตล์ของ adminhome โดยตรง
+import { useNavigate } from "react-router-dom"; // Import useNavigate
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import Popup from "../components/Popup";
+import "./adminhome.css";
 
 const AdminHome = () => {
+    const navigate = useNavigate(); // Initialize navigate
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [userData, setUserData] = useState(null);
-    const [error, setError] = useState("");
+    const [error, setError] = useState(""); // State for errors
+    const [isPasswordChange, setIsPasswordChange] = useState(false);
+    const [passwordData, setPasswordData] = useState({ currentPassword: "", newPassword: "" });
 
     // ฟังก์ชันสำหรับเปิด/ปิด popup
     const togglePopup = () => setIsPopupOpen(!isPopupOpen);
@@ -16,23 +20,73 @@ const AdminHome = () => {
         try {
             const response = await fetch("http://localhost:8000/users/me", {
                 method: "GET",
-                credentials: "include", // ส่งคุกกี้ไปด้วย
+                credentials: "include",
             });
 
             if (!response.ok) {
-                throw new Error("Failed to fetch user details.");
+                const errorData = await response.json(); // ดึงข้อความจาก detail
+                throw new Error(errorData.detail || "Failed to fetch user details.");
             }
 
             const data = await response.json();
             setUserData(data);
         } catch (err) {
-            setError(err.message);
+            setError(err.message); // แสดงข้อความ error
+        }
+    };
+
+    // ฟังก์ชันสำหรับเปลี่ยนรหัสผ่าน
+    const handleChangePassword = async () => {
+        try {
+            const response = await fetch("http://localhost:8000/users/change_password", {
+                method: "PUT",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    current_password: passwordData.currentPassword,
+                    new_password: passwordData.newPassword,
+                }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json(); // ดึงข้อความจาก detail
+                throw new Error(errorData.detail || "Failed to change password.");
+            }
+
+            alert("Password updated successfully. Please log in again.");
+            setIsPasswordChange(false);
+            setPasswordData({ currentPassword: "", newPassword: "" });
+            togglePopup();
+        } catch (err) {
+            setError(err.message); // แสดงข้อความ error
+        }
+    };
+
+    // ฟังก์ชันสำหรับ logout
+    const handleLogout = async () => {
+        try {
+            const response = await fetch("http://localhost:8000/logout", {
+                method: "POST",
+                credentials: "include",
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json(); // ดึงข้อความจาก detail
+                throw new Error(errorData.detail || "Logout failed.");
+            }
+
+            alert("Logged out successfully.");
+            navigate("/"); // Redirect to Home
+        } catch (err) {
+            setError(err.message); // แสดงข้อความ error
         }
     };
 
     useEffect(() => {
         if (isPopupOpen) {
-            fetchUserData(); // ดึงข้อมูลเมื่อเปิด popup
+            fetchUserData();
         }
     }, [isPopupOpen]);
 
@@ -42,7 +96,7 @@ const AdminHome = () => {
                 <h1>Admin Home</h1>
                 <button
                     className="profile-icon"
-                    onClick={togglePopup} // เปิด/ปิด popup
+                    onClick={togglePopup}
                 >
                     <AccountCircleIcon fontSize="large" />
                 </button>
@@ -51,16 +105,41 @@ const AdminHome = () => {
 
             {/* Popup Component */}
             <Popup isOpen={isPopupOpen} onClose={togglePopup}>
-                <h2>User Details</h2>
-                {error && <p style={{ color: "red" }}>{error}</p>}
-                {userData ? (
+                {isPasswordChange ? (
                     <div>
-                        <p><strong>Username:</strong> {userData.username}</p>
-                        <p><strong>First Name:</strong> {userData.first_name}</p>
-                        <p><strong>Last Name:</strong> {userData.last_name}</p>
+                        <h2>Change Password</h2>
+                        {error && <p style={{ color: "red" }}>{error}</p>} {/* แสดงข้อความ error */}
+                        <input
+                            type="password"
+                            placeholder="Current Password"
+                            value={passwordData.currentPassword}
+                            onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                        />
+                        <input
+                            type="password"
+                            placeholder="New Password"
+                            value={passwordData.newPassword}
+                            onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                        />
+                        <button onClick={handleChangePassword}>Submit</button>
+                        <button onClick={() => setIsPasswordChange(false)}>Back</button>
                     </div>
                 ) : (
-                    <p>Loading...</p>
+                    <div>
+                        <h2>User Details</h2>
+                        {error && <p style={{ color: "red" }}>{error}</p>} {/* แสดงข้อความ error */}
+                        {userData ? (
+                            <div>
+                                <p><strong>Username:</strong> {userData.username}</p>
+                                <p><strong>First Name:</strong> {userData.first_name}</p>
+                                <p><strong>Last Name:</strong> {userData.last_name}</p>
+                            </div>
+                        ) : (
+                            <p>Loading...</p>
+                        )}
+                        <button onClick={() => setIsPasswordChange(true)}>Change Password</button>
+                        <button onClick={handleLogout}>Logout</button>
+                    </div>
                 )}
             </Popup>
         </div>
