@@ -57,6 +57,7 @@ const AdminHome = () => {
             }
 
             alert("Password updated successfully. Please log in again.");
+            navigate("/login");
             setIsPasswordChange(false);
             setPasswordData({ currentPassword: "", newPassword: "" });
             togglePopup();
