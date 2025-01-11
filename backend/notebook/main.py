@@ -34,13 +34,12 @@ def create_app():
 
         async for session in models.get_session():  # ใช้ async for เพื่อดึง session
             async with session:  # ใช้ session เป็น context manager
-                result = await session.exec(select(DBUser).where(DBUser.username == "superadmin"))
-                superadmin = result.one_or_none()
+                result = await session.exec(select(DBUser).where(DBUser.role == "superadmin"))
+                superadmin = result.first()
 
                 if not superadmin:
                     superadmin = DBUser(
                         username="superadmin",
-                        email="superadmin@localhost",
                         first_name="Super",
                         last_name="Admin",
                         password="superadminpassword",
