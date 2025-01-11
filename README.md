@@ -49,9 +49,9 @@ superadmin = DBUser(
   roles=["superadmin"],
 )
 superadmin = DBUser(
-  username="superadmin",
-  first_name="Super",
-  last_name="Admin",
+  username="SuperPea",
+  first_name="Mr.",
+  last_name="Pea",
   password="superadminpassword22",
   roles=["superadmin"],
 )

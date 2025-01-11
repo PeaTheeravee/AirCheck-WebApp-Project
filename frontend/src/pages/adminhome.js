@@ -80,7 +80,7 @@ const AdminHome = () => {
             }
 
             alert("Logged out successfully.");
-            navigate("/login");
+            navigate("/");
         } catch (err) {
             setError(err.message);
         }
