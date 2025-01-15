@@ -3,7 +3,7 @@ from typing import Annotated
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, WebSocket, WebSocketDisconnect
 
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -144,3 +144,38 @@ async def delete_device_by_api_key(
     await session.commit()
 
     return {"message": "Device deleted successfully."}
+
+
+@router.websocket("/ws/devices")
+async def websocket_devices(websocket: WebSocket, session: Annotated[AsyncSession, Depends(get_session)]):
+
+    await websocket.accept()
+    device = None  # Initialize to track the device linked to the WebSocket
+    try:
+        while True:
+            # Wait for the device to send its API key
+            data = await websocket.receive_text()
+            device_api_key = data.strip()
+
+            # Fetch the device from the database
+            result = await session.exec(select(DBDevice).where(DBDevice.api_key == device_api_key))
+            device = result.one_or_none()
+
+            if device:
+                # Update device status to 'online'
+                device.device_status = "online"
+                session.add(device)
+                await session.commit()
+                await session.refresh(device)
+                await websocket.send_text(f"Device {device.device_name} is online.")
+            else:
+                # Notify that the device is not registered
+                await websocket.send_text("Device not registered.")
+
+    except WebSocketDisconnect:
+        if device:
+            # Update device status to 'offline' upon disconnect
+            device.device_status = "offline"
+            session.add(device)
+            await session.commit()
+        print("WebSocket disconnected.")

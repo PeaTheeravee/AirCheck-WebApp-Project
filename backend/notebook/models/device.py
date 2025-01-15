@@ -11,6 +11,7 @@ class BaseDevice(BaseModel):
     device_name: str  # ชื่ออุปกรณ์
     location: str  # ตำแหน่งของอุปกรณ์
     user_id: int | None = None  # ใครเป็นผู้เพิ่มอุปกรณ์
+    device_status: str | None = ""  # สถานะอุปกรณ์ (online, offline)
 
 
 class CreatedDevice(BaseDevice):
@@ -35,6 +36,7 @@ class DBDevice(SQLModel, table=True):
 
     device_name: str
     location: str
+    device_status: str | None = ""
     user_id: int = Field(default=None, foreign_key="users.id")
     user: users.DBUser | None = Relationship()
 
@@ -46,3 +48,7 @@ class DeviceList(BaseModel):
     #page: int
     #page_size: int
     #size_per_page: int
+
+
+class DeviceStatusUpdate(BaseModel):
+    device_status: str  # ค่าสถานะอุปกรณ์ เช่น "online" หรือ "offline"

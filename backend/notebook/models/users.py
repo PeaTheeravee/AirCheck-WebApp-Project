@@ -65,11 +65,11 @@ class DBUser(BaseUser, SQLModel, table=True):
     role: str = Field(default="admin")
     status: str = Field(default="inactive")
 
-    async def has_roles(self, roles):
-        for role in roles:
-            if role in self.roles:
-                return True
-        return False
+    #async def has_roles(self, roles):
+    #    for role in roles:
+    #        if role in self.roles:
+    #            return True
+    #    return False
 
     async def set_password(self, plain_password):
         self.password = pwd_context.hash(plain_password)
