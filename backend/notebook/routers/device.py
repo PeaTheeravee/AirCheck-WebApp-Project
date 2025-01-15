@@ -21,8 +21,8 @@ import math
 router = APIRouter(prefix="/devices", tags=["devices"])
 router = APIRouter(prefix="/ws", tags=["websocket"])
 
-# ตัวแปรเก็บสถานะการเชื่อมต่อของอุปกรณ์
-connected_devices = set()
+# ตัวแปรเก็บ WebSocket และ API Key ของอุปกรณ์ที่เชื่อมต่อ
+connected_devices = {}
 
 SIZE_PER_PAGE = 50
 
@@ -154,14 +154,21 @@ async def delete_device_by_api_key(
 async def websocket_devices(websocket: WebSocket, session: Annotated[AsyncSession, Depends(get_session)]):
 
     await websocket.accept()
-    connected_devices.add(websocket)
     try:
-        # แสดงจำนวนอุปกรณ์ที่เชื่อมต่ออยู่ในปัจจุบัน
-        print(f"Device connected. Total devices: {len(connected_devices)}")
+        # รอรับ API Key จากอุปกรณ์
+        api_key = await websocket.receive_text()
+        connected_devices[websocket] = api_key
+
+        # แสดง API Keys ของอุปกรณ์ที่เชื่อมต่อทั้งหมด
+        print(f"Device connected: {api_key}")
+        print(f"Connected API Keys: {list(connected_devices.values())}")
+
         while True:
             # Wait for any message from the device
             await websocket.receive_text()
     except WebSocketDisconnect:
-        # ลบอุปกรณ์ออกจากเซ็ตเมื่อการเชื่อมต่อถูกตัด
-        connected_devices.remove(websocket)
-        print(f"Device disconnected. Total devices: {len(connected_devices)}")
+        # ลบอุปกรณ์ออกจาก dict เมื่อการเชื่อมต่อถูกตัด
+        if websocket in connected_devices:
+            disconnected_api_key = connected_devices.pop(websocket)
+            print(f"Device disconnected: {disconnected_api_key}")
+            print(f"Connected API Keys: {list(connected_devices.values())}")
