@@ -19,6 +19,10 @@ from notebook.deps import *
 import math
 
 router = APIRouter(prefix="/devices", tags=["devices"])
+router = APIRouter(prefix="/ws", tags=["websocket"])
+
+# ตัวแปรเก็บสถานะการเชื่อมต่อของอุปกรณ์
+connected_devices = set()
 
 SIZE_PER_PAGE = 50
 
@@ -146,36 +150,18 @@ async def delete_device_by_api_key(
     return {"message": "Device deleted successfully."}
 
 
-@router.websocket("/ws/devices")
+@router.websocket("/devices")
 async def websocket_devices(websocket: WebSocket, session: Annotated[AsyncSession, Depends(get_session)]):
 
     await websocket.accept()
-    device = None  # Initialize to track the device linked to the WebSocket
+    connected_devices.add(websocket)
     try:
+        # แสดงจำนวนอุปกรณ์ที่เชื่อมต่ออยู่ในปัจจุบัน
+        print(f"Device connected. Total devices: {len(connected_devices)}")
         while True:
-            # Wait for the device to send its API key
-            data = await websocket.receive_text()
-            device_api_key = data.strip()
-
-            # Fetch the device from the database
-            result = await session.exec(select(DBDevice).where(DBDevice.api_key == device_api_key))
-            device = result.one_or_none()
-
-            if device:
-                # Update device status to 'online'
-                device.device_status = "online"
-                session.add(device)
-                await session.commit()
-                await session.refresh(device)
-                await websocket.send_text(f"Device {device.device_name} is online.")
-            else:
-                # Notify that the device is not registered
-                await websocket.send_text("Device not registered.")
-
+            # Wait for any message from the device
+            await websocket.receive_text()
     except WebSocketDisconnect:
-        if device:
-            # Update device status to 'offline' upon disconnect
-            device.device_status = "offline"
-            session.add(device)
-            await session.commit()
-        print("WebSocket disconnected.")
+        # ลบอุปกรณ์ออกจากเซ็ตเมื่อการเชื่อมต่อถูกตัด
+        connected_devices.remove(websocket)
+        print(f"Device disconnected. Total devices: {len(connected_devices)}")
