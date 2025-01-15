@@ -3,7 +3,7 @@ from typing import Annotated
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 
-from fastapi import APIRouter, HTTPException, Depends, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, HTTPException, Depends
 
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -19,7 +19,6 @@ from notebook.deps import *
 import math
 
 router = APIRouter(prefix="/devices", tags=["devices"])
-router = APIRouter(prefix="/ws", tags=["websocket"])
 
 # ตัวแปรเก็บ WebSocket และ API Key ของอุปกรณ์ที่เชื่อมต่อ
 connected_devices = {}
@@ -148,24 +147,3 @@ async def delete_device_by_api_key(
     await session.commit()
 
     return {"message": "Device deleted successfully."}
-
-
-@router.websocket("/devices/{api_key}")
-async def websocket_devices(websocket: WebSocket, api_key: str):
-
-    await websocket.accept()
-    try:
-        # บันทึกการเชื่อมต่อ
-        connected_devices[websocket] = api_key
-        print(f"Device connected: {api_key}")
-
-        # รอจนกว่าจะมีการตัดการเชื่อมต่อ
-        while True:
-            await websocket.receive_text()
-
-    except WebSocketDisconnect:
-        # ลบ WebSocket ออกจากตัวแปรและแสดงข้อความ
-        if websocket in connected_devices:
-            disconnected_api_key = connected_devices.pop(websocket)
-            print(f"Device disconnected: {disconnected_api_key}")
- 

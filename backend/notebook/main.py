@@ -7,7 +7,7 @@ from sqlmodel import select
 
 from . import models, routers, config
 from .models.users import DBUser
-from .routers.device import router as device_router  # นำเข้า router จาก device.py
+from .routers.websocket import router as websocket_router  # นำเข้า router จาก device.py
 
 def create_app():
     settings = config.get_settings()
@@ -29,7 +29,7 @@ def create_app():
     routers.init_router(app)
     
     # เพิ่ม router สำหรับ WebSocket และอุปกรณ์
-    app.include_router(device_router)  # เพิ่ม router จาก device.py
+    app.include_router(websocket_router)  # เพิ่ม router จาก websocket.py
 
     @app.on_event("startup")
     async def on_startup():
