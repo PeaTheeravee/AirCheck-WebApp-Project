@@ -150,25 +150,22 @@ async def delete_device_by_api_key(
     return {"message": "Device deleted successfully."}
 
 
-@router.websocket("/devices")
-async def websocket_devices(websocket: WebSocket, session: Annotated[AsyncSession, Depends(get_session)]):
+@router.websocket("/devices/{api_key}")
+async def websocket_devices(websocket: WebSocket, api_key: str):
 
     await websocket.accept()
     try:
-        # รอรับ API Key จากอุปกรณ์
-        api_key = await websocket.receive_text()
+        # บันทึกการเชื่อมต่อ
         connected_devices[websocket] = api_key
-
-        # แสดง API Keys ของอุปกรณ์ที่เชื่อมต่อทั้งหมด
         print(f"Device connected: {api_key}")
-        print(f"Connected API Keys: {list(connected_devices.values())}")
 
+        # รอจนกว่าจะมีการตัดการเชื่อมต่อ
         while True:
-            # Wait for any message from the device
             await websocket.receive_text()
+
     except WebSocketDisconnect:
-        # ลบอุปกรณ์ออกจาก dict เมื่อการเชื่อมต่อถูกตัด
+        # ลบ WebSocket ออกจากตัวแปรและแสดงข้อความ
         if websocket in connected_devices:
             disconnected_api_key = connected_devices.pop(websocket)
             print(f"Device disconnected: {disconnected_api_key}")
-            print(f"Connected API Keys: {list(connected_devices.values())}")
+ 
