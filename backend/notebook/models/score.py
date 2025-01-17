@@ -16,6 +16,8 @@ class BaseScore(BaseModel):
     pm10_fix: str  # คำแนะนำสำหรับ PM10
     co2_quality_level: str  # ระดับคุณภาพอากาศสำหรับ CO2
     co2_fix: str  # คำแนะนำสำหรับ CO2
+    tvoc_quality_level: str  # ระดับคุณภาพอากาศ สารอินทรีย์ระเหยรวม  
+    tvoc_fix: str  # คำแนะนำสำหรับ สารอินทรีย์ระเหยรวม
     humidity_quality_level: str  # ระดับคุณภาพอากาศสำหรับ Humidity
     humidity_fix: str  # คำแนะนำสำหรับ Humidity
     temperature_quality_level: str  # ระดับคุณภาพอากาศสำหรับ Temperature
@@ -46,6 +48,8 @@ class DBScore(SQLModel, table=True):
     pm10_fix: str  # คำแนะนำสำหรับ PM10
     co2_quality_level: str  # ระดับคุณภาพอากาศ CO2
     co2_fix: str  # คำแนะนำสำหรับ CO2
+    tvoc_quality_level: str  # ระดับคุณภาพอากาศ สารอินทรีย์ระเหยรวม  
+    tvoc_fix: str  # คำแนะนำสำหรับ สารอินทรีย์ระเหยรวม
     humidity_quality_level: str  # ระดับคุณภาพอากาศ Humidity
     humidity_fix: str  # คำแนะนำสำหรับ Humidity
     temperature_quality_level: str  # ระดับคุณภาพอากาศ Temperature

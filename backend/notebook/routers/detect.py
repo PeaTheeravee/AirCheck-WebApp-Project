@@ -30,6 +30,11 @@ def get_quality_level(value, pollutant):
             {'range': (1000.1, 1200.0), 'level': 'ปานกลาง', 'fix': 'เปิดหน้าต่างหรือประตูชั่วคราว'},
             {'range': (1200.1, float('inf')), 'level': 'อันตราย', 'fix': 'ใช้พัดลมช่วยเพิ่มการถ่ายเทอากาศ , เปิดหน้าต่างหรือประตูให้นานขึ้น'}
         ],
+        'TVOC': [
+            {'range': (0.0, 1000.0), 'level': 'ดี', 'fix': '1'},
+            {'range': (1000.1, 1200.0), 'level': 'ปานกลาง', 'fix': '2'},
+            {'range': (1200.1, float('inf')), 'level': 'อันตราย', 'fix': '3'}
+        ],
         'Temperature': [
             {'range': (24.0, 26.0), 'level': 'ดี', 'fix': '---------'},
             {'range': (22.0, 23.99), 'level': 'ปานกลาง', 'fix': 'ปรับอุณหภูมิแอร์ให้อยู่ในช่วง 24-26°C'},
@@ -79,6 +84,7 @@ async def create_detect(
     pm2_5_quality, pm2_5_fix = get_quality_level(dbdata.pm2_5, "PM2.5")
     pm10_quality, pm10_fix = get_quality_level(dbdata.pm10, "PM10")
     co2_quality, co2_fix = get_quality_level(dbdata.co2, "CO2")
+    tvoc_quality, tvoc_fix = get_quality_level(dbdata.tvoc, "TVOC")
     humidity_quality, humidity_fix = get_quality_level(dbdata.humidity, "Humidity")
     temperature_quality, temperature_fix = get_quality_level(dbdata.temperature, "Temperature")
 
@@ -92,6 +98,8 @@ async def create_detect(
         pm10_fix=pm10_fix,
         co2_quality_level=co2_quality,
         co2_fix=co2_fix,
+        tvoc_quality_level=tvoc_quality,
+        tvoc_fix=tvoc_fix,
         humidity_quality_level=humidity_quality,
         humidity_fix=humidity_fix,
         temperature_quality_level=temperature_quality,
