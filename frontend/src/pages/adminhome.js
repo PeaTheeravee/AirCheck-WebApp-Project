@@ -96,8 +96,11 @@ const AdminHome = () => {
                 throw new Error(errorData.detail || "Logout failed.");
             }
 
-            alert("Logged out successfully.");
-            navigate("/");
+            setSuccessMessage("Logged out successfully!"); // แสดงข้อความยืนยันใต้ Last Name
+            setTimeout(() => {
+                setSuccessMessage(""); // ลบข้อความหลัง 3 วินาที
+                navigate("/"); // เด้งไปหน้า Home
+            }, 3000);
         } catch (err) {
             setError(err.message);
         }
@@ -246,6 +249,9 @@ const AdminHome = () => {
                             <p><strong>Username:</strong> {userData.username}</p>
                             <p><strong>First Name:</strong> {userData.first_name}</p>
                             <p><strong>Last Name:</strong> {userData.last_name}</p>
+                            {successMessage && (
+                                <p style={{ color: "green", marginTop: "10px" }}>{successMessage}</p>
+                            )}
                         </div>
                     ) : (
                         <p>Loading...</p>
