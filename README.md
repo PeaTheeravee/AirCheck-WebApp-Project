@@ -52,6 +52,6 @@ superadmin = DBUser(
   username="SuperPea",
   first_name="Mr.",
   last_name="Pea",
-  password="superadminpassword22",
+  password="sp238238",
   roles=["superadmin"],
 )

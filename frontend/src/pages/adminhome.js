@@ -8,7 +8,10 @@ import {
     DialogActions,
     Button,
     TextField,
+    IconButton,
+    InputAdornment,
 } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import "./adminhome.css";
 
 const AdminHome = () => {
@@ -18,6 +21,7 @@ const AdminHome = () => {
     const [error, setError] = useState("");
     const [isPasswordChange, setIsPasswordChange] = useState(false);
     const [passwordData, setPasswordData] = useState({ currentPassword: "", newPassword: "" });
+    const [showPassword, setShowPassword] = useState({ current: false, new: false });
     const [users, setUsers] = useState([]);
 
     // ฟังก์ชันสำหรับเปิด/ปิด Dialog
@@ -69,6 +73,11 @@ const AdminHome = () => {
         } catch (err) {
             setError(err.message);
         }
+    };
+
+    // ฟังก์ชันแสดง/ซ่อนรหัสผ่าน
+    const handleTogglePassword = (field) => {
+        setShowPassword((prev) => ({ ...prev, [field]: !prev[field] }));
     };
 
     // ฟังก์ชันสำหรับ logout
@@ -128,8 +137,6 @@ const AdminHome = () => {
                 </button>
             </header>
 
-
-
             {/* Content/Main */}
             <div className="content">
                 <h2>User Management</h2>
@@ -186,23 +193,45 @@ const AdminHome = () => {
                             {error && <p style={{ color: "red" }}>{error}</p>}
                             <TextField
                                 label="Current Password"
-                                type="password"
+                                type={showPassword.current ? "text" : "password"}
                                 fullWidth
                                 margin="dense"
                                 value={passwordData.currentPassword}
                                 onChange={(e) =>
                                     setPasswordData({ ...passwordData, currentPassword: e.target.value })
                                 }
+                                InputProps={{
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                                onClick={() => handleTogglePassword("current")}
+                                            >
+                                                {showPassword.current ? <Visibility /> : <VisibilityOff />}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    ),
+                                }}
                             />
                             <TextField
                                 label="New Password"
-                                type="password"
+                                type={showPassword.new ? "text" : "password"}
                                 fullWidth
                                 margin="dense"
                                 value={passwordData.newPassword}
                                 onChange={(e) =>
                                     setPasswordData({ ...passwordData, newPassword: e.target.value })
                                 }
+                                InputProps={{
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                                onClick={() => handleTogglePassword("new")}
+                                            >
+                                                {showPassword.new ? <Visibility /> : <VisibilityOff />}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    ),
+                                }}
                             />
                         </div>
                     ) : userData ? (
