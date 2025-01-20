@@ -1,34 +1,39 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import Popup from "../components/PopupUD";
+import {
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    Button,
+    TextField,
+} from "@mui/material";
 import "./adminhome.css";
 
 const AdminHome = () => {
     const navigate = useNavigate();
-    const [isPopupOpen, setIsPopupOpen] = useState(false);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [userData, setUserData] = useState(null);
     const [error, setError] = useState("");
     const [isPasswordChange, setIsPasswordChange] = useState(false);
     const [passwordData, setPasswordData] = useState({ currentPassword: "", newPassword: "" });
-    const [users, setUsers] = useState([]); // State สำหรับข้อมูลผู้ใช้ทั้งหมด (ตาราง)
+    const [users, setUsers] = useState([]);
 
-    // ฟังก์ชันสำหรับเปิด/ปิด popup
-    const togglePopup = () => setIsPopupOpen(!isPopupOpen);
+    // ฟังก์ชันสำหรับเปิด/ปิด Dialog
+    const toggleDialog = () => setIsDialogOpen(!isDialogOpen);
 
-    // ฟังก์ชันสำหรับดึงข้อมูลผู้ใช้ (Header)
+    // ดึงข้อมูลผู้ใช้ที่ล็อกอินอยู่
     const fetchUserData = async () => {
         try {
             const response = await fetch("http://localhost:8000/users/me", {
                 method: "GET",
                 credentials: "include",
             });
-
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.detail || "Failed to fetch user details.");
             }
-
             const data = await response.json();
             setUserData(data);
         } catch (err) {
@@ -60,7 +65,7 @@ const AdminHome = () => {
             navigate("/login");
             setIsPasswordChange(false);
             setPasswordData({ currentPassword: "", newPassword: "" });
-            togglePopup();
+            toggleDialog();
         } catch (err) {
             setError(err.message);
         }
@@ -86,7 +91,7 @@ const AdminHome = () => {
         }
     };
 
-    // ฟังก์ชันสำหรับดึงข้อมูลผู้ใช้ทั้งหมด (Content/Main)
+    // ดึงข้อมูลผู้ใช้ทั้งหมด
     const fetchUsers = async () => {
         try {
             const response = await fetch("http://localhost:8000/users/all", {
@@ -107,18 +112,18 @@ const AdminHome = () => {
     };
 
     useEffect(() => {
-        if (isPopupOpen) {
+        if (isDialogOpen) {
             fetchUserData();
         }
-        fetchUsers(); // ดึงข้อมูลผู้ใช้ทั้งหมด
-    }, [isPopupOpen]);
+        fetchUsers();
+    }, [isDialogOpen]);
 
     return (
         <div>
             {/* Header */}
             <header className="admin-header">
                 <h1>Admin Home</h1>
-                <button className="profile-icon" onClick={togglePopup}>
+                <button className="profile-icon" onClick={toggleDialog}>
                     <AccountCircleIcon fontSize="large" />
                 </button>
             </header>
@@ -130,7 +135,7 @@ const AdminHome = () => {
                 <h2>User Management</h2>
                 <button
                     className="create-button"
-                    onClick={() => alert("Mock: Create Account")} // Mock ปุ่มสร้างบัญชี
+                    onClick={() => alert("Mock: Create Account")}
                 >
                     Create account
                 </button>
@@ -169,51 +174,61 @@ const AdminHome = () => {
                 </table>
             </div>
 
-
-
-            {/* Popup */}
-            <Popup isOpen={isPopupOpen} onClose={togglePopup}>
-                {isPasswordChange ? (
-                    <div>
-                        <h2>Change Password</h2>
-                        {error && <p style={{ color: "red" }}>{error}</p>}
-                        <input
-                            type="password"
-                            placeholder="Current Password"
-                            value={passwordData.currentPassword}
-                            onChange={(e) =>
-                                setPasswordData({ ...passwordData, currentPassword: e.target.value })
-                            }
-                        />
-                        <input
-                            type="password"
-                            placeholder="New Password"
-                            value={passwordData.newPassword}
-                            onChange={(e) =>
-                                setPasswordData({ ...passwordData, newPassword: e.target.value })
-                            }
-                        />
-                        <button onClick={handleChangePassword}>Submit</button>
-                        <button onClick={() => setIsPasswordChange(false)}>Back</button>
-                    </div>
-                ) : (
-                    <div>
-                        <h2>User Details</h2>
-                        
-                        {userData ? (
-                            <div>
-                                <p><strong>Username:</strong> {userData.username}</p>
-                                <p><strong>First Name:</strong> {userData.first_name}</p>
-                                <p><strong>Last Name:</strong> {userData.last_name}</p>
-                            </div>
-                        ) : (
-                            <p>Loading...</p>
-                        )}
-                        <button onClick={() => setIsPasswordChange(true)}>Change Password</button>
-                        <button onClick={handleLogout}>Logout</button>
-                    </div>
-                )}
-            </Popup>
+            {/* Dialog */}
+            <Dialog open={isDialogOpen} onClose={toggleDialog}>
+                <DialogTitle>
+                    {isPasswordChange ? "Change Password" : "User Details"}
+                    <Button onClick={toggleDialog} style={{ float: "right" }}>X</Button>
+                </DialogTitle>
+                <DialogContent>
+                    {isPasswordChange ? (
+                        <div>
+                            {error && <p style={{ color: "red" }}>{error}</p>}
+                            <TextField
+                                label="Current Password"
+                                type="password"
+                                fullWidth
+                                margin="dense"
+                                value={passwordData.currentPassword}
+                                onChange={(e) =>
+                                    setPasswordData({ ...passwordData, currentPassword: e.target.value })
+                                }
+                            />
+                            <TextField
+                                label="New Password"
+                                type="password"
+                                fullWidth
+                                margin="dense"
+                                value={passwordData.newPassword}
+                                onChange={(e) =>
+                                    setPasswordData({ ...passwordData, newPassword: e.target.value })
+                                }
+                            />
+                        </div>
+                    ) : userData ? (
+                        <div>
+                            <p><strong>Username:</strong> {userData.username}</p>
+                            <p><strong>First Name:</strong> {userData.first_name}</p>
+                            <p><strong>Last Name:</strong> {userData.last_name}</p>
+                        </div>
+                    ) : (
+                        <p>Loading...</p>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    {isPasswordChange ? (
+                        <>
+                            <Button onClick={handleChangePassword}>Submit</Button>
+                            <Button onClick={() => setIsPasswordChange(false)}>Back</Button>
+                        </>
+                    ) : (
+                        <>
+                            <Button onClick={() => setIsPasswordChange(true)}>Change Password</Button>
+                            <Button onClick={handleLogout}>Logout</Button>
+                        </>
+                    )}
+                </DialogActions>
+            </Dialog>
         </div>
     );
 };
