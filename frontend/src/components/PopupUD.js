@@ -1,5 +1,5 @@
 import React from "react";
-import "./Popup.css"; // เพิ่มไฟล์ CSS สำหรับ Popup
+import "./PopupUD.css"; // เพิ่มไฟล์ CSS สำหรับ Popup
 
 const Popup = ({ isOpen, onClose, children }) => {
     if (!isOpen) return null;

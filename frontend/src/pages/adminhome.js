@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import Popup from "../components/Popup";
+import Popup from "../components/PopupUD";
 import "./adminhome.css";
 
 const AdminHome = () => {
