@@ -19,6 +19,7 @@ const AdminHome = () => {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [userData, setUserData] = useState(null);
     const [error, setError] = useState("");
+    const [successMessage, setSuccessMessage] = useState(""); // เพิ่ม state สำหรับข้อความยืนยัน
     const [isPasswordChange, setIsPasswordChange] = useState(false);
     const [passwordData, setPasswordData] = useState({ currentPassword: "", newPassword: "" });
     const [showPassword, setShowPassword] = useState({ current: false, new: false });
@@ -65,11 +66,13 @@ const AdminHome = () => {
                 throw new Error(errorData.detail || "Failed to change password.");
             }
 
-            alert("Password updated successfully. Please log in again.");
-            navigate("/login");
-            setIsPasswordChange(false);
+            setSuccessMessage("Password updated successfully!"); // แสดงข้อความยืนยัน
             setPasswordData({ currentPassword: "", newPassword: "" });
-            toggleDialog();
+            
+            setTimeout(() => {
+                setSuccessMessage(""); // ลบข้อความหลัง 3 วินาที
+                navigate("/login"); // เด้งไปหน้า Login
+            }, 3000);
         } catch (err) {
             setError(err.message);
         }
@@ -100,7 +103,13 @@ const AdminHome = () => {
         }
     };
 
-    // ดึงข้อมูลผู้ใช้ทั้งหมด
+    useEffect(() => {
+        if (isDialogOpen) {
+            fetchUserData();
+        }
+        fetchUsers();
+    }, [isDialogOpen]);
+
     const fetchUsers = async () => {
         try {
             const response = await fetch("http://localhost:8000/users/all", {
@@ -119,13 +128,6 @@ const AdminHome = () => {
             setError(err.message);
         }
     };
-
-    useEffect(() => {
-        if (isDialogOpen) {
-            fetchUserData();
-        }
-        fetchUsers();
-    }, [isDialogOpen]);
 
     return (
         <div>
@@ -233,6 +235,11 @@ const AdminHome = () => {
                                     ),
                                 }}
                             />
+                            {successMessage && (
+                                <p style={{ color: "green", marginTop: "10px" }}>
+                                    {successMessage}
+                                </p>
+                            )}
                         </div>
                     ) : userData ? (
                         <div>
