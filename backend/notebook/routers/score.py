@@ -10,18 +10,18 @@ from notebook.models.score import *
 router = APIRouter(prefix="/scores", tags=["scores"])
 
 
-@router.get("/all")
-async def get_all_scores(
-    session: Annotated[AsyncSession, Depends(get_session)],
-) -> list[Score]:
+#@router.get("/all")
+#async def get_all_scores(
+#    session: Annotated[AsyncSession, Depends(get_session)],
+#) -> list[Score]:
 
-    result = await session.exec(select(DBScore))
-    scores = result.all()
+#    result = await session.exec(select(DBScore))
+#    scores = result.all()
 
-    if not scores:
-        raise HTTPException(status_code=404, detail="No score data found.")
+#    if not scores:
+#        raise HTTPException(status_code=404, detail="No score data found.")
 
-    return [Score.from_orm(sco) for sco in scores]
+#    return [Score.from_orm(sco) for sco in scores]
 
 
 @router.get("/{api_key}")

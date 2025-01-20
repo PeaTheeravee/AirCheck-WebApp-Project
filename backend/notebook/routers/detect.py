@@ -111,18 +111,18 @@ async def create_detect(
     return Detect.from_orm(dbdata)
 
 
-@router.get("/all")
-async def get_all_detects(
-    session: Annotated[AsyncSession, Depends(get_session)],
-) -> list[Detect]:
+#@router.get("/all")
+#async def get_all_detects(
+#    session: Annotated[AsyncSession, Depends(get_session)],
+#) -> list[Detect]:
 
-    result = await session.exec(select(DBDetect))
-    detects = result.all()
+#    result = await session.exec(select(DBDetect))
+#    detects = result.all()
 
-    if not detects:
-        raise HTTPException(status_code=404, detail="No detection data found.")
+#    if not detects:
+#        raise HTTPException(status_code=404, detail="No detection data found.")
 
-    return [Detect.from_orm(det) for det in detects]
+#    return [Detect.from_orm(det) for det in detects]
 
 
 @router.get("/{api_key}")
