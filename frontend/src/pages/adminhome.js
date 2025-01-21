@@ -63,7 +63,9 @@ const AdminHome = () => {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.detail || "Failed to change password.");
+                setError(errorData.detail || "Failed to change password.");
+                setTimeout(() => setError(""), 3000); // ลบข้อความหลัง 3 วินาที
+                return;
             }
 
             setSuccessMessage("Password updated successfully!"); // แสดงข้อความยืนยัน
@@ -75,6 +77,7 @@ const AdminHome = () => {
             }, 3000);
         } catch (err) {
             setError(err.message);
+            setTimeout(() => setError(""), 3000); // ลบข้อความหลัง 3 วินาที
         }
     };
 
@@ -96,9 +99,9 @@ const AdminHome = () => {
                 throw new Error(errorData.detail || "Logout failed.");
             }
 
-            //setSuccessMessage("Logged out successfully!"); // แสดงข้อความยืนยันใต้ Last Name
+            setSuccessMessage("Return to home page"); // แสดงข้อความยืนยันใต้ Last Name
             setTimeout(() => {
-                //setSuccessMessage(""); // ลบข้อความหลัง 3 วินาที
+                setSuccessMessage(""); // ลบข้อความหลัง 3 วินาที
                 navigate("/"); // เด้งไปหน้า Home
             }, 1000);
         } catch (err) {
@@ -195,7 +198,6 @@ const AdminHome = () => {
                 <DialogContent>
                     {isPasswordChange ? (
                         <div>
-                            {error && <p style={{ color: "red" }}>{error}</p>}
                             <TextField
                                 label="Current Password"
                                 type={showPassword.current ? "text" : "password"}
@@ -238,6 +240,12 @@ const AdminHome = () => {
                                     ),
                                 }}
                             />
+                            {/* แสดงข้อความ Error ใต้ช่อง New Password */}
+                            {error && (
+                                <p style={{ color: "red", marginTop: "10px", marginBottom: "0" }}>
+                                    {error}
+                                </p>
+                            )}
                             {successMessage && (
                                 <p style={{ color: "green", marginTop: "10px" }}>
                                     {successMessage}
