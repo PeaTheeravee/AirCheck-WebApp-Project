@@ -48,6 +48,19 @@ const AdminHome = () => {
 
     // ฟังก์ชันสำหรับเปลี่ยนรหัสผ่าน
     const handleChangePassword = async () => {
+        
+        if (!passwordData.currentPassword.trim()) {
+            setError("Current Password cannot be empty.");
+            setTimeout(() => setError(""), 3000); // ลบข้อความ Error หลัง 3 วินาที
+            return;
+        }
+        if (!passwordData.newPassword.trim()) {
+            setError("New Password cannot be empty.");
+            setTimeout(() => setError(""), 3000); // ลบข้อความ Error หลัง 3 วินาที
+            return;
+        }
+
+
         try {
             const response = await fetch("http://localhost:8000/users/change_password", {
                 method: "PUT",
