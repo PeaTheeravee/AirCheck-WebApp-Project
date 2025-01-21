@@ -96,11 +96,11 @@ const AdminHome = () => {
                 throw new Error(errorData.detail || "Logout failed.");
             }
 
-            setSuccessMessage("Logged out successfully!"); // แสดงข้อความยืนยันใต้ Last Name
+            //setSuccessMessage("Logged out successfully!"); // แสดงข้อความยืนยันใต้ Last Name
             setTimeout(() => {
-                setSuccessMessage(""); // ลบข้อความหลัง 3 วินาที
+                //setSuccessMessage(""); // ลบข้อความหลัง 3 วินาที
                 navigate("/"); // เด้งไปหน้า Home
-            }, 3000);
+            }, 1000);
         } catch (err) {
             setError(err.message);
         }
