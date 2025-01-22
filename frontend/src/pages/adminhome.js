@@ -16,7 +16,7 @@ import "./adminhome.css";
 
 const AdminHome = () => {
     const navigate = useNavigate();
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isDialogOpen] = useState(false);
     const [userData, setUserData] = useState(null);
     const [error, setError] = useState("");
     const [successMessage, setSuccessMessage] = useState(""); // เพิ่ม state สำหรับข้อความยืนยัน
@@ -261,7 +261,7 @@ const AdminHome = () => {
                 </table>
             </div>
 
-            {/* Dialog PopUp */}
+            {/* PopUp User Details */}
             <Dialog open={isUserDetailsDialogOpen} onClose={toggleUserDetailsDialog}>
                 <DialogTitle>
                     User Details
@@ -285,6 +285,7 @@ const AdminHome = () => {
                 </DialogActions>
             </Dialog>
 
+            {/* Pop-Up Change Password */}
             <Dialog open={isChangePasswordDialogOpen} onClose={toggleChangePasswordDialog}>
                 <DialogTitle>Change Password</DialogTitle>
                 <DialogContent>
@@ -322,8 +323,16 @@ const AdminHome = () => {
                             ),
                         }}
                     />
-                    {error && <p style={{ color: "red" }}>{error}</p>}
-                    {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
+                    {error && (
+                        <p style={{ color: "red", marginTop: "10px", marginBottom: "0" }}>
+                            {error}
+                        </p>
+                    )}
+                    {successMessage && (
+                        <p style={{ color: "green", marginTop: "10px" }}>
+                            {successMessage}
+                        </p>
+                    )}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleChangePassword}>Submit</Button>
@@ -342,7 +351,7 @@ const AdminHome = () => {
                         label="Username"
                         fullWidth
                         margin="dense"
-                        value={updateData.username} // เพิ่ม state username
+                        value={updateData.username} 
                         onChange={(e) => setUpdateData({ ...updateData, username: e.target.value })}
                     />
                     <TextField
