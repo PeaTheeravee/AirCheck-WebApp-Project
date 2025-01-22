@@ -24,9 +24,14 @@ const AdminHome = () => {
     const [passwordData, setPasswordData] = useState({ currentPassword: "", newPassword: "" });
     const [showPassword, setShowPassword] = useState({ current: false, new: false });
     const [users, setUsers] = useState([]);
+    const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
+    // เพิ่ม useState สำหรับ updateData
+    const [updateData, setUpdateData] = useState({firstName: "",lastName: "",});
 
     // ฟังก์ชันสำหรับเปิด/ปิด Dialog
     const toggleDialog = () => setIsDialogOpen(!isDialogOpen);
+
+    const toggleUpdateDialog = () => setIsUpdateDialogOpen(!isUpdateDialogOpen);
 
     // ดึงข้อมูลผู้ใช้ที่ล็อกอินอยู่
     const fetchUserData = async () => {
@@ -97,6 +102,43 @@ const AdminHome = () => {
     // ฟังก์ชันแสดง/ซ่อนรหัสผ่าน
     const handleTogglePassword = (field) => {
         setShowPassword((prev) => ({ ...prev, [field]: !prev[field] }));
+    };
+
+    // ฟังก์ชันสำหรับอัปเดตข้อมูลผู้ใช้
+    const handleUpdateUser = async () => {
+        if (!updateData.firstName.trim() || !updateData.lastName.trim()) {
+            setError("First Name and Last Name cannot be empty.");
+            setTimeout(() => setError(""), 3000);
+            return;
+        }
+
+        try {
+            const response = await fetch(`http://localhost:8000/users/${userData.id}/update`, {
+                method: "PUT",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    first_name: updateData.firstName,
+                    last_name: updateData.lastName,
+                }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || "Failed to update user.");
+            }
+
+            setSuccessMessage("User updated successfully!");
+            setTimeout(() => {
+                setSuccessMessage("");
+                toggleUpdateDialog(); // ปิด Pop-Up Update
+            }, 3000);
+        } catch (err) {
+            setError(err.message);
+            setTimeout(() => setError(""), 3000);
+        }
     };
 
     // ฟังก์ชันสำหรับ logout
@@ -286,12 +328,52 @@ const AdminHome = () => {
                         </>
                     ) : (
                         <>
+                            <Button onClick={toggleUpdateDialog}>Update</Button>
                             <Button onClick={() => setIsPasswordChange(true)}>Change Password</Button>
                             <Button onClick={handleLogout}>Logout</Button>
                         </>
                     )}
                 </DialogActions>
             </Dialog>
+            
+            {/* Pop-Up Update User */}
+            <Dialog open={isUpdateDialogOpen} onClose={toggleUpdateDialog}>
+                <DialogTitle>
+                    Update User
+                    <Button onClick={toggleUpdateDialog} style={{ float: "right" }}>X</Button>
+                </DialogTitle>
+                <DialogContent>
+                    <TextField
+                        label="First Name"
+                        fullWidth
+                        margin="dense"
+                        value={updateData.firstName}
+                        onChange={(e) => setUpdateData({ ...updateData, firstName: e.target.value })}
+                    />
+                    <TextField
+                        label="Last Name"
+                        fullWidth
+                        margin="dense"
+                        value={updateData.lastName}
+                        onChange={(e) => setUpdateData({ ...updateData, lastName: e.target.value })}
+                    />
+                    {error && (
+                        <p style={{ color: "red", marginTop: "10px", marginBottom: "0" }}>
+                            {error}
+                        </p>
+                    )}
+                    {successMessage && (
+                        <p style={{ color: "green", marginTop: "10px" }}>
+                            {successMessage}
+                        </p>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleUpdateUser}>Submit</Button>
+                    <Button onClick={toggleUpdateDialog}>BACK</Button>
+                </DialogActions>
+            </Dialog>
+
         </div>
     );
 };
