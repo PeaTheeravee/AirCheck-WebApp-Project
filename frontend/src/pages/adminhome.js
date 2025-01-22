@@ -62,7 +62,11 @@ const AdminHome = () => {
 
     // ฟังก์ชันสำหรับเปลี่ยนรหัสผ่าน
     const handleChangePassword = async () => {
-        
+        if (!passwordData.currentPassword.trim() && !passwordData.newPassword.trim()) {
+            setError("Current Password and New Password cannot be empty.");
+            setTimeout(() => setError(""), 3000); // ลบข้อความ Error หลัง 3 วินาที
+            return;
+        }
         if (!passwordData.currentPassword.trim()) {
             setError("Current Password cannot be empty.");
             setTimeout(() => setError(""), 3000); // ลบข้อความ Error หลัง 3 วินาที
@@ -73,7 +77,6 @@ const AdminHome = () => {
             setTimeout(() => setError(""), 3000); // ลบข้อความ Error หลัง 3 วินาที
             return;
         }
-
 
         try {
             const response = await fetch("http://localhost:8000/users/change_password", {
@@ -164,12 +167,6 @@ const AdminHome = () => {
                 const errorData = await response.json();
                 throw new Error(errorData.detail || "Logout failed.");
             }
-
-            setSuccessMessage("Return to home page"); // แสดงข้อความยืนยันใต้ Last Name
-            setTimeout(() => {
-                setSuccessMessage(""); // ลบข้อความหลัง 3 วินาที
-                navigate("/"); // เด้งไปหน้า Home
-            }, 1000);
         } catch (err) {
             setError(err.message);
         }
