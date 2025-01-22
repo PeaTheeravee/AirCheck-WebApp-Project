@@ -141,6 +141,7 @@ const AdminHome = () => {
             }
 
             setSuccessMessage("User updated successfully!");
+            await fetchUserData(); // ดึงข้อมูลใหม่
             setTimeout(() => {
                 setSuccessMessage("");
                 toggleUpdateDialog(); // ปิด Pop-Up Update
