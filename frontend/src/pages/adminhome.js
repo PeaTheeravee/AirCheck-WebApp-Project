@@ -172,19 +172,7 @@ const AdminHome = () => {
         }
     };
 
-    useEffect(() => {
-        if (isDialogOpen) {
-            fetchUserData();
-        }
-        fetchUserAll();
-    }, [isDialogOpen]);
-
-    useEffect(() => {
-        if (isUserDetailsDialogOpen) {
-            fetchUserData(); // เรียกตอนเปิด Dialog
-        }
-    }, [isUserDetailsDialogOpen]);
-
+    // ดึงข้อมูลผู้ใช้ทั้งหมด
     const fetchUserAll = async () => {
         try {
             const response = await fetch("http://localhost:8000/users/all", {
@@ -203,6 +191,20 @@ const AdminHome = () => {
             setError(err.message);
         }
     };
+
+
+    useEffect(() => {
+        if (isDialogOpen) {
+            fetchUserData();
+        }
+        fetchUserAll();
+    }, [isDialogOpen]);
+
+    useEffect(() => {
+        if (isUserDetailsDialogOpen) {
+            fetchUserData(); // เรียกตอนเปิด Dialog
+        }
+    }, [isUserDetailsDialogOpen]);
 
     return (
         <div>
