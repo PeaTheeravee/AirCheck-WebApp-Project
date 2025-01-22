@@ -26,7 +26,7 @@ const AdminHome = () => {
     const [users, setUsers] = useState([]);
     const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
     // เพิ่ม useState สำหรับ updateData
-    const [updateData, setUpdateData] = useState({firstName: "",lastName: "",});
+    const [updateData, setUpdateData] = useState({username: "",firstName: "",lastName: "",});
 
     // ฟังก์ชันสำหรับเปิด/ปิด Dialog
     const toggleDialog = () => setIsDialogOpen(!isDialogOpen);
@@ -120,6 +120,7 @@ const AdminHome = () => {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
+                    username: updateData.username,
                     first_name: updateData.firstName,
                     last_name: updateData.lastName,
                 }),
@@ -343,6 +344,13 @@ const AdminHome = () => {
                     <Button onClick={toggleUpdateDialog} style={{ float: "right" }}>X</Button>
                 </DialogTitle>
                 <DialogContent>
+                    <TextField
+                        label="Username"
+                        fullWidth
+                        margin="dense"
+                        value={updateData.username} // เพิ่ม state username
+                        onChange={(e) => setUpdateData({ ...updateData, username: e.target.value })}
+                    />
                     <TextField
                         label="First Name"
                         fullWidth
