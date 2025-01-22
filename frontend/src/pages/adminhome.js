@@ -20,16 +20,16 @@ const AdminHome = () => {
     const [userData, setUserData] = useState(null);
     const [error, setError] = useState("");
     const [successMessage, setSuccessMessage] = useState(""); // เพิ่ม state สำหรับข้อความยืนยัน
-    const [isPasswordChange, setIsPasswordChange] = useState(false);
     const [passwordData, setPasswordData] = useState({ currentPassword: "", newPassword: "" });
     const [showPassword, setShowPassword] = useState({ current: false, new: false });
     const [users, setUsers] = useState([]);
     const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
-    // เพิ่ม useState สำหรับ updateData
     const [updateData, setUpdateData] = useState({username: "",firstName: "",lastName: "",});
+    const [isUserDetailsDialogOpen, setIsUserDetailsDialogOpen] = useState(false);
+    const [isChangePasswordDialogOpen, setIsChangePasswordDialogOpen] = useState(false);
 
-    // ฟังก์ชันสำหรับเปิด/ปิด Dialog
-    const toggleDialog = () => setIsDialogOpen(!isDialogOpen);
+    const toggleUserDetailsDialog = () => setIsUserDetailsDialogOpen(!isUserDetailsDialogOpen);
+    const toggleChangePasswordDialog = () => setIsChangePasswordDialogOpen(!isChangePasswordDialogOpen);
 
     const toggleUpdateDialog = () => {
         if (!isUpdateDialogOpen && userData) {
@@ -179,10 +179,16 @@ const AdminHome = () => {
         if (isDialogOpen) {
             fetchUserData();
         }
-        fetchUsers();
+        fetchUserAll();
     }, [isDialogOpen]);
 
-    const fetchUsers = async () => {
+    useEffect(() => {
+        if (isUserDetailsDialogOpen) {
+            fetchUserData(); // เรียกตอนเปิด Dialog
+        }
+    }, [isUserDetailsDialogOpen]);
+
+    const fetchUserAll = async () => {
         try {
             const response = await fetch("http://localhost:8000/users/all", {
                 method: "GET",
@@ -206,7 +212,7 @@ const AdminHome = () => {
             {/* Header */}
             <header className="admin-header">
                 <h1>Admin Home</h1>
-                <button className="profile-icon" onClick={toggleDialog}>
+                <button className="profile-icon" onClick={setIsUserDetailsDialogOpen}>
                     <AccountCircleIcon fontSize="large" />
                 </button>
             </header>
@@ -255,98 +261,76 @@ const AdminHome = () => {
                 </table>
             </div>
 
-            {/* Dialog */}
-            <Dialog open={isDialogOpen} onClose={toggleDialog}>
+            {/* Dialog PopUp */}
+            <Dialog open={isUserDetailsDialogOpen} onClose={toggleUserDetailsDialog}>
                 <DialogTitle>
-                    {isPasswordChange ? "Change Password" : "User Details"}
-                    <Button onClick={toggleDialog} style={{ float: "right" }}>X</Button>
+                    User Details
+                    <Button onClick={toggleUserDetailsDialog} style={{ float: "right" }}>X</Button>
                 </DialogTitle>
                 <DialogContent>
-                    {isPasswordChange ? (
-                        <div>
-                            <TextField
-                                label="Current Password"
-                                type={showPassword.current ? "text" : "password"}
-                                fullWidth
-                                margin="dense"
-                                value={passwordData.currentPassword}
-                                onChange={(e) =>
-                                    setPasswordData({ ...passwordData, currentPassword: e.target.value })
-                                }
-                                InputProps={{
-                                    endAdornment: (
-                                        <InputAdornment position="end">
-                                            <IconButton
-                                                onClick={() => handleTogglePassword("current")}
-                                            >
-                                                {showPassword.current ? <Visibility /> : <VisibilityOff />}
-                                            </IconButton>
-                                        </InputAdornment>
-                                    ),
-                                }}
-                            />
-                            <TextField
-                                label="New Password"
-                                type={showPassword.new ? "text" : "password"}
-                                fullWidth
-                                margin="dense"
-                                value={passwordData.newPassword}
-                                onChange={(e) =>
-                                    setPasswordData({ ...passwordData, newPassword: e.target.value })
-                                }
-                                InputProps={{
-                                    endAdornment: (
-                                        <InputAdornment position="end">
-                                            <IconButton
-                                                onClick={() => handleTogglePassword("new")}
-                                            >
-                                                {showPassword.new ? <Visibility /> : <VisibilityOff />}
-                                            </IconButton>
-                                        </InputAdornment>
-                                    ),
-                                }}
-                            />
-                            {/* แสดงข้อความ Error ใต้ช่อง New Password */}
-                            {error && (
-                                <p style={{ color: "red", marginTop: "10px", marginBottom: "0" }}>
-                                    {error}
-                                </p>
-                            )}
-                            {successMessage && (
-                                <p style={{ color: "green", marginTop: "10px" }}>
-                                    {successMessage}
-                                </p>
-                            )}
-                        </div>
-                    ) : userData ? (
-                        <div>
+                    {userData ? (
+                        <>
                             <p><strong>Username:</strong> {userData.username}</p>
                             <p><strong>First Name:</strong> {userData.first_name}</p>
                             <p><strong>Last Name:</strong> {userData.last_name}</p>
-                            {successMessage && (
-                                <p style={{ color: "green", marginTop: "10px" }}>{successMessage}</p>
-                            )}
-                        </div>
+                        </>
                     ) : (
                         <p>Loading...</p>
                     )}
                 </DialogContent>
                 <DialogActions>
-                    {isPasswordChange ? (
-                        <>
-                            <Button onClick={handleChangePassword}>Submit</Button>
-                            <Button onClick={() => setIsPasswordChange(false)}>Back</Button>
-                        </>
-                    ) : (
-                        <>
-                            <Button onClick={toggleUpdateDialog}>Update</Button>
-                            <Button onClick={() => setIsPasswordChange(true)}>Change Password</Button>
-                            <Button onClick={handleLogout}>Logout</Button>
-                        </>
-                    )}
+                    <Button onClick={toggleUpdateDialog}>Update</Button> {/* เปิด Pop-Up Update User */}
+                    <Button onClick={toggleChangePasswordDialog}>Change Password</Button> {/* เปิด Pop-Up Change Password */}
+                    <Button onClick={handleLogout}>Logout</Button> {/* Logout */}
                 </DialogActions>
             </Dialog>
-            
+
+            <Dialog open={isChangePasswordDialogOpen} onClose={toggleChangePasswordDialog}>
+                <DialogTitle>Change Password</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        label="Current Password"
+                        type={showPassword.current ? "text" : "password"}
+                        fullWidth
+                        margin="dense"
+                        value={passwordData.currentPassword}
+                        onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton onClick={() => handleTogglePassword("current")}>
+                                        {showPassword.current ? <Visibility /> : <VisibilityOff />}
+                                    </IconButton>
+                                </InputAdornment>
+                            ),
+                        }}
+                    />
+                    <TextField
+                        label="New Password"
+                        type={showPassword.new ? "text" : "password"}
+                        fullWidth
+                        margin="dense"
+                        value={passwordData.newPassword}
+                        onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton onClick={() => handleTogglePassword("new")}>
+                                        {showPassword.new ? <Visibility /> : <VisibilityOff />}
+                                    </IconButton>
+                                </InputAdornment>
+                            ),
+                        }}
+                    />
+                    {error && <p style={{ color: "red" }}>{error}</p>}
+                    {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleChangePassword}>Submit</Button>
+                    <Button onClick={toggleChangePasswordDialog}>Back</Button>
+                </DialogActions>
+            </Dialog>  
+
             {/* Pop-Up Update User */}
             <Dialog open={isUpdateDialogOpen} onClose={toggleUpdateDialog}>
                 <DialogTitle>
