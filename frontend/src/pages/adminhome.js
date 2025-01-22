@@ -31,7 +31,16 @@ const AdminHome = () => {
     // ฟังก์ชันสำหรับเปิด/ปิด Dialog
     const toggleDialog = () => setIsDialogOpen(!isDialogOpen);
 
-    const toggleUpdateDialog = () => setIsUpdateDialogOpen(!isUpdateDialogOpen);
+    const toggleUpdateDialog = () => {
+        if (!isUpdateDialogOpen && userData) {
+            setUpdateData({
+                username: userData.username || "",
+                firstName: userData.first_name || "",
+                lastName: userData.last_name || "",
+            });
+        }
+        setIsUpdateDialogOpen(!isUpdateDialogOpen);
+    };
 
     // ดึงข้อมูลผู้ใช้ที่ล็อกอินอยู่
     const fetchUserData = async () => {
