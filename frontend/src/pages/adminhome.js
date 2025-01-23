@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback} from "react";
 import { useNavigate } from "react-router-dom";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import SearchIcon from "@mui/icons-material/Search";
 import {
     Dialog,
     DialogTitle,
@@ -10,6 +11,14 @@ import {
     TextField,
     IconButton,
     InputAdornment,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    TablePagination,
+
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import "./adminhome.css";
@@ -28,6 +37,14 @@ const AdminHome = () => {
     const [isUserDetailsDialogOpen, setIsUserDetailsDialogOpen] = useState(false);
     const [isChangePasswordDialogOpen, setIsChangePasswordDialogOpen] = useState(false);
 
+    //สำหรับ ตาราง + Pagination
+    const [searchTerm, setSearchTerm] = useState("");
+    const [currentPage, setCurrentPage] = useState(0);
+    const [pageSize, setPageSize] = useState(5);
+    const [totalUsers, setTotalUsers] = useState(0);
+    const [loading, setLoading] = useState(false);
+
+    //------------------------------------------------------------------------------------------------
     const toggleUserDetailsDialog = () => setIsUserDetailsDialogOpen(!isUserDetailsDialogOpen);
     const toggleChangePasswordDialog = () => setIsChangePasswordDialogOpen(!isChangePasswordDialogOpen);
 
@@ -42,6 +59,8 @@ const AdminHome = () => {
         setIsUpdateDialogOpen(!isUpdateDialogOpen);
     };
 
+
+    //================================================================================================
     // ดึงข้อมูลผู้ใช้ที่ล็อกอินอยู่
     const fetchUserData = async () => {
         try {
@@ -173,12 +192,16 @@ const AdminHome = () => {
     };
 
     // ดึงข้อมูลผู้ใช้ทั้งหมด
-    const fetchUserAll = async () => {
+    const fetchUserAll = useCallback(async () => {
+        setLoading(true); // เริ่มโหลดข้อมูล
         try {
-            const response = await fetch("http://localhost:8000/users/all", {
-                method: "GET",
-                credentials: "include",
-            });
+            const response = await fetch(
+                `http://localhost:8000/users/all?page=${currentPage + 1}&size=${pageSize}&search=${searchTerm}`,
+                {
+                    method: "GET",
+                    credentials: "include",
+                }
+            );
 
             if (!response.ok) {
                 const errorData = await response.json();
@@ -186,26 +209,55 @@ const AdminHome = () => {
             }
 
             const data = await response.json();
-            setUsers(data); // เก็บข้อมูลผู้ใช้ใน state
+            setUsers(data.users); // ข้อมูลผู้ใช้
+            setTotalUsers(data.total); // จำนวนผู้ใช้ทั้งหมด
         } catch (err) {
-            setError(err.message);
+            console.error("Error fetching users:", err.message);
+        } finally {
+            setLoading(false); // จบโหลดข้อมูล
         }
+    }, [currentPage, pageSize, searchTerm]); // เพิ่ม dependencies
+
+    // ฟังก์ชันสำหรับเปลี่ยนหน้า
+    const handlePageChange = (event, newPage) => {
+        setCurrentPage(newPage);
     };
 
+    // ฟังก์ชันสำหรับเปลี่ยนจำนวนรายการต่อหน้า
+    const handleRowsPerPageChange = (event) => {
+        setPageSize(parseInt(event.target.value, 10));
+        setCurrentPage(0); // รีเซ็ตหน้า
+    };
 
+    // ฟังก์ชันค้นหา
+    const handleSearch = (event) => {
+        setSearchTerm(event.target.value);
+        setCurrentPage(0); // รีเซ็ตหน้าเมื่อมีการค้นหา
+    };
+
+    // ดึงข้อมูลเมื่อมีการเปลี่ยนแปลงของ pagination หรือ searchTerm
+    useEffect(() => {
+        fetchUserAll();
+    }, [fetchUserAll]);
+
+
+    //------------------------------------------------------------------------------------------------
+    // ใช้ useEffect ดึงข้อมูลผู้ใช้เมื่อเปิด Dialog
     useEffect(() => {
         if (isDialogOpen) {
             fetchUserData();
         }
-        fetchUserAll();
     }, [isDialogOpen]);
 
+    // ใช้ useEffect ดึงข้อมูลเมื่อเปิด User Details Dialog
     useEffect(() => {
         if (isUserDetailsDialogOpen) {
             fetchUserData(); // เรียกตอนเปิด Dialog
         }
     }, [isUserDetailsDialogOpen]);
 
+
+    //================================================================================================
     return (
         <div>
             {/* Header */}
@@ -219,45 +271,90 @@ const AdminHome = () => {
             {/* Content/Main */}
             <div className="content">
                 <h2>User Management</h2>
+
                 <button
                     className="create-button"
                     onClick={() => alert("Mock: Create Account")}
                 >
                     Create account
                 </button>
-                <table className="user-table">
-                    <thead>
-                        <tr>
-                            <th>User</th>
-                            <th>First Name</th>
-                            <th>Last Name</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {users.map((user) => (
-                            <tr key={user.id}>
-                                <td>{user.username}</td>
-                                <td>{user.first_name}</td>
-                                <td>{user.last_name}</td>
-                                <td>
-                                    <button
-                                        className="edit-button"
-                                        onClick={() => alert(`Mock: Edit account of ${user.username}`)}
-                                    >
-                                        Edit account
-                                    </button>
-                                    <button
-                                        className="delete-button"
-                                        onClick={() => alert(`Mock: Delete account of ${user.username}`)}
-                                    >
-                                        Delete account
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                
+                <TextField
+                    label="Search Users"
+                    variant="outlined"
+                    fullWidth
+                    margin="normal"
+                    value={searchTerm}
+                    onChange={handleSearch}
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <SearchIcon />
+                            </InputAdornment>
+                        ),
+                    }}
+                />
+                <TableContainer>
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>Username</TableCell>
+                                <TableCell>First Name</TableCell>
+                                <TableCell>Last Name</TableCell>
+                                <TableCell>Actions</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {loading ? (
+                                <TableRow>
+                                    <TableCell colSpan={4} align="center">
+                                        Loading...
+                                    </TableCell>
+                                </TableRow>
+                            ) : users.length > 0 ? (
+                                users.map((user) => (
+                                    <TableRow key={user.id}>
+                                        <TableCell>{user.username}</TableCell>
+                                        <TableCell>{user.first_name}</TableCell>
+                                        <TableCell>{user.last_name}</TableCell>
+                                        <TableCell>
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
+                                                onClick={() => alert(`Edit user: ${user.username}`)}
+                                                style={{ marginRight: "10px" }}
+                                            >
+                                                Edit
+                                            </Button>
+                                            <Button
+                                                variant="contained"
+                                                color="secondary"
+                                                onClick={() => alert(`Delete user: ${user.username}`)}
+                                            >
+                                                Delete
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={4} align="center">
+                                        No users found.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+                <TablePagination
+                    rowsPerPageOptions={[5, 10, 25]}
+                    component="div"
+                    count={totalUsers}
+                    rowsPerPage={pageSize}
+                    page={currentPage}
+                    onPageChange={handlePageChange}
+                    onRowsPerPageChange={handleRowsPerPageChange}
+                />
             </div>
 
             {/* PopUp User Details */}
