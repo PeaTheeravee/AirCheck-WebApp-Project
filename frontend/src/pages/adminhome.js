@@ -196,7 +196,7 @@ const AdminHome = () => {
         setLoading(true); // เริ่มโหลดข้อมูล
         try {
             const response = await fetch(
-                `http://localhost:8000/users/all?page=${currentPage + 1}&size=${pageSize}&search=${searchTerm}`,
+                `http://localhost:8000/users/all?page=${currentPage + 1}&size=${pageSize}`,
                 {
                     method: "GET",
                     credentials: "include",
@@ -209,14 +209,14 @@ const AdminHome = () => {
             }
 
             const data = await response.json();
-            setUsers(data.users); // ข้อมูลผู้ใช้
+            setUsers(data.users); // เก็บข้อมูลผู้ใช้ใน state
             setTotalUsers(data.total); // จำนวนผู้ใช้ทั้งหมด
         } catch (err) {
             console.error("Error fetching users:", err.message);
         } finally {
             setLoading(false); // จบโหลดข้อมูล
         }
-    }, [currentPage, pageSize, searchTerm]); // เพิ่ม dependencies
+    }, [currentPage, pageSize]); // เพิ่ม dependencies
 
     // ฟังก์ชันสำหรับเปลี่ยนหน้า
     const handlePageChange = (event, newPage) => {
@@ -235,6 +235,20 @@ const AdminHome = () => {
         setCurrentPage(0); // รีเซ็ตหน้าเมื่อมีการค้นหา
     };
 
+    // กรองข้อมูลในตารางโดยใช้ searchTerm
+    const filteredUsers = users.filter((user) => {
+        // ตรวจสอบว่า searchTerm ไม่ว่าง และมีการ trim ค่า searchTerm
+        const term = searchTerm.trim().toLowerCase();
+        if (term === "") {
+            return true; // ถ้า searchTerm ว่าง แสดงผู้ใช้ทั้งหมด
+        }
+        return (
+            user.username.toLowerCase().includes(term) ||
+            user.first_name.toLowerCase().includes(term) ||
+            user.last_name.toLowerCase().includes(term)
+        );
+    });
+    
     // ดึงข้อมูลเมื่อมีการเปลี่ยนแปลงของ pagination หรือ searchTerm
     useEffect(() => {
         fetchUserAll();
@@ -311,8 +325,8 @@ const AdminHome = () => {
                                         Loading...
                                     </TableCell>
                                 </TableRow>
-                            ) : users.length > 0 ? (
-                                users.map((user) => (
+                            ) : filteredUsers.length > 0 ? (
+                                filteredUsers.map((user) => (
                                     <TableRow key={user.id}>
                                         <TableCell>{user.username}</TableCell>
                                         <TableCell>{user.first_name}</TableCell>
