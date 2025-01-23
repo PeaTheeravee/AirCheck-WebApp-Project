@@ -16,10 +16,18 @@ class BaseUser(BaseModel):
     username: str = pydantic.Field(example="admin")
     first_name: str = pydantic.Field(example="Firstname")
     last_name: str = pydantic.Field(example="Lastname")
+    password: str = pydantic.Field(example="password")
 
 
 class User(BaseUser):
     id: int
+
+
+class CreatedUser(BaseModel):
+    username: str
+    first_name: str
+    last_name: str
+    password: str
 
 
 class ChangedPassword(BaseModel):
@@ -31,10 +39,6 @@ class UpdatedUser(BaseUser):
     username: str
     first_name: str
     last_name: str
-
-
-class RegisteredUser(BaseUser):
-    password: str = pydantic.Field(example="password")
 
 
 class DBUser(BaseUser, SQLModel, table=True):
@@ -56,3 +60,7 @@ class DBUser(BaseUser, SQLModel, table=True):
 class UserList(BaseModel):
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
     users: list[User]
+    total: int  # จำนวนผู้ใช้ทั้งหมด
+    page: int  # หน้าปัจจุบัน
+    size: int  # จำนวนผู้ใช้ต่อหน้า
+    total_pages: int  # จำนวนหน้าทั้งหมด

@@ -11,13 +11,13 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 @router.post("/create")
 async def create(
-    user_info: RegisteredUser,
+    user_create: CreatedUser,
     session: Annotated[AsyncSession, Depends(models.get_session)],
     current_user: Annotated[User, Depends(deps.get_current_active_superuser)], # ตรวจสอบว่าเป็น SuperAdmin
 ) -> User:
 
     # ตรวจสอบว่ามี username ซ้ำหรือไม่
-    username_check = await session.exec(select(DBUser).where(DBUser.username == user_info.username))
+    username_check = await session.exec(select(DBUser).where(DBUser.username == user_create.username))
     if username_check.one_or_none():
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -25,7 +25,7 @@ async def create(
         )
 
     # ตรวจสอบว่ามี first_name ซ้ำหรือไม่
-    first_name_check = await session.exec(select(DBUser).where(DBUser.first_name == user_info.first_name))
+    first_name_check = await session.exec(select(DBUser).where(DBUser.first_name == user_create.first_name))
     if first_name_check.one_or_none():
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -33,7 +33,7 @@ async def create(
         )
 
     # ตรวจสอบว่ามี last_name ซ้ำหรือไม่
-    last_name_check = await session.exec(select(DBUser).where(DBUser.last_name == user_info.last_name))
+    last_name_check = await session.exec(select(DBUser).where(DBUser.last_name == user_create.last_name))
     if last_name_check.one_or_none():
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -42,13 +42,13 @@ async def create(
 
     # สร้างผู้ใช้ใหม่โดยตั้ง role เป็น "admin"
     user = DBUser(
-        username=user_info.username,
-        first_name=user_info.first_name,
-        last_name=user_info.last_name,
-        password=user_info.password,
+        username=user_create.username,
+        first_name=user_create.first_name,
+        last_name=user_create.last_name,
+        password=user_create.password,
         role="admin",  # กำหนดบทบาทเป็น admin
     )
-    await user.set_password(user_info.password)
+    await user.set_password(user_create.password)
     session.add(user)
     await session.commit()
     await session.refresh(user)
@@ -83,15 +83,37 @@ async def delete_user(
 async def get_all_users(
     session: Annotated[AsyncSession, Depends(models.get_session)],
     current_user: Annotated[User, Depends(deps.get_current_active_superuser)],  # ตรวจสอบว่าเป็น SuperAdmin
-) -> list[User]:
- 
-    result = await session.exec(select(DBUser))
+    page: int = 1,  # หน้าปัจจุบัน (default = 1)
+    size: int = 5,  # จำนวนรายการต่อหน้า (default = 5)
+) -> UserList:
+
+    # Query จำนวนรายการทั้งหมด
+    total_users_query = await session.exec(select(DBUser))
+    total_users = len(total_users_query.all())  # จำนวนทั้งหมด
+
+    # คำนวณ offset และ limit สำหรับ pagination
+    offset = (page - 1) * size
+
+    # Query รายการของผู้ใช้
+    result = await session.exec(
+        select(DBUser).offset(offset).limit(size)
+    )
     users = result.all()
 
     if not users:
         raise HTTPException(status_code=404, detail="No users found.")
 
-    return [User.from_orm(user) for user in users]
+    # คำนวณจำนวนหน้าทั้งหมด
+    total_pages = (total_users + size - 1) // size
+
+    # สร้าง Response พร้อมข้อมูล Pagination
+    return UserList(
+        users=[User.from_orm(user) for user in users],
+        total=total_users,
+        page=page,
+        size=size,
+        total_pages=total_pages,
+    )
 
 
 @router.get("/me")
