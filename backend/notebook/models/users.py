@@ -22,39 +22,19 @@ class User(BaseUser):
     id: int
 
 
-class ReferenceUser(BaseModel):
-    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
-    username: str = pydantic.Field(example="admin")
-    first_name: str = pydantic.Field(example="Firstname")
-    last_name: str = pydantic.Field(example="Lastname")
-
-
-class UserList(BaseModel):
-    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
-    users: list[User]
-
-
-class Login(BaseModel):
-    username: str
-    password: str
-
-
 class ChangedPassword(BaseModel):
     current_password: str
     new_password: str
 
 
+class UpdatedUser(BaseUser):
+    username: str
+    first_name: str
+    last_name: str
+
+
 class RegisteredUser(BaseUser):
     password: str = pydantic.Field(example="password")
-
-
-class UpdatedUser(BaseUser):
-    pass
-
-
-class ChangedPasswordUser(BaseModel):
-    current_password: str
-    new_password: str
 
 
 class DBUser(BaseUser, SQLModel, table=True):
@@ -71,3 +51,8 @@ class DBUser(BaseUser, SQLModel, table=True):
 
     async def verify_password(self, plain_password):
         return pwd_context.verify(plain_password, self.password)
+    
+
+class UserList(BaseModel):
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+    users: list[User]

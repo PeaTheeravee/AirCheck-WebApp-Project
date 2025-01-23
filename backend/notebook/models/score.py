@@ -24,14 +24,6 @@ class BaseScore(BaseModel):
     temperature_fix: str  # คำแนะนำสำหรับ Temperature
 
 
-class CreatedScore(BaseScore):
-    pass
-
-
-class UpdatedScore(BaseScore):
-    pass
-
-
 class Score(BaseScore):
     id: int
 

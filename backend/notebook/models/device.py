@@ -14,8 +14,14 @@ class BaseDevice(BaseModel):
     device_status: str | None = ""  # สถานะอุปกรณ์ (online, offline)
 
 
+class Device(BaseDevice):
+    id: int
+    api_key: str  # API Key ของอุปกรณ์
+
+
 class CreatedDevice(BaseDevice):
-    pass
+    device_name: str  # ชื่ออุปกรณ์
+    location: str  # ตำแหน่งของอุปกรณ์
 
 
 class UpdatedDevice(BaseDevice):
@@ -23,9 +29,8 @@ class UpdatedDevice(BaseDevice):
     location: str  # ตำแหน่งของอุปกรณ์
 
 
-class Device(BaseDevice):
-    id: int
-    api_key: str  # API Key ของอุปกรณ์
+class DeviceStatusUpdate(BaseModel):
+    device_status: str  # ค่าสถานะอุปกรณ์ เช่น "online" หรือ "offline"
 
 
 class DBDevice(SQLModel, table=True):
@@ -48,7 +53,3 @@ class DeviceList(BaseModel):
     #page: int
     #page_size: int
     #size_per_page: int
-
-
-class DeviceStatusUpdate(BaseModel):
-    device_status: str  # ค่าสถานะอุปกรณ์ เช่น "online" หรือ "offline"

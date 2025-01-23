@@ -15,17 +15,19 @@ class BaseDetect(BaseModel):
     temperature: float | None = 0
     timestamp: Optional[datetime]
 
-
-class CreatedDetect(BaseDetect):
-    pass
-
-
-class UpdatedDetect(BaseDetect):
-    pass
-
-
 class Detect(BaseDetect):
     id: int
+
+
+class CreatedDetect(BaseDetect):
+    api_key: str  
+    pm2_5: float | None = 0  
+    pm10: float | None = 0  
+    co2: float | None = 0  
+    tvoc: float | None = 0  
+    humidity: float | None = 0
+    temperature: float | None = 0
+    timestamp: Optional[datetime]
 
 
 class DBDetect(SQLModel, table=True):
