@@ -37,6 +37,8 @@ const AdminHome = () => {
     const [isUserDetailsDialogOpen, setIsUserDetailsDialogOpen] = useState(false);
     const [isChangePasswordYourselfDialogOpen, setIsChangePasswordYourselfDialogOpen] = useState(false);
     const [isChangeSomeonePasswordDialogOpen, setIsChangeSomeonePasswordDialogOpen] = useState(false);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
     const [targetUserId, setTargetUserId] = useState(null);
 
     //สำหรับ ตาราง + Pagination
@@ -49,9 +51,15 @@ const AdminHome = () => {
     //------------------------------------------------------------------------------------------------
     const toggleUserDetailsDialog = () => setIsUserDetailsDialogOpen(!isUserDetailsDialogOpen);
     const toggleChangePasswordYourselfDialog = () => setIsChangePasswordYourselfDialogOpen(!isChangePasswordYourselfDialogOpen);
+    
     const toggleChangeSomeonePasswordDialog = (userId = null) => {
         setTargetUserId(userId); // เก็บ userId ใน state
         setIsChangeSomeonePasswordDialogOpen(!isChangeSomeonePasswordDialogOpen);
+    };
+
+    const toggleDeleteDialog = (userId = null) => {
+        setTargetUserId(userId); // เก็บ userId ใน state
+        setIsDeleteDialogOpen(!isDeleteDialogOpen);
     };
 
     const toggleUpdateDialog = () => {
@@ -182,6 +190,29 @@ const AdminHome = () => {
     // ฟังก์ชันแสดง/ซ่อนรหัสผ่าน
     const handleTogglePassword = (field) => {
         setShowPassword((prev) => ({ ...prev, [field]: !prev[field] }));
+    };
+
+    // ฟังก์ชันสำหรับลบผู้ใช้
+    const handleDeleteUser = async (userId) => {
+        try {
+            const response = await fetch(`http://localhost:8000/users/${targetUserId}`, {
+                method: "DELETE",
+                credentials: "include",
+            });
+    
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || "Failed to delete user.");
+            }
+    
+            setSuccessMessage("User deleted successfully!"); // แสดงข้อความสำเร็จ
+            setTimeout(() => setSuccessMessage(""), 3000);
+            await fetchUserAll(); // โหลดข้อมูลผู้ใช้ใหม่
+            toggleDeleteDialog(); // ปิด Pop-Up
+        } catch (err) {
+            setError(err.message);
+            setTimeout(() => setError(""), 3000);
+        }
     };
 
     // ฟังก์ชันสำหรับอัปเดตข้อมูลผู้ใช้
@@ -392,7 +423,7 @@ const AdminHome = () => {
                                             <Button
                                                 variant="contained"
                                                 color="secondary"
-                                                onClick={() => alert(`Delete user: ${user.username}`)}
+                                                onClick={() => toggleDeleteDialog(user.id)} // ส่ง user.id
                                             >
                                                 Delete
                                             </Button>
@@ -600,6 +631,27 @@ const AdminHome = () => {
                 </DialogActions>
             </Dialog>
 
+            {/* Pop-Up Delete User */}
+            <Dialog open={isDeleteDialogOpen} onClose={toggleDeleteDialog}>
+                <DialogTitle>
+                    Confirm Deletion
+                </DialogTitle>
+                <DialogContent>
+                    <p>Are you sure you want to delete this user?</p>
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        onClick={handleDeleteUser} // ใช้ targetUserId จาก state
+                        color="secondary"
+                        variant="contained"
+                    >
+                        Yes, Delete
+                    </Button>
+                    <Button onClick={toggleDeleteDialog} variant="outlined">
+                        Cancel
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </div>
     );
 };
