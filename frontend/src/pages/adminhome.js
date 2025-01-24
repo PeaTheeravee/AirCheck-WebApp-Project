@@ -34,8 +34,7 @@ const AdminHome = () => {
     const [users, setUsers] = useState([]);
     const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
     const [updateData, setUpdateData] = useState({username: "",firstName: "",lastName: "",});
-    const [targetUserNameForDelete, setTargetUserNameForDelete] = useState("");
-    const [targetUserNameForChange, setTargetUserNameForChange] = useState("");
+    const [targetUserName, setTargetUserName] = useState("");
 
     const [isUserDetailsDialogOpen, setIsUserDetailsDialogOpen] = useState(false);
     const [isChangePasswordYourselfDialogOpen, setIsChangePasswordYourselfDialogOpen] = useState(false);
@@ -57,13 +56,13 @@ const AdminHome = () => {
     
     const toggleChangeSomeonePasswordDialog = (userId = null, username = "") => {
         setTargetUserId(userId); // เก็บ userId ใน state
-        setTargetUserNameForChange(username);
+        setTargetUserName(username);
         setIsChangeSomeonePasswordDialogOpen(!isChangeSomeonePasswordDialogOpen);
     };
 
     const toggleDeleteDialog = (userId = null, username = "") => {
         setTargetUserId(userId); // เก็บ userId ใน state
-        setTargetUserNameForDelete(username);
+        setTargetUserName(username);
         setIsDeleteDialogOpen(!isDeleteDialogOpen);
     };
 
@@ -539,10 +538,9 @@ const AdminHome = () => {
             <Dialog open={isChangeSomeonePasswordDialogOpen} onClose={toggleChangeSomeonePasswordDialog}>
                 <DialogTitle>
                     Change Password
-                    <Button onClick={toggleChangeSomeonePasswordDialog} style={{ float: "right" }}>X</Button>
                 </DialogTitle>
                 <DialogContent>
-                    <p>The user password you changed is <strong>{targetUserNameForChange}</strong></p>
+                    <p>The user password you changed is <strong>{targetUserName}</strong></p>
                     <TextField
                         label="New Password"
                         type={showPassword.new ? "text" : "password"}
@@ -590,6 +588,7 @@ const AdminHome = () => {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleChangeSomeonePassword}>Submit</Button>
+                    <Button onClick={toggleChangeSomeonePasswordDialog}>Cancel</Button>
                 </DialogActions>
             </Dialog>
                       
@@ -643,7 +642,7 @@ const AdminHome = () => {
                     Confirm Deletion
                 </DialogTitle>
                 <DialogContent>
-                    <p>Are you sure you want to delete the user <strong>{targetUserNameForDelete}</strong>?</p>
+                    <p>Are you sure you want to delete the user <strong>{targetUserName}</strong>?</p>
                     {error && (
                         <p style={{ color: "red", marginTop: "10px", marginBottom: "0" }}>
                             {error}
