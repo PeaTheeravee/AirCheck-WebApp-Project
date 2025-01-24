@@ -143,7 +143,12 @@ const AdminHome = () => {
             setTimeout(() => setError(""), 3000); // ลบข้อความ Error หลัง 3 วินาที
             return;
         }
-
+        if (!passwordData.confirmNewPassword.trim()) {
+            setError("Confirm Password cannot be empty.");
+            setTimeout(() => setError(""), 3000); // ลบข้อความ Error หลัง 3 วินาที
+            return;
+        }
+    
         try {
             const response = await fetch(`http://localhost:8000/users/${targetUserId}/change_password`, {
                 method: "PUT",
@@ -152,8 +157,8 @@ const AdminHome = () => {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    current_password: passwordData.currentPassword || "", // อาจไม่จำเป็นต้องส่ง current_password
                     new_password: passwordData.newPassword,
+                    confirm_new_password: passwordData.confirmNewPassword,
                 }),
             });
 
@@ -165,13 +170,14 @@ const AdminHome = () => {
             }
 
             setSuccessMessage("Password updated successfully for the user!"); // แสดงข้อความยืนยัน
-            setPasswordData({ currentPassword: "", newPassword: "" });
+            setPasswordData({ newPassword: "", confirmNewPassword: "" });
             setTimeout(() => setSuccessMessage(""), 3000); // ลบข้อความหลัง 3 วินาที
+            toggleChangeSomeonePasswordDialog();
         } catch (err) {
             setError(err.message);
             setTimeout(() => setError(""), 3000); // ลบข้อความหลัง 3 วินาที
         }
-    };
+    };    
 
     // ฟังก์ชันแสดง/ซ่อนรหัสผ่าน
     const handleTogglePassword = (field) => {
@@ -502,23 +508,6 @@ const AdminHome = () => {
                 <DialogContent>
                     <TextField
                         label="New Password"
-                        type={showPassword.current ? "text" : "password"}
-                        fullWidth
-                        margin="dense"
-                        value={passwordData.currentPassword}
-                        onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-                        InputProps={{
-                            endAdornment: (
-                                <InputAdornment position="end">
-                                    <IconButton onClick={() => handleTogglePassword("current")}>
-                                        {showPassword.current ? <Visibility /> : <VisibilityOff />}
-                                    </IconButton>
-                                </InputAdornment>
-                            ),
-                        }}
-                    />
-                    <TextField
-                        label="Confirm New Password"
                         type={showPassword.new ? "text" : "password"}
                         fullWidth
                         margin="dense"
@@ -529,6 +518,23 @@ const AdminHome = () => {
                                 <InputAdornment position="end">
                                     <IconButton onClick={() => handleTogglePassword("new")}>
                                         {showPassword.new ? <Visibility /> : <VisibilityOff />}
+                                    </IconButton>
+                                </InputAdornment>
+                            ),
+                        }}
+                    />
+                    <TextField
+                        label="Confirm New Password"
+                        type={showPassword.confirm ? "text" : "password"}
+                        fullWidth
+                        margin="dense"
+                        value={passwordData.confirmNewPassword || ""}
+                        onChange={(e) => setPasswordData({ ...passwordData, confirmNewPassword: e.target.value })}
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton onClick={() => handleTogglePassword("confirm")}>
+                                        {showPassword.confirm ? <Visibility /> : <VisibilityOff />}
                                     </IconButton>
                                 </InputAdornment>
                             ),
@@ -548,7 +554,7 @@ const AdminHome = () => {
                 <DialogActions>
                     <Button onClick={handleChangeSomeonePassword}>Submit</Button>
                 </DialogActions>
-            </Dialog>  
+            </Dialog>
                       
             {/* Pop-Up Update User */}
             <Dialog open={isUpdateDialogOpen} onClose={toggleUpdateDialog}>

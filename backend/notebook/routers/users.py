@@ -178,11 +178,18 @@ async def change_password(
 @router.put("/{target_user_id}/change_password")
 async def change_password_for_others(
     target_user_id: int,
-    password_update: ChangedPassword,
+    password_update: ChangedPasswordOther,
     session: Annotated[AsyncSession, Depends(models.get_session)],
     current_user: User = Depends(deps.get_current_active_superuser), # ตรวจสอบว่าเป็น SuperAdmin
 ) -> dict:
 
+    # ตรวจสอบว่ารหัสผ่านใหม่และยืนยันรหัสผ่านตรงกันหรือไม่
+    if password_update.new_password != password_update.confirm_new_password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="New password and confirmation password do not match.",
+        )
+    
     # ดึงข้อมูลผู้ใช้ที่ต้องการเปลี่ยนรหัสผ่าน
     user = await session.get(DBUser, target_user_id)
     if not user:

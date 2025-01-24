@@ -34,6 +34,9 @@ class ChangedPassword(BaseModel):
     current_password: str
     new_password: str
 
+class ChangedPasswordOther(BaseModel):
+    new_password: str
+    confirm_new_password: str
 
 class UpdatedUser(BaseModel):
     username: str
