@@ -13,10 +13,10 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 class BaseUser(BaseModel):
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
-    username: str = pydantic.Field(example="admin")
-    first_name: str = pydantic.Field(example="Firstname")
-    last_name: str = pydantic.Field(example="Lastname")
-    password: str = pydantic.Field(example="password")
+    username: str 
+    first_name: str 
+    last_name: str 
+    password: str 
 
 
 class User(BaseUser):
@@ -35,7 +35,7 @@ class ChangedPassword(BaseModel):
     new_password: str
 
 
-class UpdatedUser(BaseUser):
+class UpdatedUser(BaseModel):
     username: str
     first_name: str
     last_name: str

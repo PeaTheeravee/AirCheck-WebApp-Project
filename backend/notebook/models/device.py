@@ -19,12 +19,12 @@ class Device(BaseDevice):
     api_key: str  # API Key ของอุปกรณ์
 
 
-class CreatedDevice(BaseDevice):
+class CreatedDevice(BaseModel):
     device_name: str  # ชื่ออุปกรณ์
     location: str  # ตำแหน่งของอุปกรณ์
 
 
-class UpdatedDevice(BaseDevice):
+class UpdatedDevice(BaseModel):
     device_name: str  # ชื่ออุปกรณ์
     location: str  # ตำแหน่งของอุปกรณ์
 
