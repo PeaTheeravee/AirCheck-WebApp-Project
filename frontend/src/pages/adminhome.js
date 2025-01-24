@@ -29,8 +29,10 @@ const AdminHome = () => {
     const [userData, setUserData] = useState(null);
     const [error, setError] = useState("");
     const [successMessage, setSuccessMessage] = useState(""); // เพิ่ม state สำหรับข้อความยืนยัน
+
     const [passwordData, setPasswordData] = useState({ currentPassword: "", newPassword: "" });
     const [showPassword, setShowPassword] = useState({ current: false, new: false });
+
     const [users, setUsers] = useState([]);
     const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
     const [updateData, setUpdateData] = useState({username: "",firstName: "",lastName: "",});
@@ -66,13 +68,14 @@ const AdminHome = () => {
         setIsDeleteDialogOpen(!isDeleteDialogOpen);
     };
 
-    const toggleUpdateDialog = () => {
-        if (!isUpdateDialogOpen && userData) {
+    const toggleUpdateDialog = (userId = null, username = "", firstName = "", lastName = "") => {
+        if (userId) {
             setUpdateData({
-                username: userData.username || "",
-                firstName: userData.first_name || "",
-                lastName: userData.last_name || "",
+                username: username || "",
+                firstName: firstName || "",
+                lastName: lastName || "",
             });
+            setTargetUserId(userId); // เก็บ userId ใน state
         }
         setIsUpdateDialogOpen(!isUpdateDialogOpen);
     };
@@ -228,7 +231,7 @@ const AdminHome = () => {
         }
 
         try {
-            const response = await fetch(`http://localhost:8000/users/${userData.id}/update`, {
+            const response = await fetch(`http://localhost:8000/users/${targetUserId}/update`, {
                 method: "PUT",
                 credentials: "include",
                 headers: {
@@ -247,7 +250,7 @@ const AdminHome = () => {
             }
 
             setSuccessMessage("User updated successfully!");
-            await fetchUserData(); // ดึงข้อมูลใหม่
+            await fetchUserAll(); // อัปเดตตารางข้อมูลผู้ใช้
             setTimeout(() => {
                 setSuccessMessage("");
                 toggleUpdateDialog(); // ปิด Pop-Up Update
@@ -419,6 +422,14 @@ const AdminHome = () => {
                                             <Button
                                                 variant="contained"
                                                 color="primary"
+                                                onClick={() => toggleUpdateDialog(user.id, user.username, user.first_name, user.last_name)} // ส่งข้อมูลผู้ใช้ไปยังฟังก์ชัน
+                                                style={{ marginRight: "10px" }}
+                                            >
+                                                Update
+                                            </Button>
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
                                                 onClick={() => toggleChangeSomeonePasswordDialog(user.id, user.username)} // ส่ง user.id และ user.username
                                                 style={{ marginRight: "10px" }}
                                             >
@@ -473,7 +484,6 @@ const AdminHome = () => {
                     )}
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={toggleUpdateDialog}>Update</Button> {/* เปิด Pop-Up Update User */}
                     <Button onClick={toggleChangePasswordYourselfDialog}>Change Password</Button> {/* เปิด Pop-Up Change Password */}
                     <Button onClick={handleLogout}>Logout</Button> {/* Logout */}
                 </DialogActions>
@@ -537,10 +547,9 @@ const AdminHome = () => {
             {/* Pop-Up Change Someone Password */}
             <Dialog open={isChangeSomeonePasswordDialogOpen} onClose={toggleChangeSomeonePasswordDialog}>
                 <DialogTitle>
-                    Change Password
+                    The user password you changed is <strong>{targetUserName}</strong>
                 </DialogTitle>
                 <DialogContent>
-                    <p>The user password you changed is <strong>{targetUserName}</strong></p>
                     <TextField
                         label="New Password"
                         type={showPassword.new ? "text" : "password"}
@@ -595,7 +604,7 @@ const AdminHome = () => {
             {/* Pop-Up Update User */}
             <Dialog open={isUpdateDialogOpen} onClose={toggleUpdateDialog}>
                 <DialogTitle>
-                    Update User
+                    The user you updated is <strong>{updateData.username}</strong>
                 </DialogTitle>
                 <DialogContent>
                     <TextField
@@ -632,17 +641,16 @@ const AdminHome = () => {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleUpdateUser}>Submit</Button>
-                    <Button onClick={toggleUpdateDialog}>BACK</Button>
+                    <Button onClick={toggleUpdateDialog}>Cancel</Button>
                 </DialogActions>
             </Dialog>
 
             {/* Pop-Up Delete User */}
             <Dialog open={isDeleteDialogOpen} onClose={toggleDeleteDialog}>
                 <DialogTitle>
-                    Confirm Deletion
+                    Are you sure you want to delete the user <strong>{targetUserName}</strong>?
                 </DialogTitle>
                 <DialogContent>
-                    <p>Are you sure you want to delete the user <strong>{targetUserName}</strong>?</p>
                     {error && (
                         <p style={{ color: "red", marginTop: "10px", marginBottom: "0" }}>
                             {error}
