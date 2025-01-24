@@ -34,6 +34,9 @@ const AdminHome = () => {
     const [users, setUsers] = useState([]);
     const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
     const [updateData, setUpdateData] = useState({username: "",firstName: "",lastName: "",});
+    const [targetUserNameForDelete, setTargetUserNameForDelete] = useState("");
+    const [targetUserNameForChange, setTargetUserNameForChange] = useState("");
+
     const [isUserDetailsDialogOpen, setIsUserDetailsDialogOpen] = useState(false);
     const [isChangePasswordYourselfDialogOpen, setIsChangePasswordYourselfDialogOpen] = useState(false);
     const [isChangeSomeonePasswordDialogOpen, setIsChangeSomeonePasswordDialogOpen] = useState(false);
@@ -52,13 +55,15 @@ const AdminHome = () => {
     const toggleUserDetailsDialog = () => setIsUserDetailsDialogOpen(!isUserDetailsDialogOpen);
     const toggleChangePasswordYourselfDialog = () => setIsChangePasswordYourselfDialogOpen(!isChangePasswordYourselfDialogOpen);
     
-    const toggleChangeSomeonePasswordDialog = (userId = null) => {
+    const toggleChangeSomeonePasswordDialog = (userId = null, username = "") => {
         setTargetUserId(userId); // เก็บ userId ใน state
+        setTargetUserNameForChange(username);
         setIsChangeSomeonePasswordDialogOpen(!isChangeSomeonePasswordDialogOpen);
     };
 
-    const toggleDeleteDialog = (userId = null) => {
+    const toggleDeleteDialog = (userId = null, username = "") => {
         setTargetUserId(userId); // เก็บ userId ใน state
+        setTargetUserNameForDelete(username);
         setIsDeleteDialogOpen(!isDeleteDialogOpen);
     };
 
@@ -415,7 +420,7 @@ const AdminHome = () => {
                                             <Button
                                                 variant="contained"
                                                 color="primary"
-                                                onClick={() => toggleChangeSomeonePasswordDialog(user.id)} // ส่ง user.id
+                                                onClick={() => toggleChangeSomeonePasswordDialog(user.id, user.username)} // ส่ง user.id และ user.username
                                                 style={{ marginRight: "10px" }}
                                             >
                                                 Change Password
@@ -423,7 +428,7 @@ const AdminHome = () => {
                                             <Button
                                                 variant="contained"
                                                 color="secondary"
-                                                onClick={() => toggleDeleteDialog(user.id)} // ส่ง user.id
+                                                onClick={() => toggleDeleteDialog(user.id, user.username)} // ส่ง user.id และ user.username
                                             >
                                                 Delete
                                             </Button>
@@ -537,6 +542,7 @@ const AdminHome = () => {
                     <Button onClick={toggleChangeSomeonePasswordDialog} style={{ float: "right" }}>X</Button>
                 </DialogTitle>
                 <DialogContent>
+                    <p>The user password you changed is <strong>{targetUserNameForChange}</strong></p>
                     <TextField
                         label="New Password"
                         type={showPassword.new ? "text" : "password"}
@@ -637,19 +643,21 @@ const AdminHome = () => {
                     Confirm Deletion
                 </DialogTitle>
                 <DialogContent>
-                    <p>Are you sure you want to delete this user?</p>
+                    <p>Are you sure you want to delete the user <strong>{targetUserNameForDelete}</strong>?</p>
+                    {error && (
+                        <p style={{ color: "red", marginTop: "10px", marginBottom: "0" }}>
+                            {error}
+                        </p>
+                    )}
+                    {successMessage && (
+                        <p style={{ color: "green", marginTop: "10px" }}>
+                            {successMessage}
+                        </p>
+                    )}
                 </DialogContent>
                 <DialogActions>
-                    <Button
-                        onClick={handleDeleteUser} // ใช้ targetUserId จาก state
-                        color="secondary"
-                        variant="contained"
-                    >
-                        Yes, Delete
-                    </Button>
-                    <Button onClick={toggleDeleteDialog} variant="outlined">
-                        Cancel
-                    </Button>
+                    <Button onClick={handleDeleteUser}>Delete</Button>
+                    <Button onClick={toggleDeleteDialog}>Cancel</Button>
                 </DialogActions>
             </Dialog>
         </div>
