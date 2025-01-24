@@ -37,6 +37,7 @@ const AdminHome = () => {
     const [isUserDetailsDialogOpen, setIsUserDetailsDialogOpen] = useState(false);
     const [isChangePasswordYourselfDialogOpen, setIsChangePasswordYourselfDialogOpen] = useState(false);
     const [isChangeSomeonePasswordDialogOpen, setIsChangeSomeonePasswordDialogOpen] = useState(false);
+    const [targetUserId, setTargetUserId] = useState(null);
 
     //สำหรับ ตาราง + Pagination
     const [searchTerm, setSearchTerm] = useState("");
@@ -48,7 +49,10 @@ const AdminHome = () => {
     //------------------------------------------------------------------------------------------------
     const toggleUserDetailsDialog = () => setIsUserDetailsDialogOpen(!isUserDetailsDialogOpen);
     const toggleChangePasswordYourselfDialog = () => setIsChangePasswordYourselfDialogOpen(!isChangePasswordYourselfDialogOpen);
-    const toggleChangeSomeonePasswordDialog = () => setIsChangeSomeonePasswordDialogOpen(!isChangeSomeonePasswordDialogOpen);
+    const toggleChangeSomeonePasswordDialog = (userId = null) => {
+        setTargetUserId(userId); // เก็บ userId ใน state
+        setIsChangeSomeonePasswordDialogOpen(!isChangeSomeonePasswordDialogOpen);
+    };
 
     const toggleUpdateDialog = () => {
         if (!isUpdateDialogOpen && userData) {
@@ -133,7 +137,7 @@ const AdminHome = () => {
     };
 
     // ฟังก์ชันสำหรับเปลี่ยนรหัสผ่านของผู้ใช้อื่น (โดย Super Admin)
-    const handleChangeSomeonePassword = async (targetUserId) => {
+    const handleChangeSomeonePassword = async () => {
         if (!passwordData.newPassword.trim()) {
             setError("New Password cannot be empty.");
             setTimeout(() => setError(""), 3000); // ลบข้อความ Error หลัง 3 วินาที
@@ -374,7 +378,7 @@ const AdminHome = () => {
                                             <Button
                                                 variant="contained"
                                                 color="primary"
-                                                onClick={toggleChangeSomeonePasswordDialog}
+                                                onClick={() => toggleChangeSomeonePasswordDialog(user.id)} // ส่ง user.id
                                                 style={{ marginRight: "10px" }}
                                             >
                                                 Change Password

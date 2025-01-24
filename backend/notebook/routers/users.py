@@ -191,13 +191,6 @@ async def change_password_for_others(
             detail="User not found.",
         )
 
-    # ตรวจสอบว่ารหัสผ่านใหม่เหมือนกับรหัสผ่านเดิมไหม
-    if password_update.current_password == password_update.new_password:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="The new password must not be the same as the current password.",
-        )
-
     # ตั้งค่ารหัสผ่านใหม่ของคนที่ superadmin ไปเปลี่ยนรหัส
     await user.set_password(password_update.new_password)
 
