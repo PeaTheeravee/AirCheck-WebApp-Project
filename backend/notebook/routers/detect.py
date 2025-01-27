@@ -82,8 +82,19 @@ async def update_daily_average(
     )
     averages = result.one()
 
+    # กำหนดหลักทศนิยมให้กับค่าเฉลี่ย
+    rounded_averages = {
+        "avg_pm2_5": round(averages.avg_pm2_5 or 0, 2),
+        "avg_pm10": round(averages.avg_pm10 or 0, 2),
+        "avg_co2": round(averages.avg_co2 or 0, 2),
+        "avg_tvoc": round(averages.avg_tvoc or 0, 2),
+        "avg_humidity": round(averages.avg_humidity or 0, 2),
+        "avg_temperature": round(averages.avg_temperature or 0, 2),
+    }
+
     # ตรวจสอบว่ามีข้อมูลในตาราง daily_averages สำหรับ API Key และวันที่นี้หรือไม่
-    existing_daily_average = await session.exec(select(DailyAverage)
+    existing_daily_average = await session.exec(
+        select(DailyAverage)
         .where(DailyAverage.api_key == api_key)
         .where(DailyAverage.date == specific_date)
     )
@@ -91,24 +102,24 @@ async def update_daily_average(
 
     if daily_average:
         # หากมีข้อมูลอยู่แล้ว ทำการอัปเดต
-        daily_average.avg_pm2_5 = averages.avg_pm2_5
-        daily_average.avg_pm10 = averages.avg_pm10
-        daily_average.avg_co2 = averages.avg_co2
-        daily_average.avg_tvoc = averages.avg_tvoc
-        daily_average.avg_humidity = averages.avg_humidity
-        daily_average.avg_temperature = averages.avg_temperature
+        daily_average.avg_pm2_5 = rounded_averages["avg_pm2_5"]
+        daily_average.avg_pm10 = rounded_averages["avg_pm10"]
+        daily_average.avg_co2 = rounded_averages["avg_co2"]
+        daily_average.avg_tvoc = rounded_averages["avg_tvoc"]
+        daily_average.avg_humidity = rounded_averages["avg_humidity"]
+        daily_average.avg_temperature = rounded_averages["avg_temperature"]
         session.add(daily_average)
     else:
         # หากยังไม่มีข้อมูล ทำการเพิ่มใหม่
         new_daily_average = DailyAverage(
             api_key=api_key,
             date=specific_date,
-            avg_pm2_5=averages.avg_pm2_5,
-            avg_pm10=averages.avg_pm10,
-            avg_co2=averages.avg_co2,
-            avg_tvoc=averages.avg_tvoc,
-            avg_humidity=averages.avg_humidity,
-            avg_temperature=averages.avg_temperature,
+            avg_pm2_5=rounded_averages["avg_pm2_5"],
+            avg_pm10=rounded_averages["avg_pm10"],
+            avg_co2=rounded_averages["avg_co2"],
+            avg_tvoc=rounded_averages["avg_tvoc"],
+            avg_humidity=rounded_averages["avg_humidity"],
+            avg_temperature=rounded_averages["avg_temperature"],
         )
         session.add(new_daily_average)
 
