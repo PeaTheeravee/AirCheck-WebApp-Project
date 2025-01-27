@@ -3,6 +3,7 @@ from . import authentication
 from . import device
 from . import detect
 from . import score
+from . import daily_average
 
 def init_router(app):
     app.include_router(users.router)
@@ -10,3 +11,4 @@ def init_router(app):
     app.include_router(device.router)
     app.include_router(detect.router)
     app.include_router(score.router)
+    app.include_router(daily_average.router)

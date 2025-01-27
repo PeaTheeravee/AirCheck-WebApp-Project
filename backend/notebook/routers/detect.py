@@ -1,8 +1,10 @@
 from typing import Annotated
+from datetime import date
 from fastapi import APIRouter, HTTPException, Depends
-from sqlmodel import select
+from sqlmodel import select, func
 from sqlmodel.ext.asyncio.session import AsyncSession
 
+from notebook.models.daily_average import DailyAverage
 from notebook.models import get_session
 from notebook.models.device import DBDevice
 from notebook.models.detect import *
@@ -62,6 +64,57 @@ def get_quality_level(value, pollutant):
     return 'ไม่ทราบ'
 
 
+async def update_daily_average(
+    session: AsyncSession, api_key: str, specific_date: date
+):
+    # ดึงข้อมูล detect เฉพาะวันนั้น
+    result = await session.exec(
+        select(
+            func.avg(DBDetect.pm2_5).label("avg_pm2_5"),
+            func.avg(DBDetect.pm10).label("avg_pm10"),
+            func.avg(DBDetect.co2).label("avg_co2"),
+            func.avg(DBDetect.tvoc).label("avg_tvoc"),
+            func.avg(DBDetect.humidity).label("avg_humidity"),
+            func.avg(DBDetect.temperature).label("avg_temperature"),
+        )
+        .where(DBDetect.api_key == api_key)
+        .where(func.date(DBDetect.timestamp) == specific_date)
+    )
+    averages = result.one()
+
+    # ตรวจสอบว่ามีข้อมูลในตาราง daily_averages สำหรับ API Key และวันที่นี้หรือไม่
+    existing_daily_average = await session.exec(select(DailyAverage)
+        .where(DailyAverage.api_key == api_key)
+        .where(DailyAverage.date == specific_date)
+    )
+    daily_average = existing_daily_average.one_or_none()
+
+    if daily_average:
+        # หากมีข้อมูลอยู่แล้ว ทำการอัปเดต
+        daily_average.avg_pm2_5 = averages.avg_pm2_5
+        daily_average.avg_pm10 = averages.avg_pm10
+        daily_average.avg_co2 = averages.avg_co2
+        daily_average.avg_tvoc = averages.avg_tvoc
+        daily_average.avg_humidity = averages.avg_humidity
+        daily_average.avg_temperature = averages.avg_temperature
+        session.add(daily_average)
+    else:
+        # หากยังไม่มีข้อมูล ทำการเพิ่มใหม่
+        new_daily_average = DailyAverage(
+            api_key=api_key,
+            date=specific_date,
+            avg_pm2_5=averages.avg_pm2_5,
+            avg_pm10=averages.avg_pm10,
+            avg_co2=averages.avg_co2,
+            avg_tvoc=averages.avg_tvoc,
+            avg_humidity=averages.avg_humidity,
+            avg_temperature=averages.avg_temperature,
+        )
+        session.add(new_daily_average)
+
+    await session.commit()
+
+
 @router.post("/create")
 async def create_detect(
     detect: CreatedDetect,
@@ -110,7 +163,7 @@ async def create_detect(
         session.add(score)
     else:
         # หากยังไม่มีข้อมูล ทำการเพิ่มใหม่
-        score_entry = DBScore(
+        new_score = DBScore(
             api_key=dbdata.api_key,
             timestamp=dbdata.timestamp,
             pm2_5_quality_level=pm2_5_quality,
@@ -126,9 +179,13 @@ async def create_detect(
             temperature_quality_level=temperature_quality,
             temperature_fix=temperature_fix,
         )
-        session.add(score_entry)
+        session.add(new_score)
 
     await session.commit()
+
+    # อัปเดตค่าเฉลี่ยรายวัน
+    specific_date = dbdata.timestamp.date()  # ดึงวันที่จาก timestamp
+    await update_daily_average(session, detect.api_key, specific_date)
 
     return Detect.from_orm(dbdata)
 
