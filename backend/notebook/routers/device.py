@@ -115,6 +115,29 @@ async def update_device_by_api_key(
     return Device.from_orm(dbdevice)
 
 
+#สำหรับดูปีเเละเดือน เพื่อใช้ประกอบการตัดสินใจ
+@router.get("/timestamps/{api_key}")
+async def get_timestamps_by_api_key(
+    api_key: str,
+    session: Annotated[AsyncSession, Depends(get_session)],
+    current_user: Annotated[User, Depends(get_current_active_user)],  # ตรวจสอบ user.status == "active"
+) -> list[str]:
+    # ดึงข้อมูล timestamp ตาม API Key
+    result = await session.exec(select(DBScore.timestamp).where(DBScore.api_key == api_key))
+    timestamps = result.all()
+
+    if not timestamps:
+        raise HTTPException(status_code=404, detail="No timestamps found for the provided API Key.")
+
+    # แปลงเป็นปีและเดือนเท่านั้น
+    year_months = [ts.strftime("%Y-%m") for ts in timestamps if ts]
+
+    # ลบข้อมูลที่ซ้ำกัน
+    unique_year_months = sorted(set(year_months))
+
+    return unique_year_months
+
+
 @router.delete("/delete/{api_key}")
 async def delete_device_by_api_key(
     api_key: str,
@@ -145,3 +168,66 @@ async def delete_device_by_api_key(
     await session.commit()
 
     return {"message": "The device and all associated data have been successfully erased"}
+
+
+@router.delete("/delete_by_month/{api_key}")
+async def delete_data_by_month(
+    api_key: str,
+    months_to_delete: int,
+    session: Annotated[AsyncSession, Depends(get_session)],
+    current_user: Annotated[User, Depends(get_current_active_user)],  # ตรวจสอบ user.status == "active"
+):
+    # ดึงข้อมูล detect ตาม API Key และจัดเรียงตาม timestamp
+    detect_result = await session.exec(
+        select(DBDetect).where(DBDetect.api_key == api_key).order_by(DBDetect.timestamp.asc())
+    )
+    detects = detect_result.all()
+
+    # ดึงข้อมูล score ตาม API Key และจัดเรียงตาม timestamp
+    score_result = await session.exec(
+        select(DBScore).where(DBScore.api_key == api_key).order_by(DBScore.timestamp.asc())
+    )
+    scores = score_result.all()
+
+    if not detects and not scores:
+        raise HTTPException(status_code=404, detail="No data found for the provided API Key.")
+
+    # จัดกลุ่มข้อมูล detect ตามเดือน
+    grouped_detects = {}
+    for detect in detects:
+        month_key = detect.timestamp.strftime("%Y-%m") if detect.timestamp else None
+        if month_key not in grouped_detects:
+            grouped_detects[month_key] = []
+        grouped_detects[month_key].append(detect)
+
+    # จัดกลุ่มข้อมูล score ตามเดือน
+    grouped_scores = {}
+    for score in scores:
+        month_key = score.timestamp.strftime("%Y-%m") if score.timestamp else None
+        if month_key not in grouped_scores:
+            grouped_scores[month_key] = []
+        grouped_scores[month_key].append(score)
+
+    # ตรวจสอบว่ามีเดือนเพียงพอที่จะลบหรือไม่
+    if len(grouped_detects) < months_to_delete and len(grouped_scores) < months_to_delete:
+        raise HTTPException(
+            status_code=400,
+            detail="Not enough months of data to delete the specified number of months."
+        )
+
+    # ลบข้อมูลจากเดือนที่เก่าสุด
+    months_deleted = 0
+    for month in sorted(set(grouped_detects.keys()).union(grouped_scores.keys())):
+        if month in grouped_detects:
+            for detect in grouped_detects[month]:
+                await session.delete(detect)
+        if month in grouped_scores:
+            for score in grouped_scores[month]:
+                await session.delete(score)
+        months_deleted += 1
+        if months_deleted >= months_to_delete:
+            break
+
+    await session.commit()
+
+    return {"message": f"Deleted {months_deleted} months of detection and score data successfully."}

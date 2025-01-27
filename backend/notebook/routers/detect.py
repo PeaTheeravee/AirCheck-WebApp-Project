@@ -111,20 +111,6 @@ async def create_detect(
     return Detect.from_orm(dbdata)
 
 
-#@router.get("/all")
-#async def get_all_detects(
-#    session: Annotated[AsyncSession, Depends(get_session)],
-#) -> list[Detect]:
-
-#    result = await session.exec(select(DBDetect))
-#    detects = result.all()
-
-#    if not detects:
-#        raise HTTPException(status_code=404, detail="No detection data found.")
-
-#    return [Detect.from_orm(det) for det in detects]
-
-
 @router.get("/{api_key}")
 async def get_detects_by_api_key(
     api_key: str,
@@ -138,48 +124,3 @@ async def get_detects_by_api_key(
         raise HTTPException(status_code=404, detail=f"No detection data found for API Key: {api_key}.")
 
     return [Detect.from_orm(det) for det in detect]
-
-
-@router.delete("/delete_by_month/{api_key}")
-async def delete_detects_by_month(
-    api_key: str,
-    months_to_delete: int,
-    session: Annotated[AsyncSession, Depends(get_session)],
-    current_user: Annotated[User, Depends(get_current_active_user)],  # ตรวจสอบ user.status == "active"
-):
-    # ดึงข้อมูล detect ตาม API Key และจัดเรียงข้อมูลตาม timestamp
-    result = await session.exec(
-        select(DBDetect).where(DBDetect.api_key == api_key).order_by(DBDetect.timestamp.asc())
-    )
-    detects = result.all()
-
-    if not detects:
-        raise HTTPException(status_code=404, detail="No detection data found for the provided API Key.")
-
-    # จัดกลุ่มข้อมูลตามเดือน
-    grouped_by_month = {}
-    for detect in detects:
-        month_key = detect.timestamp.strftime("%Y-%m") if detect.timestamp else None
-        if month_key not in grouped_by_month:
-            grouped_by_month[month_key] = []
-        grouped_by_month[month_key].append(detect)
-
-    # ตรวจสอบว่ามีเดือนเพียงพอที่จะลบหรือไม่
-    if len(grouped_by_month) < months_to_delete:
-        raise HTTPException(
-            status_code=400,
-            detail="Not enough months of detection data to delete the specified number of months."
-        )
-
-    # ลบข้อมูลจากเดือนที่เก่าสุด
-    months_deleted = 0
-    for month in sorted(grouped_by_month.keys()):
-        for detect in grouped_by_month[month]:
-            await session.delete(detect)
-        months_deleted += 1
-        if months_deleted >= months_to_delete:
-            break
-
-    await session.commit()
-
-    return {"message": f"Deleted {months_deleted} months of detection data successfully."}
