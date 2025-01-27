@@ -138,9 +138,24 @@ async def create_detect(
     if not device:
         raise HTTPException(status_code=400, detail="Invalid API Key. Please add devices first.")
 
-    # หากพบ API Key ในระบบ ให้สร้าง detect ใหม่
-    dbdata = DBDetect(**detect.dict())
-    session.add(dbdata)
+    # ตรวจสอบว่ามีข้อมูล detect สำหรับ API Key นี้หรือยัง
+    existing_detect = await session.exec(select(DBDetect).where(DBDetect.api_key == detect.api_key))
+    dbdata = existing_detect.one_or_none()
+
+    if dbdata:
+        # หากมีข้อมูลอยู่แล้ว ทำการอัปเดต
+        dbdata.pm2_5 = detect.pm2_5
+        dbdata.pm10 = detect.pm10
+        dbdata.co2 = detect.co2
+        dbdata.tvoc = detect.tvoc
+        dbdata.humidity = detect.humidity
+        dbdata.temperature = detect.temperature
+        dbdata.timestamp = detect.timestamp
+    else:
+        # หากยังไม่มีข้อมูล ทำการเพิ่มใหม่
+        dbdata = DBDetect(**detect.dict())
+        session.add(dbdata)
+
     await session.commit()
     await session.refresh(dbdata)
 
