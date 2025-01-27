@@ -88,24 +88,46 @@ async def create_detect(
     humidity_quality, humidity_fix = get_quality_level(dbdata.humidity, "Humidity")
     temperature_quality, temperature_fix = get_quality_level(dbdata.temperature, "Temperature")
 
-    score_entry = DBScore(
-        api_key=dbdata.api_key,
-        device_name=device.device_name,
-        timestamp=dbdata.timestamp,
-        pm2_5_quality_level=pm2_5_quality,
-        pm2_5_fix=pm2_5_fix,
-        pm10_quality_level=pm10_quality,
-        pm10_fix=pm10_fix,
-        co2_quality_level=co2_quality,
-        co2_fix=co2_fix,
-        tvoc_quality_level=tvoc_quality,
-        tvoc_fix=tvoc_fix,
-        humidity_quality_level=humidity_quality,
-        humidity_fix=humidity_fix,
-        temperature_quality_level=temperature_quality,
-        temperature_fix=temperature_fix,
-    )
-    session.add(score_entry)
+    # ตรวจสอบว่ามีข้อมูลในตาราง score สำหรับ API Key นี้หรือยัง
+    existing_score = await session.exec(select(DBScore).where(DBScore.api_key == detect.api_key))
+    score = existing_score.one_or_none()
+
+    if score:
+        # หากมีข้อมูลอยู่แล้ว ทำการอัปเดต
+        score.timestamp = dbdata.timestamp
+        score.pm2_5_quality_level = pm2_5_quality
+        score.pm2_5_fix = pm2_5_fix
+        score.pm10_quality_level = pm10_quality
+        score.pm10_fix = pm10_fix
+        score.co2_quality_level = co2_quality
+        score.co2_fix = co2_fix
+        score.tvoc_quality_level = tvoc_quality
+        score.tvoc_fix = tvoc_fix
+        score.humidity_quality_level = humidity_quality
+        score.humidity_fix = humidity_fix
+        score.temperature_quality_level = temperature_quality
+        score.temperature_fix = temperature_fix
+        session.add(score)
+    else:
+        # หากยังไม่มีข้อมูล ทำการเพิ่มใหม่
+        score_entry = DBScore(
+            api_key=dbdata.api_key,
+            timestamp=dbdata.timestamp,
+            pm2_5_quality_level=pm2_5_quality,
+            pm2_5_fix=pm2_5_fix,
+            pm10_quality_level=pm10_quality,
+            pm10_fix=pm10_fix,
+            co2_quality_level=co2_quality,
+            co2_fix=co2_fix,
+            tvoc_quality_level=tvoc_quality,
+            tvoc_fix=tvoc_fix,
+            humidity_quality_level=humidity_quality,
+            humidity_fix=humidity_fix,
+            temperature_quality_level=temperature_quality,
+            temperature_fix=temperature_fix,
+        )
+        session.add(score_entry)
+
     await session.commit()
 
     return Detect.from_orm(dbdata)
