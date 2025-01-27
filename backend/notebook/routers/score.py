@@ -62,29 +62,6 @@ async def get_timestamps_by_api_key(
     return unique_year_months
 
 
-#เมื่อต้องการลบข้อมูลอุปกรณ์
-@router.delete("/delete/{api_key}")
-async def delete_scores_by_api_key(
-    api_key: str,
-    session: Annotated[AsyncSession, Depends(get_session)],
-    current_user: Annotated[User, Depends(get_current_active_user)],  # ตรวจสอบ user.status == "active"
-):
-    # ดึงข้อมูล score ตาม API Key
-    result = await session.exec(select(DBScore).where(DBScore.api_key == api_key))
-    scores = result.all()
-
-    if not scores:
-        raise HTTPException(status_code=404, detail="No score data found for the provided API Key.")
-
-    # ลบข้อมูลทั้งหมดที่เกี่ยวข้องกับ API Key
-    for score in scores:
-        await session.delete(score)
-
-    await session.commit()
-
-    return {"message": "All score data associated with the API Key has been deleted successfully."}
-
-
 @router.delete("/delete_by_month/{api_key}")
 async def delete_scores_by_month(
     api_key: str,

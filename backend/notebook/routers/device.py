@@ -121,29 +121,27 @@ async def delete_device_by_api_key(
     session: Annotated[AsyncSession, Depends(get_session)],
     current_user: Annotated[User, Depends(get_current_active_user)],  # ตรวจสอบ user.status == "active"
 ):
+    # ตรวจสอบว่าอุปกรณ์มีอยู่หรือไม่
     result = await session.exec(select(DBDevice).where(DBDevice.api_key == api_key))
     dbdevice = result.one_or_none()
 
     if not dbdevice:
         raise HTTPException(status_code=404, detail="Device not found.")
 
-    # ตรวจสอบความสัมพันธ์กับตาราง score และ detect
-    score_check = await session.exec(select(DBScore).where(DBScore.api_key == api_key))
-    if score_check.first():
-        raise HTTPException(
-            status_code=400,
-            detail="Cannot delete this device because it is referenced in the scores table."
-        )
+    # ลบข้อมูลในตาราง scores
+    score_result = await session.exec(select(DBScore).where(DBScore.api_key == api_key))
+    scores = score_result.all()
+    for score in scores:
+        await session.delete(score)
 
-    detect_check = await session.exec(select(DBDetect).where(DBDetect.api_key == api_key))
-    if detect_check.first():
-        raise HTTPException(
-            status_code=400,
-            detail="Cannot delete this device because it is referenced in the detects table."
-        )
+    # ลบข้อมูลในตาราง detects
+    detect_result = await session.exec(select(DBDetect).where(DBDetect.api_key == api_key))
+    detects = detect_result.all()
+    for detect in detects:
+        await session.delete(detect)
 
-    # ลบข้อมูล
+    # ลบอุปกรณ์
     await session.delete(dbdevice)
     await session.commit()
 
-    return {"message": "Device deleted successfully."}
+    return {"message": "The device and all associated data have been successfully erased"}

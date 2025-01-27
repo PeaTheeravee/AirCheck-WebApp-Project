@@ -140,29 +140,6 @@ async def get_detects_by_api_key(
     return [Detect.from_orm(det) for det in detect]
 
 
-#เมื่อต้องการลบข้อมูลอุปกรณ์
-@router.delete("/delete/{api_key}")
-async def delete_detect_by_api_key(
-    api_key: str,
-    session: Annotated[AsyncSession, Depends(get_session)],
-    current_user: Annotated[User, Depends(get_current_active_user)],  # ตรวจสอบ user.status == "active"
-):
-    # ตรวจสอบว่า API Key มีการอ้างอิงใน detect หรือไม่
-    result = await session.exec(select(DBDetect).where(DBDetect.api_key == api_key))
-    detects = result.all()
-
-    if not detects:
-        raise HTTPException(status_code=404, detail="No detection data found for the provided API Key.")
-
-    # ลบข้อมูลทั้งหมดที่เกี่ยวข้องกับ API Key
-    for detect in detects:
-        await session.delete(detect)
-    
-    await session.commit()
-
-    return {"message": "All detection data associated with the API Key has been deleted successfully."}
-
-
 @router.delete("/delete_by_month/{api_key}")
 async def delete_detects_by_month(
     api_key: str,
