@@ -9,7 +9,7 @@ from notebook.models import get_session
 from notebook.models.device import *
 from notebook.models.detect import *
 from notebook.models.score import *
-from notebook.models.save import *
+from backend.notebook.models.showdetect import *
 from notebook.deps import *
 
 router = APIRouter(prefix="/detects", tags=["detects"])
@@ -139,29 +139,14 @@ async def create_detect(
     if not device:
         raise HTTPException(status_code=400, detail="Invalid API Key. Please add devices first.")
 
-    # ตรวจสอบว่ามีข้อมูล detect สำหรับ API Key นี้หรือยัง
-    existing_detect = await session.exec(select(DBDetect).where(DBDetect.api_key == detect.api_key))
-    dbdata = existing_detect.one_or_none()
-
-    if dbdata:
-        # หากมีข้อมูลอยู่แล้ว ทำการอัปเดต
-        dbdata.pm2_5 = detect.pm2_5
-        dbdata.pm10 = detect.pm10
-        dbdata.co2 = detect.co2
-        dbdata.tvoc = detect.tvoc
-        dbdata.humidity = detect.humidity
-        dbdata.temperature = detect.temperature
-        dbdata.timestamp = detect.timestamp
-    else:
-        # หากยังไม่มีข้อมูล ทำการเพิ่มใหม่
-        dbdata = DBDetect(**detect.dict())
-        session.add(dbdata)
-
+    # หากพบ API Key ในระบบ ให้สร้าง detect ใหม่
+    dbdata = DBDetect(**detect.dict())
+    session.add(dbdata)
     await session.commit()
     await session.refresh(dbdata)
 
-    # บันทึกข้อมูลที่วัดได้ลงในตาราง Save
-    new_save = Save(
+    # บันทึกข้อมูลที่วัดได้ลงในตาราง Showdetect
+    new_Show = Show(
         api_key=detect.api_key,
         pm2_5=detect.pm2_5,
         pm10=detect.pm10,
@@ -171,9 +156,9 @@ async def create_detect(
         temperature=detect.temperature,
         timestamp=detect.timestamp,
     )
-    session.add(new_save)
+    session.add(new_Show)
     await session.commit()
-    await session.refresh(new_save)
+    await session.refresh(new_Show)
 
     # คำนวณระดับคุณภาพ
     pm2_5_quality, pm2_5_fix = get_quality_level(dbdata.pm2_5, "PM2.5")

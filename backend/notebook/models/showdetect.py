@@ -2,8 +2,8 @@ from datetime import datetime
 from sqlmodel import SQLModel, Field
 
 
-class Save(SQLModel, table=True):
-    __tablename__ = "saves"
+class Show(SQLModel, table=True):
+    __tablename__ = "showdetects"
 
     id: int = Field(default=None, primary_key=True)
     api_key: str = Field(index=True)  # ใช้ API Key อ้างอิงอุปกรณ์
