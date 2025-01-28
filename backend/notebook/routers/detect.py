@@ -146,19 +146,35 @@ async def create_detect(
     await session.refresh(dbdata)
 
     # บันทึกข้อมูลที่วัดได้ลงในตาราง Showdetect
-    new_Show = Show(
-        api_key=detect.api_key,
-        pm2_5=detect.pm2_5,
-        pm10=detect.pm10,
-        co2=detect.co2,
-        tvoc=detect.tvoc,
-        humidity=detect.humidity,
-        temperature=detect.temperature,
-        timestamp=detect.timestamp,
-    )
-    session.add(new_Show)
+    existing_show = await session.exec(select(Show).where(Show.api_key == detect.api_key))
+    show = existing_show.one_or_none()
+
+    if show:
+        # หากมีข้อมูลอยู่แล้ว ทำการอัปเดต
+        show.pm2_5 = detect.pm2_5
+        show.pm10 = detect.pm10
+        show.co2 = detect.co2
+        show.tvoc = detect.tvoc
+        show.humidity = detect.humidity
+        show.temperature = detect.temperature
+        show.timestamp = detect.timestamp
+        session.add(show)
+    else:
+        # หากยังไม่มีข้อมูล ทำการเพิ่มใหม่
+        new_Show = Show(
+            api_key=detect.api_key,
+            pm2_5=detect.pm2_5,
+            pm10=detect.pm10,
+            co2=detect.co2,
+            tvoc=detect.tvoc,
+            humidity=detect.humidity,
+            temperature=detect.temperature,
+            timestamp=detect.timestamp,
+        )
+        session.add(new_Show)
+
     await session.commit()
-    await session.refresh(new_Show)
+
 
     # คำนวณระดับคุณภาพ
     pm2_5_quality, pm2_5_fix = get_quality_level(dbdata.pm2_5, "PM2.5")
