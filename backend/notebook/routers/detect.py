@@ -9,7 +9,7 @@ from notebook.models import get_session
 from notebook.models.device import *
 from notebook.models.detect import *
 from notebook.models.score import *
-from backend.notebook.models.showdetect import *
+from notebook.models.showdetect import *
 from notebook.deps import *
 
 router = APIRouter(prefix="/detects", tags=["detects"])
