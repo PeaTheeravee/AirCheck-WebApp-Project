@@ -6,9 +6,10 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from notebook.models.daily_average import DailyAverage
 from notebook.models import get_session
-from notebook.models.device import DBDevice
+from notebook.models.device import *
 from notebook.models.detect import *
-from notebook.models.score import DBScore
+from notebook.models.score import *
+from notebook.models.save import *
 from notebook.deps import *
 
 router = APIRouter(prefix="/detects", tags=["detects"])
@@ -158,6 +159,21 @@ async def create_detect(
 
     await session.commit()
     await session.refresh(dbdata)
+
+    # บันทึกข้อมูลที่วัดได้ลงในตาราง Save
+    new_save = Save(
+        api_key=detect.api_key,
+        pm2_5=detect.pm2_5,
+        pm10=detect.pm10,
+        co2=detect.co2,
+        tvoc=detect.tvoc,
+        humidity=detect.humidity,
+        temperature=detect.temperature,
+        timestamp=detect.timestamp,
+    )
+    session.add(new_save)
+    await session.commit()
+    await session.refresh(new_save)
 
     # คำนวณระดับคุณภาพ
     pm2_5_quality, pm2_5_fix = get_quality_level(dbdata.pm2_5, "PM2.5")
