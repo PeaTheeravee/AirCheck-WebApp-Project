@@ -22,7 +22,7 @@ async def get_daily_averages(
     if not daily_averages:
         raise HTTPException(status_code=404, detail="No daily averages found.")
 
-    # จัดข้อมูลในรูปแบบที่เหมาะกับ Recharts
+    # จัดข้อมูลในรูปแบบที่เหมาะกับ Recharts (รูปเเบบ Line Chart)
     return [
         {
             "date": daily_avg.date.strftime("%Y-%m-%d"),

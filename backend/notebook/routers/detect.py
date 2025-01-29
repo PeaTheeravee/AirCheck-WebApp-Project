@@ -1,6 +1,7 @@
 from typing import Annotated
-from datetime import date
+from datetime import date, datetime, timedelta
 from fastapi import APIRouter, HTTPException, Depends
+from sqlalchemy import delete
 from sqlmodel import select, func
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -132,6 +133,13 @@ async def create_detect(
     detect: CreatedDetect,
     session: Annotated[AsyncSession, Depends(get_session)],
 ) -> Detect | None:
+
+    # คำนวณวันที่ปัจจุบัน
+    today = datetime.utcnow().date()
+    # ลบข้อมูล detect ที่ "น้อยกว่าวันนี้" (ลบทุกอย่างที่ไม่ใช่ของวันปัจจุบัน)
+    delete_stmt = delete(DBDetect).where(DBDetect.timestamp < today)
+    await session.execute(delete_stmt)
+    await session.commit()
 
     # ตรวจสอบว่า API Key มีอยู่ในฐานข้อมูลหรือไม่
     device = await session.exec(select(DBDevice).where(DBDevice.api_key == detect.api_key))
