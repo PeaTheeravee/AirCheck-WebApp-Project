@@ -8,6 +8,8 @@ from fastapi import APIRouter, HTTPException, Depends
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
+from notebook.models.daily_average import DailyAverage
+from notebook.models.showdetect import Show
 from notebook.models.detect import DBDetect
 from notebook.models.score import DBScore
 from notebook import deps
@@ -188,6 +190,18 @@ async def delete_device_by_api_key(
     if not dbdevice:
         raise HTTPException(status_code=404, detail="Device not found.")
 
+    # ลบข้อมูลในตาราง showdetect
+    showdetect_result = await session.exec(select(Show).where(Show.api_key == api_key))
+    showdetects = showdetect_result.all()
+    for show in showdetects:
+        await session.delete(show)
+
+    # ลบข้อมูลในตาราง daily_averages
+    daily_avg_result = await session.exec(select(DailyAverage).where(DailyAverage.api_key == api_key))
+    daily_averages = daily_avg_result.all()
+    for daily_avg in daily_averages:
+        await session.delete(daily_avg)
+
     # ลบข้อมูลในตาราง scores
     score_result = await session.exec(select(DBScore).where(DBScore.api_key == api_key))
     scores = score_result.all()
@@ -214,20 +228,28 @@ async def delete_data_by_month(
     session: Annotated[AsyncSession, Depends(get_session)],
     current_user: Annotated[User, Depends(get_current_active_user)],  # ตรวจสอบ user.status == "active"
 ):
+    # ดึงข้อมูล daily_average ตาม API Key และจัดเรียงตามวันที่
+    daily_avg_result = await session.exec(
+        select(DailyAverage).where(DailyAverage.api_key == api_key).order_by(DailyAverage.date.asc())
+    )
+    daily_averages = daily_avg_result.all()
+
     # ดึงข้อมูล detect ตาม API Key และจัดเรียงตาม timestamp
     detect_result = await session.exec(
         select(DBDetect).where(DBDetect.api_key == api_key).order_by(DBDetect.timestamp.asc())
     )
     detects = detect_result.all()
 
-    # ดึงข้อมูล score ตาม API Key และจัดเรียงตาม timestamp
-    score_result = await session.exec(
-        select(DBScore).where(DBScore.api_key == api_key).order_by(DBScore.timestamp.asc())
-    )
-    scores = score_result.all()
+    if not daily_averages and not detects:
+        raise HTTPException(status_code=404, detail="No daily average or detect data found for the provided API Key.")
 
-    if not detects and not scores:
-        raise HTTPException(status_code=404, detail="No data found for the provided API Key.")
+    # จัดกลุ่มข้อมูล daily_average ตามเดือน
+    grouped_daily_avg = {}
+    for daily_avg in daily_averages:
+        month_key = daily_avg.date.strftime("%Y-%m") if daily_avg.date else None
+        if month_key not in grouped_daily_avg:
+            grouped_daily_avg[month_key] = []
+        grouped_daily_avg[month_key].append(daily_avg)
 
     # จัดกลุ่มข้อมูล detect ตามเดือน
     grouped_detects = {}
@@ -237,16 +259,9 @@ async def delete_data_by_month(
             grouped_detects[month_key] = []
         grouped_detects[month_key].append(detect)
 
-    # จัดกลุ่มข้อมูล score ตามเดือน
-    grouped_scores = {}
-    for score in scores:
-        month_key = score.timestamp.strftime("%Y-%m") if score.timestamp else None
-        if month_key not in grouped_scores:
-            grouped_scores[month_key] = []
-        grouped_scores[month_key].append(score)
-
     # ตรวจสอบว่ามีเดือนเพียงพอที่จะลบหรือไม่
-    if len(grouped_detects) < months_to_delete and len(grouped_scores) < months_to_delete:
+    available_months = sorted(set(grouped_daily_avg.keys()).union(grouped_detects.keys()))
+    if len(available_months) < months_to_delete:
         raise HTTPException(
             status_code=400,
             detail="Not enough months of data to delete the specified number of months."
@@ -254,17 +269,19 @@ async def delete_data_by_month(
 
     # ลบข้อมูลจากเดือนที่เก่าสุด
     months_deleted = 0
-    for month in sorted(set(grouped_detects.keys()).union(grouped_scores.keys())):
+    for month in available_months:
+        if month in grouped_daily_avg:
+            for daily_avg in grouped_daily_avg[month]:
+                await session.delete(daily_avg)
+
         if month in grouped_detects:
             for detect in grouped_detects[month]:
                 await session.delete(detect)
-        if month in grouped_scores:
-            for score in grouped_scores[month]:
-                await session.delete(score)
+
         months_deleted += 1
         if months_deleted >= months_to_delete:
             break
 
     await session.commit()
 
-    return {"message": f"Deleted {months_deleted} months of detection and score data successfully."}
+    return {"message": f"Deleted {months_deleted} months of daily average and detect data successfully."}
