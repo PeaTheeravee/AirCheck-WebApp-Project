@@ -115,7 +115,44 @@ async def update_device_by_api_key(
     return Device.from_orm(dbdevice)
 
 
-#สำหรับดูปีเเละเดือน เพื่อใช้ประกอบการตัดสินใจ
+@router.put("/update_time/{api_key}")
+async def update_device_time(
+    api_key: str,
+    device_settime: int,  # รับค่าเวลาเป็นนาที
+    session: Annotated[AsyncSession, Depends(get_session)],
+    current_user: Annotated[User, Depends(get_current_active_user)],  # ตรวจสอบ user.status == "active"
+) -> Device:
+    result = await session.exec(select(DBDevice).where(DBDevice.api_key == api_key))
+    dbdevice = result.one_or_none()
+
+    if not dbdevice:
+        raise HTTPException(status_code=404, detail="Device not found.")
+
+    dbdevice.device_settime = device_settime  # อัปเดตค่าเวลา
+    
+    session.add(dbdevice)
+    await session.commit()
+    await session.refresh(dbdevice)
+
+    return Device.from_orm(dbdevice)
+
+
+# สำหรับ ESP32
+@router.get("/get_time/{api_key}")
+async def get_device_settime(
+    api_key: str,
+    session: Annotated[AsyncSession, Depends(get_session)],
+) -> dict:
+    result = await session.exec(select(DBDevice.device_settime).where(DBDevice.api_key == api_key))
+    device_settime = result.one_or_none()
+
+    if device_settime is None:
+        raise HTTPException(status_code=404, detail="Device not found.")
+
+    return {"device_settime": device_settime}
+
+
+# สำหรับดูปีเเละเดือน เพื่อใช้ประกอบการตัดสินใจ
 @router.get("/timestamps/{api_key}")
 async def get_timestamps_by_api_key(
     api_key: str,

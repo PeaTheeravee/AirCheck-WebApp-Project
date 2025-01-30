@@ -10,8 +10,9 @@ class BaseDevice(BaseModel):
 
     device_name: str  # ชื่ออุปกรณ์
     location: str  # ตำแหน่งของอุปกรณ์
-    user_id: int | None = None  # ใครเป็นผู้เพิ่มอุปกรณ์
-    device_status: str | None = ""  # สถานะอุปกรณ์ (online, offline)
+    user_id: int # ใครเป็นผู้เพิ่มอุปกรณ์
+    device_status: str = "offline"  # สถานะอุปกรณ์ offline
+    device_settime: int = 5  # เวลาในหน่วยนาที
 
 
 class Device(BaseDevice):
@@ -41,8 +42,9 @@ class DBDevice(SQLModel, table=True):
 
     device_name: str
     location: str
-    device_status: str | None = ""
-    user_id: int = Field(default=None, foreign_key="users.id")
+    device_status: str = Field(default="offline")
+    device_settime: int = Field(default=5)
+    user_id: int = Field(foreign_key="users.id")
     user: users.DBUser | None = Relationship()
 
 
