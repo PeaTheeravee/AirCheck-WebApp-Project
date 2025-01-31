@@ -136,8 +136,9 @@ async def create_detect(
 
     # คำนวณวันที่ปัจจุบัน
     today = datetime.utcnow().date()
+
     # ลบข้อมูล detect ที่ "น้อยกว่าวันนี้" (ลบทุกอย่างที่ไม่ใช่ของวันปัจจุบัน)
-    delete_stmt = delete(DBDetect).where(DBDetect.timestamp < today)
+    delete_stmt = delete(DBDetect).where(func.date(DBDetect.timestamp) < today)
     await session.execute(delete_stmt)
     await session.commit()
 
