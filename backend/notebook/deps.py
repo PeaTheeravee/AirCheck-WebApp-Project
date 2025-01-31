@@ -9,7 +9,7 @@ from . import models
 async def get_current_active_user(
     request: Request,  # เพิ่ม request เพื่อดึงคุกกี้
     session: Annotated[models.AsyncSession, Depends(models.get_session)],
-) -> User:
+) -> UserRead:
     # ดึง user_id จากคุกกี้
     user_id = request.cookies.get("user_id")
     #logger.info(f"Cookie user_id: {user_id}")
@@ -28,7 +28,7 @@ async def get_current_active_user(
 async def get_current_active_superuser(
     request: Request,  # เพิ่ม request เพื่อดึงคุกกี้
     session: Annotated[models.AsyncSession, Depends(models.get_session)],
-) -> User:
+) -> UserRead:
     # ดึง user_id จากคุกกี้
     user_id = request.cookies.get("user_id")
     if not user_id:

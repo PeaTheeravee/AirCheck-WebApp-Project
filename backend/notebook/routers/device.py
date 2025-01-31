@@ -32,8 +32,8 @@ SIZE_PER_PAGE = 50
 async def create_device(
     device: CreatedDevice,
     session: Annotated[AsyncSession, Depends(get_session)],
-    current_user: Annotated[User, Depends(get_current_active_user)],  # ตรวจสอบ user.status == "active"
-) -> Device | None:
+    current_user: Annotated[UserRead, Depends(get_current_active_user)],  # ตรวจสอบ user.status == "active"
+) -> DeviceRead | None:
     # ตรวจสอบว่า device_name มีอยู่แล้วในระบบหรือไม่
     existing_device = await session.exec(select(DBDevice).where(DBDevice.device_name == device.device_name))
     if existing_device.one_or_none():
@@ -50,30 +50,52 @@ async def create_device(
     await session.commit()
     await session.refresh(dbdevice)
 
-    return Device.from_orm(dbdevice)
+    return DeviceRead.from_orm(dbdevice)
 
 
 @router.get("/all")
 async def read_devices(
     session: Annotated[AsyncSession, Depends(get_session)],
-    current_user: Annotated[User, Depends(deps.get_current_active_user)],
-) -> list[Device]:
+    current_user: Annotated[UserRead, Depends(deps.get_current_active_user)],
+    page: int = 1,  # หน้าปัจจุบัน (default = 1)
+    size: int = 5,  # จำนวนรายการต่อหน้า (default = 5)
+) -> DeviceList:
 
-    result = await session.exec(select(DBDevice))
+    # Query จำนวนรายการทั้งหมด
+    total_devices_query = await session.exec(select(DBDevice))
+    total_devices = len(total_devices_query.all())  # จำนวนทั้งหมด
+
+    # คำนวณ offset และ limit สำหรับ pagination
+    offset = (page - 1) * size
+
+    # Query รายการของผู้ใช้
+    result = await session.exec(
+        select(DBDevice).offset(offset).limit(size)
+    )
     dbdevices = result.all()
 
     if not dbdevices:
         raise HTTPException(status_code=404, detail="No devices found.")
+    
+    # คำนวณจำนวนหน้าทั้งหมด
+    total_pages = (total_devices + size - 1) // size
 
-    return [Device.from_orm(dev) for dev in dbdevices]
+    # สร้าง Response พร้อมข้อมูล Pagination
+    return DeviceList(
+        devices=[DeviceRead.from_orm(dev) for dev in dbdevices],
+        total=total_devices,
+        page=page,
+        size=size,
+        total_pages=total_pages,
+    )
 
 
 @router.get("/{api_key}")
 async def read_device_by_api_key(
     api_key: str,
     session: Annotated[AsyncSession, Depends(get_session)],
-    current_user: Annotated[User, Depends(deps.get_current_active_user)],
-) -> Device:
+    current_user: Annotated[UserRead, Depends(deps.get_current_active_user)],
+) -> DeviceRead:
 
     result = await session.exec(select(DBDevice).where(DBDevice.api_key == api_key))
     dbdevice = result.one_or_none()
@@ -81,7 +103,7 @@ async def read_device_by_api_key(
     if not dbdevice:
         raise HTTPException(status_code=404, detail=f"No device found for API Key: {api_key}.")
 
-    return Device.from_orm(dbdevice)
+    return DeviceRead.from_orm(dbdevice)
 
 
 @router.put("/update/{api_key}")
@@ -89,8 +111,8 @@ async def update_device_by_api_key(
     api_key: str,
     device: UpdatedDevice,
     session: Annotated[AsyncSession, Depends(get_session)],
-    current_user: Annotated[User, Depends(get_current_active_user)],  # ตรวจสอบ user.status == "active"
-) -> Device:
+    current_user: Annotated[UserRead, Depends(get_current_active_user)],  # ตรวจสอบ user.status == "active"
+) -> DeviceRead:
     result = await session.exec(select(DBDevice).where(DBDevice.api_key == api_key))
     dbdevice = result.one_or_none()
 
@@ -114,29 +136,29 @@ async def update_device_by_api_key(
     await session.commit()
     await session.refresh(dbdevice)
 
-    return Device.from_orm(dbdevice)
+    return DeviceRead.from_orm(dbdevice)
 
 
 @router.put("/update_time/{api_key}")
 async def update_device_time(
     api_key: str,
-    device_settime: int,  # รับค่าเวลาเป็นนาที
+    device: DeviceTimeUpdate,  
     session: Annotated[AsyncSession, Depends(get_session)],
-    current_user: Annotated[User, Depends(get_current_active_user)],  # ตรวจสอบ user.status == "active"
-) -> Device:
+    current_user: Annotated[UserRead, Depends(get_current_active_user)],  # ตรวจสอบ user.status == "active"
+) -> DeviceRead:
     result = await session.exec(select(DBDevice).where(DBDevice.api_key == api_key))
     dbdevice = result.one_or_none()
 
     if not dbdevice:
         raise HTTPException(status_code=404, detail="Device not found.")
 
-    dbdevice.device_settime = device_settime  # อัปเดตค่าเวลา
+    dbdevice.device_settime = device.device_settime  # อัปเดตค่าเวลา
     
     session.add(dbdevice)
     await session.commit()
     await session.refresh(dbdevice)
 
-    return Device.from_orm(dbdevice)
+    return DeviceRead.from_orm(dbdevice)
 
 
 # สำหรับ ESP32
@@ -159,7 +181,7 @@ async def get_device_settime(
 async def get_timestamps_by_api_key(
     api_key: str,
     session: Annotated[AsyncSession, Depends(get_session)],
-    current_user: Annotated[User, Depends(get_current_active_user)],  # ตรวจสอบ user.status == "active"
+    current_user: Annotated[UserRead, Depends(get_current_active_user)],  # ตรวจสอบ user.status == "active"
 ) -> list[str]:
     # ดึงข้อมูล timestamp ตาม API Key
     result = await session.exec(select(DBScore.timestamp).where(DBScore.api_key == api_key))
@@ -181,7 +203,7 @@ async def get_timestamps_by_api_key(
 async def delete_device_by_api_key(
     api_key: str,
     session: Annotated[AsyncSession, Depends(get_session)],
-    current_user: Annotated[User, Depends(get_current_active_user)],  # ตรวจสอบ user.status == "active"
+    current_user: Annotated[UserRead, Depends(get_current_active_user)],  # ตรวจสอบ user.status == "active"
 ):
     # ตรวจสอบว่าอุปกรณ์มีอยู่หรือไม่
     result = await session.exec(select(DBDevice).where(DBDevice.api_key == api_key))
@@ -226,7 +248,7 @@ async def delete_data_by_month(
     api_key: str,
     months_to_delete: int,
     session: Annotated[AsyncSession, Depends(get_session)],
-    current_user: Annotated[User, Depends(get_current_active_user)],  # ตรวจสอบ user.status == "active"
+    current_user: Annotated[UserRead, Depends(get_current_active_user)],  # ตรวจสอบ user.status == "active"
 ):
     # ดึงข้อมูล daily_average ตาม API Key และจัดเรียงตามวันที่
     daily_avg_result = await session.exec(

@@ -13,8 +13,8 @@ router = APIRouter(prefix="/users", tags=["users"])
 async def create(
     user_create: CreatedUser,
     session: Annotated[AsyncSession, Depends(models.get_session)],
-    current_user: Annotated[User, Depends(deps.get_current_active_superuser)], # ตรวจสอบว่าเป็น SuperAdmin
-) -> User:
+    current_user: Annotated[UserRead, Depends(deps.get_current_active_superuser)], # ตรวจสอบว่าเป็น SuperAdmin
+) -> UserRead:
 
     # ตรวจสอบว่ามี username ซ้ำหรือไม่
     username_check = await session.exec(select(DBUser).where(DBUser.username == user_create.username))
@@ -53,14 +53,14 @@ async def create(
     await session.commit()
     await session.refresh(user)
 
-    return User.from_orm(user)
+    return UserRead.from_orm(user)
 
 
 @router.delete("/{target_user_id}")
 async def delete_user(
     target_user_id: int,
     session: Annotated[AsyncSession, Depends(models.get_session)],
-    current_user: Annotated[User, Depends(deps.get_current_active_superuser)], # ตรวจสอบว่าเป็น SuperAdmin
+    current_user: Annotated[UserRead, Depends(deps.get_current_active_superuser)], # ตรวจสอบว่าเป็น SuperAdmin
 ):
     user = await session.get(DBUser, target_user_id)
 
@@ -82,7 +82,7 @@ async def delete_user(
 @router.get("/all")
 async def get_all_users(
     session: Annotated[AsyncSession, Depends(models.get_session)],
-    current_user: Annotated[User, Depends(deps.get_current_active_superuser)],  # ตรวจสอบว่าเป็น SuperAdmin
+    current_user: Annotated[UserRead, Depends(deps.get_current_active_superuser)],  # ตรวจสอบว่าเป็น SuperAdmin
     page: int = 1,  # หน้าปัจจุบัน (default = 1)
     size: int = 5,  # จำนวนรายการต่อหน้า (default = 5)
 ) -> UserList:
@@ -108,7 +108,7 @@ async def get_all_users(
 
     # สร้าง Response พร้อมข้อมูล Pagination
     return UserList(
-        users=[User.from_orm(user) for user in users],
+        users=[UserRead.from_orm(user) for user in users],
         total=total_users,
         page=page,
         size=size,
@@ -118,8 +118,8 @@ async def get_all_users(
 
 @router.get("/me")
 def get_me(
-    current_user: User = Depends(deps.get_current_active_user)  # ตรวจสอบ user.status == "active"
-) -> User:
+    current_user: UserRead = Depends(deps.get_current_active_user)  # ตรวจสอบ user.status == "active"
+) -> UserRead:
     return current_user
 
 
@@ -127,8 +127,8 @@ def get_me(
 async def get(
     target_user_id: int,
     session: Annotated[AsyncSession, Depends(models.get_session)],
-    current_user: Annotated[User, Depends(deps.get_current_active_user)],  # ตรวจสอบ user.status == "active"
-) -> User:
+    current_user: Annotated[UserRead, Depends(deps.get_current_active_user)],  # ตรวจสอบ user.status == "active"
+) -> UserRead:
 
     user = await session.get(DBUser, target_user_id)
     
@@ -146,7 +146,7 @@ async def get(
 async def change_password(
     password_update: ChangedPassword,
     session: Annotated[AsyncSession, Depends(models.get_session)],
-    current_user: User = Depends(deps.get_current_active_user), # ตรวจสอบ user.status == "active"
+    current_user: UserRead = Depends(deps.get_current_active_user), # ตรวจสอบ user.status == "active"
 ) -> dict:
 
     # ตรวจสอบว่ารหัสผ่านใหม่เหมือนกับรหัสผ่านเดิมไหม
@@ -180,7 +180,7 @@ async def change_password_for_others(
     target_user_id: int,
     password_update: ChangedPasswordOther,
     session: Annotated[AsyncSession, Depends(models.get_session)],
-    current_user: User = Depends(deps.get_current_active_superuser), # ตรวจสอบว่าเป็น SuperAdmin
+    current_user: UserRead = Depends(deps.get_current_active_superuser), # ตรวจสอบว่าเป็น SuperAdmin
 ) -> dict:
 
     # ตรวจสอบว่ารหัสผ่านใหม่และยืนยันรหัสผ่านตรงกันหรือไม่
@@ -214,8 +214,8 @@ async def update(
     target_user_id: int,
     session: Annotated[AsyncSession, Depends(models.get_session)],
     user_update: UpdatedUser,
-    current_user: User = Depends(deps.get_current_active_superuser), # ตรวจสอบว่าเป็น SuperAdmin
-) -> User:
+    current_user: UserRead = Depends(deps.get_current_active_superuser), # ตรวจสอบว่าเป็น SuperAdmin
+) -> UserRead:
     
     # ดึงข้อมูลผู้ใช้ที่ต้องการอัปเดต
     db_user = await session.get(DBUser, target_user_id)
@@ -262,4 +262,4 @@ async def update(
     await session.commit()
     await session.refresh(db_user)
 
-    return User.from_orm(db_user)
+    return UserRead.from_orm(db_user)
