@@ -1,11 +1,11 @@
-from typing_extensions import Annotated
 from fastapi import APIRouter, HTTPException, Depends
 from sqlmodel import select
+from typing import Annotated
 from sqlmodel.ext.asyncio.session import AsyncSession
 
+from notebook.models.daily_average import *
 from notebook.deps import *
 from notebook.models import get_session
-from notebook.models.daily_average import *
 
 router = APIRouter(prefix="/avg", tags=["avg"])
 
@@ -13,14 +13,14 @@ router = APIRouter(prefix="/avg", tags=["avg"])
 async def get_daily_averages(
     api_key: str,
     session: Annotated[AsyncSession, Depends(get_session)],
-) -> list[dict]:
+) -> list[DailyAverageRead]:
     result = await session.exec(
-        select(DailyAverage).where(DailyAverage.api_key == api_key)
+        select(DBDailyAverage).where(DBDailyAverage.api_key == api_key)
     )
     daily_averages = result.all()
 
     if not daily_averages:
-        raise HTTPException(status_code=404, detail="No daily averages found.")
+        raise HTTPException(status_code=404, detail=f"No daily averages found for API Key: {api_key}.")
 
     # จัดข้อมูลในรูปแบบที่เหมาะกับ Recharts (รูปเเบบ Line Chart)
     return [

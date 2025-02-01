@@ -1,24 +1,17 @@
-from typing import Annotated
-
-from sqlalchemy import func
-from sqlalchemy.exc import IntegrityError
-
 from fastapi import APIRouter, HTTPException, Depends
-
 from sqlmodel import select
+from typing import Annotated
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from notebook.models.daily_average import DailyAverage
-from notebook.models.showdetect import Show
-from notebook.models.detect import DBDetect
-from notebook.models.score import DBScore
-from notebook import deps
-from notebook.models import get_session
+from notebook.models.daily_average import *
+from notebook.models.showdetect import *
+from notebook.models.detect import *
+from notebook.models.score import *
 from notebook.models.device import *
 from notebook.models.users import *
 from notebook.deps import *
 
-import math
+from notebook.models import get_session
 
 router = APIRouter(prefix="/devices", tags=["devices"])
 
@@ -32,8 +25,8 @@ SIZE_PER_PAGE = 50
 async def create_device(
     device: CreatedDevice,
     session: Annotated[AsyncSession, Depends(get_session)],
-    current_user: Annotated[UserRead, Depends(get_current_active_user)],  # ตรวจสอบ user.status == "active"
-) -> DeviceRead | None:
+    current_user: Annotated[UserRead, Depends(get_current_active_user)],  
+) -> DeviceRead:
     # ตรวจสอบว่า device_name มีอยู่แล้วในระบบหรือไม่
     existing_device = await session.exec(select(DBDevice).where(DBDevice.device_name == device.device_name))
     if existing_device.one_or_none():
@@ -42,7 +35,7 @@ async def create_device(
         )
 
     # เพิ่มข้อมูลผู้ใช้ในอุปกรณ์
-    data = device.dict()
+    data = device.model_dump()
     data['user_id'] = current_user.id
 
     dbdevice = DBDevice(**data)
@@ -50,13 +43,13 @@ async def create_device(
     await session.commit()
     await session.refresh(dbdevice)
 
-    return DeviceRead.from_orm(dbdevice)
+    return DeviceRead.model_validate(dbdevice)
 
 
 @router.get("/all")
 async def read_devices(
     session: Annotated[AsyncSession, Depends(get_session)],
-    current_user: Annotated[UserRead, Depends(deps.get_current_active_user)],
+    current_user: Annotated[UserRead, Depends(get_current_active_user)],
     page: int = 1,  # หน้าปัจจุบัน (default = 1)
     size: int = 5,  # จำนวนรายการต่อหน้า (default = 5)
 ) -> DeviceList:
@@ -82,7 +75,7 @@ async def read_devices(
 
     # สร้าง Response พร้อมข้อมูล Pagination
     return DeviceList(
-        devices=[DeviceRead.from_orm(dev) for dev in dbdevices],
+        devices=[DeviceRead.model_validate(dev) for dev in dbdevices],
         total=total_devices,
         page=page,
         size=size,
@@ -94,7 +87,7 @@ async def read_devices(
 async def read_device_by_api_key(
     api_key: str,
     session: Annotated[AsyncSession, Depends(get_session)],
-    current_user: Annotated[UserRead, Depends(deps.get_current_active_user)],
+    current_user: Annotated[UserRead, Depends(get_current_active_user)],
 ) -> DeviceRead:
 
     result = await session.exec(select(DBDevice).where(DBDevice.api_key == api_key))
@@ -103,7 +96,7 @@ async def read_device_by_api_key(
     if not dbdevice:
         raise HTTPException(status_code=404, detail=f"No device found for API Key: {api_key}.")
 
-    return DeviceRead.from_orm(dbdevice)
+    return DeviceRead.model_validate(dbdevice)
 
 
 @router.put("/update/{api_key}")
@@ -111,7 +104,7 @@ async def update_device_by_api_key(
     api_key: str,
     device: UpdatedDevice,
     session: Annotated[AsyncSession, Depends(get_session)],
-    current_user: Annotated[UserRead, Depends(get_current_active_user)],  # ตรวจสอบ user.status == "active"
+    current_user: Annotated[UserRead, Depends(get_current_active_user)],  
 ) -> DeviceRead:
     result = await session.exec(select(DBDevice).where(DBDevice.api_key == api_key))
     dbdevice = result.one_or_none()
@@ -136,7 +129,7 @@ async def update_device_by_api_key(
     await session.commit()
     await session.refresh(dbdevice)
 
-    return DeviceRead.from_orm(dbdevice)
+    return DeviceRead.model_validate(dbdevice)
 
 
 @router.put("/update_time/{api_key}")
@@ -144,7 +137,7 @@ async def update_device_time(
     api_key: str,
     device: DeviceTimeUpdate,  
     session: Annotated[AsyncSession, Depends(get_session)],
-    current_user: Annotated[UserRead, Depends(get_current_active_user)],  # ตรวจสอบ user.status == "active"
+    current_user: Annotated[UserRead, Depends(get_current_active_user)], 
 ) -> DeviceRead:
     result = await session.exec(select(DBDevice).where(DBDevice.api_key == api_key))
     dbdevice = result.one_or_none()
@@ -158,7 +151,7 @@ async def update_device_time(
     await session.commit()
     await session.refresh(dbdevice)
 
-    return DeviceRead.from_orm(dbdevice)
+    return DeviceRead.model_validate(dbdevice)
 
 
 # สำหรับ ESP32
@@ -181,7 +174,7 @@ async def get_device_settime(
 async def get_timestamps_by_api_key(
     api_key: str,
     session: Annotated[AsyncSession, Depends(get_session)],
-    current_user: Annotated[UserRead, Depends(get_current_active_user)],  # ตรวจสอบ user.status == "active"
+    current_user: Annotated[UserRead, Depends(get_current_active_user)],  
 ) -> list[str]:
     # ดึงข้อมูล timestamp ตาม API Key
     result = await session.exec(select(DBScore.timestamp).where(DBScore.api_key == api_key))
@@ -203,7 +196,7 @@ async def get_timestamps_by_api_key(
 async def delete_device_by_api_key(
     api_key: str,
     session: Annotated[AsyncSession, Depends(get_session)],
-    current_user: Annotated[UserRead, Depends(get_current_active_user)],  # ตรวจสอบ user.status == "active"
+    current_user: Annotated[UserRead, Depends(get_current_active_user)],  
 ):
     # ตรวจสอบว่าอุปกรณ์มีอยู่หรือไม่
     result = await session.exec(select(DBDevice).where(DBDevice.api_key == api_key))
@@ -213,13 +206,13 @@ async def delete_device_by_api_key(
         raise HTTPException(status_code=404, detail="Device not found.")
 
     # ลบข้อมูลในตาราง showdetect
-    showdetect_result = await session.exec(select(Show).where(Show.api_key == api_key))
+    showdetect_result = await session.exec(select(DBShow).where(DBShow.api_key == api_key))
     showdetects = showdetect_result.all()
     for show in showdetects:
         await session.delete(show)
 
     # ลบข้อมูลในตาราง daily_averages
-    daily_avg_result = await session.exec(select(DailyAverage).where(DailyAverage.api_key == api_key))
+    daily_avg_result = await session.exec(select(DBDailyAverage).where(DBDailyAverage.api_key == api_key))
     daily_averages = daily_avg_result.all()
     for daily_avg in daily_averages:
         await session.delete(daily_avg)
@@ -248,11 +241,11 @@ async def delete_data_by_month(
     api_key: str,
     months_to_delete: int,
     session: Annotated[AsyncSession, Depends(get_session)],
-    current_user: Annotated[UserRead, Depends(get_current_active_user)],  # ตรวจสอบ user.status == "active"
+    current_user: Annotated[UserRead, Depends(get_current_active_user)],  
 ):
     # ดึงข้อมูล daily_average ตาม API Key และจัดเรียงตามวันที่
     daily_avg_result = await session.exec(
-        select(DailyAverage).where(DailyAverage.api_key == api_key).order_by(DailyAverage.date.asc())
+        select(DBDailyAverage).where(DBDailyAverage.api_key == api_key).order_by(DBDailyAverage.date.asc())
     )
     daily_averages = daily_avg_result.all()
 

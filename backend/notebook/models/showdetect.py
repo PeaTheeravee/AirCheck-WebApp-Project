@@ -1,16 +1,32 @@
-from datetime import datetime
+from pydantic import BaseModel, ConfigDict
 from sqlmodel import SQLModel, Field
+from datetime import datetime
 
 
-class Show(SQLModel, table=True):
+class ShowRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    api_key: str  
+    pm2_5: float
+    pm10: float
+    co2: float
+    tvoc: float
+    humidity: float
+    temperature: float
+    timestamp: datetime
+
+
+class DBShow(SQLModel, table=True):
     __tablename__ = "showdetects"
 
-    id: int = Field(default=None, primary_key=True)
-    api_key: str = Field(index=True)  # ใช้ API Key อ้างอิงอุปกรณ์
-    pm2_5: float | None = 0
-    pm10: float | None = 0
-    co2: float | None = 0
-    tvoc: float | None = 0
-    humidity: float | None = 0
-    temperature: float | None = 0
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    id: int = Field(primary_key=True)
+    api_key: str = Field(index=True)  
+
+    pm2_5: float
+    pm10: float
+    co2: float
+    tvoc: float
+    humidity: float
+    temperature: float
+    timestamp: datetime

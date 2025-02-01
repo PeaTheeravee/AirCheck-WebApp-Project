@@ -1,17 +1,19 @@
-from typing import Annotated
-from datetime import date, datetime, timedelta
 from fastapi import APIRouter, HTTPException, Depends
-from sqlalchemy import delete
 from sqlmodel import select, func
+from typing import Annotated
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from notebook.models.daily_average import DailyAverage
-from notebook.models import get_session
+from datetime import date, datetime
+from sqlalchemy import delete
+
+from notebook.models.daily_average import *
 from notebook.models.device import *
 from notebook.models.detect import *
 from notebook.models.score import *
 from notebook.models.showdetect import *
 from notebook.deps import *
+
+from notebook.models import get_session
 
 router = APIRouter(prefix="/detects", tags=["detects"])
 
@@ -96,9 +98,9 @@ async def update_daily_average(
 
     # ตรวจสอบว่ามีข้อมูลในตาราง daily_averages สำหรับ API Key และวันที่นี้หรือไม่
     existing_daily_average = await session.exec(
-        select(DailyAverage)
-        .where(DailyAverage.api_key == api_key)
-        .where(DailyAverage.date == specific_date)
+        select(DBDailyAverage)
+        .where(DBDailyAverage.api_key == api_key)
+        .where(DBDailyAverage.date == specific_date)
     )
     daily_average = existing_daily_average.one_or_none()
 
@@ -111,9 +113,12 @@ async def update_daily_average(
         daily_average.avg_humidity = rounded_averages["avg_humidity"]
         daily_average.avg_temperature = rounded_averages["avg_temperature"]
         session.add(daily_average)
+        await session.commit()
+        await session.refresh(daily_average)  
+
     else:
         # หากยังไม่มีข้อมูล ทำการเพิ่มใหม่
-        new_daily_average = DailyAverage(
+        new_daily_average = DBDailyAverage(
             api_key=api_key,
             date=specific_date,
             avg_pm2_5=rounded_averages["avg_pm2_5"],
@@ -124,15 +129,15 @@ async def update_daily_average(
             avg_temperature=rounded_averages["avg_temperature"],
         )
         session.add(new_daily_average)
-
-    await session.commit()
+        await session.commit()
+        await session.refresh(new_daily_average)  
 
 
 @router.post("/create")
 async def create_detect(
-    detect: CreatedDetect,
+    detect: CreateDetect,
     session: Annotated[AsyncSession, Depends(get_session)],
-) -> Detect | None:
+) -> DetectRead:
 
     # คำนวณวันที่ปัจจุบัน
     today = datetime.utcnow().date()
@@ -149,13 +154,13 @@ async def create_detect(
         raise HTTPException(status_code=400, detail="Invalid API Key. Please add devices first.")
 
     # หากพบ API Key ในระบบ ให้สร้าง detect ใหม่
-    dbdata = DBDetect(**detect.dict())
+    dbdata = DBDetect(**detect.model_dump())
     session.add(dbdata)
     await session.commit()
-    await session.refresh(dbdata)
+    await session.refresh(dbdata)  
 
     # บันทึกข้อมูลที่วัดได้ลงในตาราง Showdetect
-    existing_show = await session.exec(select(Show).where(Show.api_key == detect.api_key))
+    existing_show = await session.exec(select(DBShow).where(DBShow.api_key == detect.api_key))
     show = existing_show.one_or_none()
 
     if show:
@@ -168,9 +173,12 @@ async def create_detect(
         show.temperature = detect.temperature
         show.timestamp = detect.timestamp
         session.add(show)
+        await session.commit()
+        await session.refresh(show)  
+
     else:
         # หากยังไม่มีข้อมูล ทำการเพิ่มใหม่
-        new_Show = Show(
+        new_show = DBShow(
             api_key=detect.api_key,
             pm2_5=detect.pm2_5,
             pm10=detect.pm10,
@@ -180,10 +188,9 @@ async def create_detect(
             temperature=detect.temperature,
             timestamp=detect.timestamp,
         )
-        session.add(new_Show)
-
-    await session.commit()
-
+        session.add(new_show)
+        await session.commit()
+        await session.refresh(new_show)  
 
     # คำนวณระดับคุณภาพ
     pm2_5_quality, pm2_5_fix = get_quality_level(dbdata.pm2_5, "PM2.5")
@@ -213,6 +220,9 @@ async def create_detect(
         score.temperature_quality_level = temperature_quality
         score.temperature_fix = temperature_fix
         session.add(score)
+        await session.commit()
+        await session.refresh(score)  
+
     else:
         # หากยังไม่มีข้อมูล ทำการเพิ่มใหม่
         new_score = DBScore(
@@ -232,26 +242,27 @@ async def create_detect(
             temperature_fix=temperature_fix,
         )
         session.add(new_score)
-
-    await session.commit()
+        await session.commit()
+        await session.refresh(new_score)  
 
     # อัปเดตค่าเฉลี่ยรายวัน
     specific_date = dbdata.timestamp.date()  # ดึงวันที่จาก timestamp
     await update_daily_average(session, detect.api_key, specific_date)
 
-    return Detect.from_orm(dbdata)
+    return DetectRead.model_validate(dbdata)
 
 
 @router.get("/{api_key}")
 async def get_detects_by_api_key(
     api_key: str,
     session: Annotated[AsyncSession, Depends(get_session)],
-) -> list[Detect]:
+) -> DetectRead:  
 
+    # ค้นหาข้อมูลล่าสุดจาก DBDetect ตาม API Key
     result = await session.exec(select(DBDetect).where(DBDetect.api_key == api_key))
-    detect = result.all()
+    detect = result.one_or_none()  
 
     if not detect:
         raise HTTPException(status_code=404, detail=f"No detection data found for API Key: {api_key}.")
 
-    return [Detect.from_orm(det) for det in detect]
+    return DetectRead.model_validate(detect)

@@ -1,13 +1,10 @@
-#import logging
-#logger = logging.getLogger(__name__)
-from fastapi import Form, Response, Request
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Form, Response, Request
 from sqlmodel import select
 from typing import Annotated
-from fastapi.responses import JSONResponse
+from sqlmodel.ext.asyncio.session import AsyncSession
 
 from notebook.models.users import *
-from .. import models
+from notebook.models import get_session
 
 router = APIRouter(tags=["authentication"])
 
@@ -15,7 +12,7 @@ router = APIRouter(tags=["authentication"])
 async def login(
     username: Annotated[str, Form()],
     password: Annotated[str, Form()],
-    session: Annotated[models.AsyncSession, Depends(models.get_session)],
+    session: Annotated[AsyncSession, Depends(get_session)],
     response: Response  # เพิ่ม response เพื่อจัดการคุกกี้
 ) -> dict:
     # ตรวจสอบ username และ password
@@ -44,7 +41,7 @@ async def login(
 @router.post("/logout")
 async def logout(
     request: Request,  # ใช้ Request เพื่อดึงคุกกี้
-    session: Annotated[models.AsyncSession, Depends(models.get_session)],
+    session: Annotated[AsyncSession, Depends(get_session)],
     response: Response  # เพิ่ม response เพื่อจัดการคุกกี้
 ):
     # ดึง user_id จากคุกกี้

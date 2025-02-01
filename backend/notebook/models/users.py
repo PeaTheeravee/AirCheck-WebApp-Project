@@ -1,4 +1,4 @@
-from typing import List, Optional, TYPE_CHECKING
+from typing import List, TYPE_CHECKING
 from pydantic import BaseModel, ConfigDict
 from sqlmodel import SQLModel, Field, Relationship
 from passlib.context import CryptContext
@@ -36,15 +36,15 @@ class ChangedPasswordOther(BaseModel):
     confirm_new_password: str
 
 class UpdatedUser(BaseModel):
-    username: Optional[str] = None  
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
+    username: str
+    first_name: str
+    last_name: str
 
 
 class DBUser(SQLModel, table=True):
     __tablename__ = "users"
     
-    id: int = Field(default=None, primary_key=True)  
+    id: int = Field(primary_key=True)  
 
     username: str = Field(unique=True, index=True)
     first_name: str

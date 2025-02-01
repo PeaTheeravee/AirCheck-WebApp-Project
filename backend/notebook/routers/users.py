@@ -1,19 +1,19 @@
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
-from sqlmodel.ext.asyncio.session import AsyncSession
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import select
 from typing import Annotated
+from sqlmodel.ext.asyncio.session import AsyncSession
+
 from notebook.models.users import *
-from .. import deps
-from .. import models
+from notebook.deps import *
+from notebook.models import get_session
 
 router = APIRouter(prefix="/users", tags=["users"])
-
 
 @router.post("/create")
 async def create(
     user_create: CreatedUser,
-    session: Annotated[AsyncSession, Depends(models.get_session)],
-    current_user: Annotated[UserRead, Depends(deps.get_current_active_superuser)], # ตรวจสอบว่าเป็น SuperAdmin
+    session: Annotated[AsyncSession, Depends(get_session)],
+    current_user: Annotated[UserRead, Depends(get_current_active_superuser)],
 ) -> UserRead:
 
     # ตรวจสอบว่ามี username ซ้ำหรือไม่
@@ -53,14 +53,14 @@ async def create(
     await session.commit()
     await session.refresh(user)
 
-    return UserRead.from_orm(user)
+    return UserRead.model_validate(user)
 
 
 @router.delete("/{target_user_id}")
 async def delete_user(
     target_user_id: int,
-    session: Annotated[AsyncSession, Depends(models.get_session)],
-    current_user: Annotated[UserRead, Depends(deps.get_current_active_superuser)], # ตรวจสอบว่าเป็น SuperAdmin
+    session: Annotated[AsyncSession, Depends(get_session)],
+    current_user: Annotated[UserRead, Depends(get_current_active_superuser)],
 ):
     user = await session.get(DBUser, target_user_id)
 
@@ -81,8 +81,8 @@ async def delete_user(
 
 @router.get("/all")
 async def get_all_users(
-    session: Annotated[AsyncSession, Depends(models.get_session)],
-    current_user: Annotated[UserRead, Depends(deps.get_current_active_superuser)],  # ตรวจสอบว่าเป็น SuperAdmin
+    session: Annotated[AsyncSession, Depends(get_session)],
+    current_user: Annotated[UserRead, Depends(get_current_active_superuser)], 
     page: int = 1,  # หน้าปัจจุบัน (default = 1)
     size: int = 5,  # จำนวนรายการต่อหน้า (default = 5)
 ) -> UserList:
@@ -108,7 +108,7 @@ async def get_all_users(
 
     # สร้าง Response พร้อมข้อมูล Pagination
     return UserList(
-        users=[UserRead.from_orm(user) for user in users],
+        users=[UserRead.model_validate(user) for user in users],
         total=total_users,
         page=page,
         size=size,
@@ -118,7 +118,7 @@ async def get_all_users(
 
 @router.get("/me")
 def get_me(
-    current_user: UserRead = Depends(deps.get_current_active_user)  # ตรวจสอบ user.status == "active"
+    current_user: UserRead = Depends(get_current_active_user)  
 ) -> UserRead:
     return current_user
 
@@ -126,8 +126,8 @@ def get_me(
 @router.get("/{user_id}")
 async def get(
     target_user_id: int,
-    session: Annotated[AsyncSession, Depends(models.get_session)],
-    current_user: Annotated[UserRead, Depends(deps.get_current_active_user)],  # ตรวจสอบ user.status == "active"
+    session: Annotated[AsyncSession, Depends(get_session)],
+    current_user: Annotated[UserRead, Depends(get_current_active_user)], 
 ) -> UserRead:
 
     user = await session.get(DBUser, target_user_id)
@@ -145,8 +145,8 @@ async def get(
 @router.put("/change_password")
 async def change_password(
     password_update: ChangedPassword,
-    session: Annotated[AsyncSession, Depends(models.get_session)],
-    current_user: UserRead = Depends(deps.get_current_active_user), # ตรวจสอบ user.status == "active"
+    session: Annotated[AsyncSession, Depends(get_session)],
+    current_user: Annotated[UserRead, Depends(get_current_active_user)],
 ) -> dict:
 
     # ตรวจสอบว่ารหัสผ่านใหม่เหมือนกับรหัสผ่านเดิมไหม
@@ -179,8 +179,8 @@ async def change_password(
 async def change_password_for_others(
     target_user_id: int,
     password_update: ChangedPasswordOther,
-    session: Annotated[AsyncSession, Depends(models.get_session)],
-    current_user: UserRead = Depends(deps.get_current_active_superuser), # ตรวจสอบว่าเป็น SuperAdmin
+    session: Annotated[AsyncSession, Depends(get_session)],
+    current_user: Annotated[UserRead, Depends(get_current_active_superuser)],
 ) -> dict:
 
     # ตรวจสอบว่ารหัสผ่านใหม่และยืนยันรหัสผ่านตรงกันหรือไม่
@@ -212,9 +212,9 @@ async def change_password_for_others(
 @router.put("/{target_user_id}/update")
 async def update(
     target_user_id: int,
-    session: Annotated[AsyncSession, Depends(models.get_session)],
     user_update: UpdatedUser,
-    current_user: UserRead = Depends(deps.get_current_active_superuser), # ตรวจสอบว่าเป็น SuperAdmin
+    session: Annotated[AsyncSession, Depends(get_session)],
+    current_user: Annotated[UserRead, Depends(get_current_active_superuser)], 
 ) -> UserRead:
     
     # ดึงข้อมูลผู้ใช้ที่ต้องการอัปเดต
@@ -253,8 +253,8 @@ async def update(
                 detail="A user with the same last_name already exists.",
             )
 
-    # อัปเดตข้อมูลที่ส่งมา
-    user_data = user_update.dict(exclude_unset=True)
+    # อัปเดตข้อมูลที่ส่งมา 
+    user_data = user_update.model_dump(exclude_unset=True)
     for key, value in user_data.items():
         setattr(db_user, key, value)
 
@@ -262,4 +262,4 @@ async def update(
     await session.commit()
     await session.refresh(db_user)
 
-    return UserRead.from_orm(db_user)
+    return UserRead.model_validate(db_user)

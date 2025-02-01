@@ -9,6 +9,7 @@ if TYPE_CHECKING:
 
 class DeviceRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
+
     id: int
     api_key: str  
     device_name: str  # ชื่ออุปกรณ์
@@ -23,8 +24,8 @@ class CreatedDevice(BaseModel):
 
 
 class UpdatedDevice(BaseModel):
-    device_name: Optional[str] = None  
-    location: Optional[str] = None  
+    device_name: str  
+    location: str
 
 
 class DeviceStatusUpdate(BaseModel):
@@ -38,7 +39,7 @@ class DeviceTimeUpdate(BaseModel):
 class DBDevice(SQLModel, table=True):
     __tablename__ = "devices"
 
-    id: int = Field(default=None, primary_key=True)
+    id: int = Field(primary_key=True)
     api_key: str = Field(default_factory=lambda: secrets.token_hex(16), unique=True)  # สร้าง API Key อัตโนมัติ
 
     device_name: str

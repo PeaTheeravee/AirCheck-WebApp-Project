@@ -1,12 +1,10 @@
-from typing import Annotated
-
 from fastapi import WebSocket, WebSocketDisconnect, APIRouter, Depends
-
 from sqlmodel import select
+from typing import Annotated
 from sqlmodel.ext.asyncio.session import AsyncSession
 
+from notebook.models.device import *
 from notebook.models import get_session
-from notebook.models.device import DBDevice
 
 router = APIRouter(prefix="/ws", tags=["websocket"])
 
