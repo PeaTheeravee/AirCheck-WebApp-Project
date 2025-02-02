@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  backend:
+    build: .
+    container_name: notebook-backend
+    user: root
+    ports:
+      - "8000:8000"
+    cap_add:
+      - SYS_PTRACE
+    privileged: true
+    environment:
+      - SQLDB_URL=postgresql+asyncpg://postgres:123456@postgres:5432/aroiwadb
+    depends_on:
+      - postgres
+    volumes:
+      - .:/app
+    command: poetry run uvicorn "notebook.main:create_app" --host 0.0.0.0 --port 8000 --reload
+
+  postgres:
+    image: postgres:16
+    container_name: D2-server
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: aroiwadb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: D2-PGadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: 6410110238@psu.ac.th
+      PGADMIN_DEFAULT_PASSWORD: 147896325
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+volumes:
+  postgres_data:
+  pgadmin_data:
