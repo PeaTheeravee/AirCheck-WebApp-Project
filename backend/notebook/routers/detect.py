@@ -139,10 +139,10 @@ async def create_detect(
     session: Annotated[AsyncSession, Depends(get_session)],
 ) -> DetectRead:
 
-    # คำนวณวันที่ปัจจุบัน
-    today = datetime.utcnow().date()
+    # คำนวณวันที่ปัจจุบัน 
+    today = datetime.now().date()
 
-    # ลบข้อมูล detect ที่ "น้อยกว่าวันนี้" (ลบทุกอย่างที่ไม่ใช่ของวันปัจจุบัน)
+    # ลบข้อมูล detect ที่มีวันที่น้อยกว่าวันปัจจุบัน
     delete_stmt = delete(DBDetect).where(func.date(DBDetect.timestamp) < today)
     await session.execute(delete_stmt)
     await session.commit()
