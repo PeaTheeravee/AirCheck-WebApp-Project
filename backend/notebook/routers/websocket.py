@@ -2,6 +2,7 @@ from fastapi import WebSocket, WebSocketDisconnect, APIRouter, Depends
 from sqlmodel import select
 from typing import Annotated
 from sqlmodel.ext.asyncio.session import AsyncSession
+from starlette.websockets import WebSocketState  
 
 from notebook.models.device import *
 from notebook.models import get_session
@@ -33,19 +34,18 @@ async def websocket_devices(
             await session.commit()
             print(f"✅ Device {api_key} status updated to 'online'.")
 
-        # รอรับข้อความจนกว่าการเชื่อมต่อจะถูกตัด
-        while True:
-            data = await websocket.receive_text()
-            print(f"📩 Received from {api_key}: {data}")
-
-    except WebSocketDisconnect:
-        print(f"✅ Device {api_key} disconnected.")
+        # WebSocket Disconnect 
+        while websocket.client_state == WebSocketState.CONNECTED:  # เช็คก่อนรับข้อมูล
+            try:
+                await websocket.receive()  # รอการตัดการเชื่อมต่อจาก ESP32
+            except WebSocketDisconnect:
+                break  # ออกจากลูปทันทีเมื่อ WebSocket ตัดการเชื่อมต่อ
 
     finally:
+        print(f"✅ Device Disconnected: {api_key}")
         # ตรวจสอบว่ามี WebSocket นี้อยู่ใน connected_devices หรือไม่
-        if websocket in connected_devices:
-            disconnected_api_key = connected_devices[websocket]
-            del connected_devices[websocket]  # ใช้ del เพื่อหลีกเลี่ยง KeyError
+        if websocket in connected_devices:  
+            disconnected_api_key = connected_devices.pop(websocket)  
 
             # อัปเดตสถานะเป็น 'offline'
             result = await session.exec(select(DBDevice).where(DBDevice.api_key == disconnected_api_key))
@@ -55,9 +55,3 @@ async def websocket_devices(
                 session.add(device)
                 await session.commit()
                 print(f"✅ Device {disconnected_api_key} status updated to 'offline'.")
-
-        # ตรวจสอบว่า WebSocket ยังเปิดอยู่ก่อนปิด
-        try:
-            await websocket.close()
-        except RuntimeError:
-            print("⚠️ WebSocket already closed, skipping `websocket.close()`")
