@@ -3,7 +3,6 @@ from sqlmodel import SQLModel, Field
 from datetime import date
 
 
-
 class DailyAverageRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
