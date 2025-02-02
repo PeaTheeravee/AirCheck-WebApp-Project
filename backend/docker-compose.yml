@@ -11,12 +11,12 @@ services:
       - SYS_PTRACE
     privileged: true
     environment:
-      - SQLDB_URL=postgresql+asyncpg://postgres:123456@postgres:5432/aroiwadb
+      - SQLDB_URL=postgresql+asyncpg://postgres:123456@localhost/air
     depends_on:
       - postgres
     volumes:
       - .:/app
-    command: poetry run uvicorn "notebook.main:create_app" --host 0.0.0.0 --port 8000 --reload
+    command: poetry run uvicorn "notebook.main:create_app" --factory --reload --host 0.0.0.0 --port 8000
 
   postgres:
     image: postgres:16
@@ -24,7 +24,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 123456
-      POSTGRES_DB: aroiwadb
+      POSTGRES_DB: air
     ports:
       - "5432:5432"
     volumes:
