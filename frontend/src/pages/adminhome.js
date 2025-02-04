@@ -29,6 +29,8 @@ const AdminHome = () => {
 
     const [userData, setUserData] = useState(null);
     const [users, setUsers] = useState([]);
+    const [devices, setDevices] = useState([]);
+
     const [targetUserId, setTargetUserId] = useState(null); // เก็บ userId ใน state
     const [targetUserName, setTargetUserName] = useState(""); // แสดงชื่อ ใน Pop-Up
 
@@ -49,14 +51,22 @@ const AdminHome = () => {
     const [isChangeSomeonePasswordDialogOpen, setIsChangeSomeonePasswordDialogOpen] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-    //สำหรับ ตาราง + Pagination
+    //สำหรับ ตารางผู้ใช้
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(0);
     const [pageSize, setPageSize] = useState(5);
     const [totalUsers, setTotalUsers] = useState(0);
     const [loading, setLoading] = useState(false);
 
+    //สำหรับ ตารางอุปกรณ์
+    const [deviceSearchTerm, setDeviceSearchTerm] = useState("");
+    const [devicePage, setDevicePage] = useState(0);
+    const [deviceSize, setDeviceSize] = useState(5);
+    const [totalDevices, setTotalDevices] = useState(0);
+    const [deviceLoading, setDeviceLoading] = useState(false);
+
     //------------------------------------------------------------------------------------------------
+
     const toggleUserDetailsDialog = () => setIsUserDetailsDialogOpen(!isUserDetailsDialogOpen);
     const toggleChangePasswordYourselfDialog = () => {
         setShowPassword({ current: false, new: false }); // รีเซ็ตให้เป็นซ่อนรหัสเสมอ
@@ -95,6 +105,7 @@ const AdminHome = () => {
     };
 
     //================================================================================================
+
     // ดึงข้อมูลผู้ใช้ที่ล็อกอินอยู่
     const fetchUserData = async () => {
         try {
@@ -356,24 +367,65 @@ const AdminHome = () => {
         }
     }, [currentPage, pageSize]); // เพิ่ม dependencies
 
+    const fetchDevices = useCallback(async () => {
+        setDeviceLoading(true);
+        try {
+            const response = await fetch(`http://localhost:8000/devices/all?page=${devicePage + 1}&size=${deviceSize}`, {
+                method: "GET",
+                credentials: "include",
+            });
+    
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || "Failed to fetch devices.");
+            }
+    
+            const data = await response.json();
+            setDevices(data.devices);
+            setTotalDevices(data.total);
+        } catch (err) {
+            console.error("Error fetching devices:", err.message);
+        } finally {
+            setDeviceLoading(false);
+        }
+    }, [devicePage, deviceSize]);
+    
+
     // ฟังก์ชันสำหรับเปลี่ยนหน้า
+    // สำหรับ ตารางผู้ใช้
     const handlePageChange = (event, newPage) => {
         setCurrentPage(newPage);
     };
+    // สำหรับ ตารางอุปกรณ์
+    const handleDevicePageChange = (event, newPage) => {
+        setDevicePage(newPage);
+    };
 
     // ฟังก์ชันสำหรับเปลี่ยนจำนวนรายการต่อหน้า
+    // สำหรับ ตารางผู้ใช้
     const handleRowsPerPageChange = (event) => {
         setPageSize(parseInt(event.target.value, 10));
         setCurrentPage(0); // รีเซ็ตหน้า
     };
+    // สำหรับ ตารางอุปกรณ์
+    const handleDeviceRowsPerPageChange = (event) => {
+        setDeviceSize(parseInt(event.target.value, 10));
+        setDevicePage(0);
+    };
 
     // ฟังก์ชันค้นหา
+    // สำหรับ ตารางผู้ใช้
     const handleSearch = (event) => {
         setSearchTerm(event.target.value);
         setCurrentPage(0); // รีเซ็ตหน้าเมื่อมีการค้นหา
     };
+    // สำหรับ ตารางอุปกรณ์
+    const handleDeviceSearch = (event) => {
+        setDeviceSearchTerm(event.target.value);
+        setDevicePage(0);
+    };
 
-    // กรองข้อมูลในตารางโดยใช้ searchTerm
+    // กรองข้อมูลในตารางผู้ใช้โดยใช้ searchTerm
     const filteredUsers = users.filter((user) => {
         // ตรวจสอบว่า searchTerm ไม่ว่าง และมีการ trim ค่า searchTerm
         const term = searchTerm.trim().toLowerCase();
@@ -386,14 +438,32 @@ const AdminHome = () => {
             user.last_name.toLowerCase().includes(term)
         );
     });
+
+    // กรองข้อมูลในตารางอุปกรณ์โดยใช้ searchTerm
+    const filteredDevices = devices.filter((device) => {
+        // ตรวจสอบว่า searchTerm ไม่ว่าง และมีการ trim ค่า searchTerm
+        const term = deviceSearchTerm.trim().toLowerCase();
+        if (term === "") {
+            return true; // ถ้า searchTerm ว่าง แสดงอุปกรณ์ทั้งหมด
+        }
+        return(
+            device.device_name.toLowerCase().includes(term) || 
+            device.location.toLowerCase().includes(term)
+        );
+    });
+
+    //------------------------------------------------------------------------------------------------
     
-    // ดึงข้อมูลเมื่อมีการเปลี่ยนแปลงของ pagination หรือ searchTerm
+    // ดึงข้อมูลผู้ใช้ทั้งหมด
     useEffect(() => {
         fetchUserAll();
     }, [fetchUserAll]);
 
+    // ดึงข้อมูลอุปกรณ์ทั้งหมด
+    useEffect(() => {
+        fetchDevices();
+    }, [fetchDevices]);
 
-    //------------------------------------------------------------------------------------------------
     // ใช้ useEffect ดึงข้อมูลผู้ใช้เมื่อเปิด Dialog
     useEffect(() => {
         if (isDialogOpen) {
@@ -523,7 +593,70 @@ const AdminHome = () => {
                     onPageChange={handlePageChange}
                     onRowsPerPageChange={handleRowsPerPageChange}
                 />
+
+
+                <h2>Device Management</h2>
+                <TextField
+                    label="Search Devices"
+                    variant="outlined"
+                    fullWidth
+                    margin="normal"
+                    value={deviceSearchTerm}
+                    onChange={handleDeviceSearch}
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <SearchIcon />
+                            </InputAdornment>
+                        ),
+                    }}
+                />
+
+                <TableContainer>
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>Device Name</TableCell>
+                                <TableCell>Location</TableCell>
+                                <TableCell>Status</TableCell>
+                                <TableCell>Set Time (min)</TableCell>
+                                <TableCell>Actions</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {deviceLoading ? (
+                                <TableRow>
+                                    <TableCell colSpan={4} align="center">Loading...</TableCell>
+                                </TableRow>
+                            ) : filteredDevices.length > 0 ? (
+                                filteredDevices.map((device) => (
+                                    <TableRow key={device.id}>
+                                        <TableCell>{device.device_name}</TableCell>
+                                        <TableCell>{device.location}</TableCell>
+                                        <TableCell>{device.device_status}</TableCell>
+                                        <TableCell>{device.device_settime}</TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={4} align="center">No devices found.</TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+
+                <TablePagination
+                    rowsPerPageOptions={[5, 10, 25]}
+                    component="div"
+                    count={totalDevices}
+                    rowsPerPage={deviceSize}
+                    page={devicePage}
+                    onPageChange={handleDevicePageChange}
+                    onRowsPerPageChange={handleDeviceRowsPerPageChange}
+                />
             </div>
+
 
             {/* PopUp User Details */}
             <Dialog open={isUserDetailsDialogOpen} onClose={toggleUserDetailsDialog}>
