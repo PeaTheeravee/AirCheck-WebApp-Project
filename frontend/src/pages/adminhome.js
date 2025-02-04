@@ -102,10 +102,12 @@ const AdminHome = () => {
                 const errorData = await response.json();
                 throw new Error(errorData.detail || "Failed to fetch user details.");
             }
+
             const data = await response.json();
             setUserData(data);
         } catch (err) {
             setError(err.message);
+            setTimeout(() => setError(""), 2000); 
         }
     };
 
@@ -113,7 +115,7 @@ const AdminHome = () => {
     const handleCreateAccount = async () => {
         if (!newUser.username || !newUser.firstName || !newUser.lastName || !newUser.password) {
             setError("All fields are required!");
-            setTimeout(() => setError(""), 3000); // ลบข้อความหลัง 3 วินาที
+            setTimeout(() => setError(""), 2000); 
             return;
         }
     
@@ -132,20 +134,18 @@ const AdminHome = () => {
     
             if (!response.ok) {
                 const errorData = await response.json();
-                setError(errorData.detail || "Failed to create user.");
-                setTimeout(() => setError(""), 3000); // ลบข้อความหลัง 3 วินาที
-                return;
+                throw new Error(errorData.detail || "Failed to create user.");
             }
     
-            setSuccessMessage("User created successfully!"); // แสดงข้อความยืนยัน
-            setNewUser({ username: "", firstName: "", lastName: "", password: "" });
-            
-            setTimeout(() => setSuccessMessage(""), 3000);
-            await fetchUserAll(); // โหลดข้อมูลผู้ใช้ใหม่
-            toggleCreateDialog(); // ปิด Pop-Up
+            setSuccessMessage("User created successfully!"); 
+            await fetchUserAll(); // อัปเดตตารางข้อมูลผู้ใช้
+            setTimeout(() => {
+                setSuccessMessage("");
+                toggleCreateDialog(); // ปิด Pop-Up
+            }, 2000);
         } catch (err) {
             setError(err.message);
-            setTimeout(() => setError(""), 3000); // ลบข้อความหลัง 3 วินาที
+            setTimeout(() => setError(""), 2000); 
         }
     };
 
@@ -153,17 +153,17 @@ const AdminHome = () => {
     const handleChangePasswordYourself = async () => {
         if (!passwordData.currentPassword.trim() && !passwordData.newPassword.trim()) {
             setError("Current Password and New Password cannot be empty.");
-            setTimeout(() => setError(""), 3000); // ลบข้อความ Error หลัง 3 วินาที
+            setTimeout(() => setError(""), 2000); 
             return;
         }
         if (!passwordData.currentPassword.trim()) {
             setError("Current Password cannot be empty.");
-            setTimeout(() => setError(""), 3000); // ลบข้อความ Error หลัง 3 วินาที
+            setTimeout(() => setError(""), 2000); 
             return;
         }
         if (!passwordData.newPassword.trim()) {
             setError("New Password cannot be empty.");
-            setTimeout(() => setError(""), 3000); // ลบข้อความ Error หลัง 3 วินาที
+            setTimeout(() => setError(""), 2000); 
             return;
         }
 
@@ -182,21 +182,17 @@ const AdminHome = () => {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                setError(errorData.detail || "Failed to change password.");
-                setTimeout(() => setError(""), 3000); // ลบข้อความหลัง 3 วินาที
-                return;
+                throw new Error(errorData.detail || "Failed to change password.");
             }
 
-            setSuccessMessage("Password updated successfully!"); // แสดงข้อความยืนยัน
-            setPasswordData({ currentPassword: "", newPassword: "" });
-            
+            setSuccessMessage("Password updated successfully!"); 
             setTimeout(() => {
-                setSuccessMessage(""); // ลบข้อความหลัง 3 วินาที
+                setSuccessMessage(""); 
                 navigate("/login"); // เด้งไปหน้า Login
-            }, 3000);
+            }, 2000);
         } catch (err) {
             setError(err.message);
-            setTimeout(() => setError(""), 3000); // ลบข้อความหลัง 3 วินาที
+            setTimeout(() => setError(""), 2000); 
         }
     };
 
@@ -204,12 +200,12 @@ const AdminHome = () => {
     const handleChangeSomeonePassword = async () => {
         if (!passwordData.newPassword.trim()) {
             setError("New Password cannot be empty.");
-            setTimeout(() => setError(""), 3000); // ลบข้อความ Error หลัง 3 วินาที
+            setTimeout(() => setError(""), 2000); 
             return;
         }
         if (!passwordData.confirmNewPassword.trim()) {
             setError("Confirm Password cannot be empty.");
-            setTimeout(() => setError(""), 3000); // ลบข้อความ Error หลัง 3 วินาที
+            setTimeout(() => setError(""), 2000); 
             return;
         }
     
@@ -228,18 +224,17 @@ const AdminHome = () => {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                setError(errorData.detail || "Failed to change password for the user.");
-                setTimeout(() => setError(""), 3000); // ลบข้อความหลัง 3 วินาที
-                return;
+                throw new Error(errorData.detail || "Failed to change password for the user.");
             }
 
-            setSuccessMessage("Password updated successfully for the user!"); // แสดงข้อความยืนยัน
-            setPasswordData({ newPassword: "", confirmNewPassword: "" });
-            setTimeout(() => setSuccessMessage(""), 3000); // ลบข้อความหลัง 3 วินาที
-            toggleChangeSomeonePasswordDialog();
+            setSuccessMessage("Password updated successfully for the user!"); 
+            setTimeout(() => {
+                setSuccessMessage("");
+                toggleChangeSomeonePasswordDialog(); // ปิด Pop-Up 
+            }, 2000);
         } catch (err) {
             setError(err.message);
-            setTimeout(() => setError(""), 3000); // ลบข้อความหลัง 3 วินาที
+            setTimeout(() => setError(""), 2000); 
         }
     };    
 
@@ -261,13 +256,15 @@ const AdminHome = () => {
                 throw new Error(errorData.detail || "Failed to delete user.");
             }
     
-            setSuccessMessage("User deleted successfully!"); // แสดงข้อความสำเร็จ
-            setTimeout(() => setSuccessMessage(""), 3000);
+            setSuccessMessage("User deleted successfully!"); 
             await fetchUserAll(); // โหลดข้อมูลผู้ใช้ใหม่
-            toggleDeleteDialog(); // ปิด Pop-Up
+            setTimeout(() => {
+                setSuccessMessage("");
+                toggleDeleteDialog(); // ปิด Pop-Up
+            }, 2000);
         } catch (err) {
             setError(err.message);
-            setTimeout(() => setError(""), 3000);
+            setTimeout(() => setError(""), 2000);
         }
     };
 
@@ -275,7 +272,7 @@ const AdminHome = () => {
     const handleUpdateUser = async () => {
         if (!updateData.firstName.trim() || !updateData.lastName.trim()) {
             setError("First Name and Last Name cannot be empty.");
-            setTimeout(() => setError(""), 3000);
+            setTimeout(() => setError(""), 2000);
             return;
         }
 
@@ -302,11 +299,11 @@ const AdminHome = () => {
             await fetchUserAll(); // อัปเดตตารางข้อมูลผู้ใช้
             setTimeout(() => {
                 setSuccessMessage("");
-                toggleUpdateDialog(); // ปิด Pop-Up Update
-            }, 3000);
+                toggleUpdateDialog(); // ปิด Pop-Up 
+            }, 2000);
         } catch (err) {
             setError(err.message);
-            setTimeout(() => setError(""), 3000);
+            setTimeout(() => setError(""), 2000); 
         }
     };
 
@@ -324,6 +321,7 @@ const AdminHome = () => {
             }
         } catch (err) {
             setError(err.message);
+            setTimeout(() => setError(""), 2000);
         }
     };
 

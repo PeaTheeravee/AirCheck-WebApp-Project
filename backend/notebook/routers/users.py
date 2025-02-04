@@ -46,7 +46,6 @@ async def create(
         first_name=user_create.first_name,
         last_name=user_create.last_name,
         password=user_create.password,
-        role="admin",  # กำหนดบทบาทเป็น admin
     )
     await user.set_password(user_create.password)
     session.add(user)
