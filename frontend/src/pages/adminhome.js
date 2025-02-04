@@ -473,26 +473,34 @@ const AdminHome = () => {
                                             <Button
                                                 variant="contained"
                                                 color="primary"
-                                                onClick={() => toggleUpdateDialog(user.id, user.username, user.first_name, user.last_name)} // ส่งข้อมูลผู้ใช้ไปยังฟังก์ชัน
+                                                onClick={() => toggleUpdateDialog(user.id, user.username, user.first_name, user.last_name)}
                                                 style={{ marginRight: "10px" }}
                                             >
                                                 Update
                                             </Button>
-                                            <Button
-                                                variant="contained"
-                                                color="primary"
-                                                onClick={() => toggleChangeSomeonePasswordDialog(user.id, user.username)} // ส่ง user.id และ user.username
-                                                style={{ marginRight: "10px" }}
-                                            >
-                                                Change Password
-                                            </Button>
-                                            <Button
-                                                variant="contained"
-                                                color="secondary"
-                                                onClick={() => toggleDeleteDialog(user.id, user.username)} // ส่ง user.id และ user.username
-                                            >
-                                                Delete
-                                            </Button>
+
+                                            {/* ซ่อนปุ่ม Change Password ถ้า user เป็น superadmin */}
+                                            {user.role !== "superadmin" && (
+                                                <Button
+                                                    variant="contained"
+                                                    color="primary"
+                                                    onClick={() => toggleChangeSomeonePasswordDialog(user.id, user.username)}
+                                                    style={{ marginRight: "10px" }}
+                                                >
+                                                    Change Password
+                                                </Button>
+                                            )}
+
+                                            {/* ซ่อนปุ่ม Delete ถ้า user เป็น superadmin */}
+                                            {user.role !== "superadmin" && (
+                                                <Button
+                                                    variant="contained"
+                                                    color="secondary"
+                                                    onClick={() => toggleDeleteDialog(user.id, user.username)}
+                                                >
+                                                    Delete
+                                                </Button>
+                                            )}
                                         </TableCell>
                                     </TableRow>
                                 ))
