@@ -26,24 +26,28 @@ import "./adminhome.css";
 const AdminHome = () => {
     const navigate = useNavigate();
     const [isDialogOpen] = useState(false);
+
     const [userData, setUserData] = useState(null);
-    const [error, setError] = useState("");
-    const [successMessage, setSuccessMessage] = useState(""); // เพิ่ม state สำหรับข้อความยืนยัน
-
-    const [passwordData, setPasswordData] = useState({ currentPassword: "", newPassword: "" });
-    const [showPassword, setShowPassword] = useState({ current: false, new: false });
-
     const [users, setUsers] = useState([]);
-    const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
-    const [updateData, setUpdateData] = useState({username: "",firstName: "",lastName: "",});
-    const [targetUserName, setTargetUserName] = useState("");
+    const [targetUserId, setTargetUserId] = useState(null); // เก็บ userId ใน state
+    const [targetUserName, setTargetUserName] = useState(""); // แสดงชื่อ ใน Pop-Up
 
+    const [error, setError] = useState("");
+    const [successMessage, setSuccessMessage] = useState(""); 
+
+
+    const [newUser, setNewUser] = useState({username: "",firstName: "",lastName: "",password: ""});
+    const [updateData, setUpdateData] = useState({username: "",firstName: "",lastName: "",});
+    const [passwordData, setPasswordData] = useState({ currentPassword: "", newPassword: "" });
+
+
+    const [showPassword, setShowPassword] = useState({ current: false, new: false });
     const [isUserDetailsDialogOpen, setIsUserDetailsDialogOpen] = useState(false);
+    const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+    const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
     const [isChangePasswordYourselfDialogOpen, setIsChangePasswordYourselfDialogOpen] = useState(false);
     const [isChangeSomeonePasswordDialogOpen, setIsChangeSomeonePasswordDialogOpen] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-
-    const [targetUserId, setTargetUserId] = useState(null);
 
     //สำหรับ ตาราง + Pagination
     const [searchTerm, setSearchTerm] = useState("");
@@ -55,7 +59,12 @@ const AdminHome = () => {
     //------------------------------------------------------------------------------------------------
     const toggleUserDetailsDialog = () => setIsUserDetailsDialogOpen(!isUserDetailsDialogOpen);
     const toggleChangePasswordYourselfDialog = () => setIsChangePasswordYourselfDialogOpen(!isChangePasswordYourselfDialogOpen);
-    
+
+    const toggleCreateDialog = () => {
+        setIsCreateDialogOpen(!isCreateDialogOpen);
+        setNewUser({ username: "", firstName: "", lastName: "", password: "" }); 
+    };
+
     const toggleChangeSomeonePasswordDialog = (userId = null, username = "") => {
         setTargetUserId(userId); // เก็บ userId ใน state
         setTargetUserName(username);
@@ -76,10 +85,10 @@ const AdminHome = () => {
                 lastName: lastName || "",
             });
             setTargetUserId(userId); // เก็บ userId ใน state
+            setTargetUserName(username);
         }
         setIsUpdateDialogOpen(!isUpdateDialogOpen);
     };
-
 
     //================================================================================================
     // ดึงข้อมูลผู้ใช้ที่ล็อกอินอยู่
@@ -97,6 +106,46 @@ const AdminHome = () => {
             setUserData(data);
         } catch (err) {
             setError(err.message);
+        }
+    };
+
+    // ฟังก์ชันสำหรับสร้างผู้ใช้ใหม่
+    const handleCreateAccount = async () => {
+        if (!newUser.username || !newUser.firstName || !newUser.lastName || !newUser.password) {
+            setError("All fields are required!");
+            setTimeout(() => setError(""), 3000); // ลบข้อความหลัง 3 วินาที
+            return;
+        }
+    
+        try {
+            const response = await fetch("http://localhost:8000/users/create", {
+                method: "POST",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    username: newUser.username,
+                    first_name: newUser.firstName,
+                    last_name: newUser.lastName,
+                    password: newUser.password
+                }),
+            });
+    
+            if (!response.ok) {
+                const errorData = await response.json();
+                setError(errorData.detail || "Failed to create user.");
+                setTimeout(() => setError(""), 3000); // ลบข้อความหลัง 3 วินาที
+                return;
+            }
+    
+            setSuccessMessage("User created successfully!"); // แสดงข้อความยืนยัน
+            setNewUser({ username: "", firstName: "", lastName: "", password: "" });
+            
+            setTimeout(() => setSuccessMessage(""), 3000);
+            await fetchUserAll(); // โหลดข้อมูลผู้ใช้ใหม่
+            toggleCreateDialog(); // ปิด Pop-Up
+        } catch (err) {
+            setError(err.message);
+            setTimeout(() => setError(""), 3000); // ลบข้อความหลัง 3 วินาที
         }
     };
 
@@ -375,7 +424,7 @@ const AdminHome = () => {
 
                 <button
                     className="create-button"
-                    onClick={() => alert("Mock: Create Account")}
+                    onClick={toggleCreateDialog}
                 >
                     Create account
                 </button>
@@ -486,6 +535,48 @@ const AdminHome = () => {
                 <DialogActions>
                     <Button onClick={toggleChangePasswordYourselfDialog}>Change Password</Button> {/* เปิด Pop-Up Change Password */}
                     <Button onClick={handleLogout}>Logout</Button> {/* Logout */}
+                </DialogActions>
+            </Dialog>
+
+            {/* Pop-Up Create Account */}
+            <Dialog open={isCreateDialogOpen} onClose={toggleCreateDialog}>
+                <DialogTitle>Create New Account</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        label="Username"
+                        fullWidth
+                        margin="dense"
+                        value={newUser.username}
+                        onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
+                    />
+                    <TextField
+                        label="First Name"
+                        fullWidth
+                        margin="dense"
+                        value={newUser.firstName}
+                        onChange={(e) => setNewUser({ ...newUser, firstName: e.target.value })}
+                    />
+                    <TextField
+                        label="Last Name"
+                        fullWidth
+                        margin="dense"
+                        value={newUser.lastName}
+                        onChange={(e) => setNewUser({ ...newUser, lastName: e.target.value })}
+                    />
+                    <TextField
+                        label="Password"
+                        type="password"
+                        fullWidth
+                        margin="dense"
+                        value={newUser.password}
+                        onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                    />
+                    {error && <p style={{ color: "red", marginTop: "10px" }}>{error}</p>}
+                    {successMessage && <p style={{ color: "green", marginTop: "10px" }}>{successMessage}</p>}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCreateAccount} color="primary">Submit</Button>
+                    <Button onClick={toggleCreateDialog}>Cancel</Button>
                 </DialogActions>
             </Dialog>
 
@@ -604,7 +695,7 @@ const AdminHome = () => {
             {/* Pop-Up Update User */}
             <Dialog open={isUpdateDialogOpen} onClose={toggleUpdateDialog}>
                 <DialogTitle>
-                    The user you updated is <strong>{updateData.username}</strong>
+                    The user you updated is <strong>{targetUserName}</strong>
                 </DialogTitle>
                 <DialogContent>
                     <TextField
