@@ -26,6 +26,7 @@ import "./adminhome.css";
 const AdminHome = () => {
     const navigate = useNavigate();
     const [isDialogOpen] = useState(false);
+    const [activeTab, setActiveTab] = useState("users"); // ควบคุมตารางที่แสดง
 
     const [userData, setUserData] = useState(null);
     const [users, setUsers] = useState([]);
@@ -340,7 +341,7 @@ const AdminHome = () => {
         }
     };
 
-    // ดึงข้อมูลผู้ใช้ทั้งหมด
+    // ฟังก์ชันดึงข้อมูลผู้ใช้
     const fetchUserAll = useCallback(async () => {
         setLoading(true); // เริ่มโหลดข้อมูล
         try {
@@ -367,6 +368,7 @@ const AdminHome = () => {
         }
     }, [currentPage, pageSize]); // เพิ่ม dependencies
 
+    // ฟังก์ชันดึงข้อมูลอุปกรณ์
     const fetchDevices = useCallback(async () => {
         setDeviceLoading(true);
         try {
@@ -454,15 +456,13 @@ const AdminHome = () => {
 
     //------------------------------------------------------------------------------------------------
     
-    // ดึงข้อมูลผู้ใช้ทั้งหมด
     useEffect(() => {
-        fetchUserAll();
-    }, [fetchUserAll]);
-
-    // ดึงข้อมูลอุปกรณ์ทั้งหมด
-    useEffect(() => {
-        fetchDevices();
-    }, [fetchDevices]);
+        if (activeTab === "users") {
+            fetchUserAll();
+        } else {
+            fetchDevices();
+        }
+    }, [activeTab, fetchUserAll, fetchDevices]);
 
     // ใช้ useEffect ดึงข้อมูลผู้ใช้เมื่อเปิด Dialog
     useEffect(() => {
@@ -492,171 +492,194 @@ const AdminHome = () => {
 
             {/* Content/Main */}
             <div className="content">
-                <h2>User Management</h2>
+                {/* ปุ่ม Toggle สำหรับเลือกตาราง */}
+                <div className="toggle-buttons">
+                    <Button
+                        variant={activeTab === "users" ? "contained" : "outlined"}
+                        onClick={() => setActiveTab("users")}
+                        style={{ marginRight: "10px" }}
+                    >
+                        User Management
+                    </Button>
+                    <Button
+                        variant={activeTab === "devices" ? "contained" : "outlined"}
+                        onClick={() => setActiveTab("devices")}
+                    >
+                        Device Management
+                    </Button>
+                </div>
 
-                <button
-                    className="create-button"
-                    onClick={toggleCreateDialog}
-                >
-                    Create account
-                </button>
-                
-                <TextField
-                    label="Search Users"
-                    variant="outlined"
-                    fullWidth
-                    margin="normal"
-                    value={searchTerm}
-                    onChange={handleSearch}
-                    InputProps={{
-                        startAdornment: (
-                            <InputAdornment position="start">
-                                <SearchIcon />
-                            </InputAdornment>
-                        ),
-                    }}
-                />
-                <TableContainer>
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>Username</TableCell>
-                                <TableCell>First Name</TableCell>
-                                <TableCell>Last Name</TableCell>
-                                <TableCell>Actions</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {loading ? (
-                                <TableRow>
-                                    <TableCell colSpan={4} align="center">
-                                        Loading...
-                                    </TableCell>
-                                </TableRow>
-                            ) : filteredUsers.length > 0 ? (
-                                filteredUsers.map((user) => (
-                                    <TableRow key={user.id}>
-                                        <TableCell>{user.username}</TableCell>
-                                        <TableCell>{user.first_name}</TableCell>
-                                        <TableCell>{user.last_name}</TableCell>
-                                        <TableCell>
-                                            <Button
-                                                variant="contained"
-                                                color="primary"
-                                                onClick={() => toggleUpdateDialog(user.id, user.username, user.first_name, user.last_name)}
-                                                style={{ marginRight: "10px" }}
-                                            >
-                                                Update
-                                            </Button>
+                {/* ตาราง User */}
+                {activeTab === "users" && (
+                    <>
+                        <button className="create-button" onClick={toggleCreateDialog}>
+                            Create account
+                        </button>
 
-                                            {/* ซ่อนปุ่ม Change Password ถ้า user เป็น superadmin */}
-                                            {user.role !== "superadmin" && (
-                                                <Button
-                                                    variant="contained"
-                                                    color="primary"
-                                                    onClick={() => toggleChangeSomeonePasswordDialog(user.id, user.username)}
-                                                    style={{ marginRight: "10px" }}
-                                                >
-                                                    Change Password
-                                                </Button>
-                                            )}
-
-                                            {/* ซ่อนปุ่ม Delete ถ้า user เป็น superadmin */}
-                                            {user.role !== "superadmin" && (
-                                                <Button
-                                                    variant="contained"
-                                                    color="secondary"
-                                                    onClick={() => toggleDeleteDialog(user.id, user.username)}
-                                                >
-                                                    Delete
-                                                </Button>
-                                            )}
-                                        </TableCell>
+                        <TextField
+                            label="Search Users"
+                            variant="outlined"
+                            fullWidth
+                            margin="normal"
+                            value={searchTerm}
+                            onChange={handleSearch}
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <SearchIcon />
+                                    </InputAdornment>
+                                ),
+                            }}
+                        />
+                        <TableContainer>
+                            <Table>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell>Username</TableCell>
+                                        <TableCell>First Name</TableCell>
+                                        <TableCell>Last Name</TableCell>
+                                        <TableCell>Actions</TableCell>
                                     </TableRow>
-                                ))
-                            ) : (
-                                <TableRow>
-                                    <TableCell colSpan={4} align="center">
-                                        No users found.
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-                <TablePagination
-                    rowsPerPageOptions={[5, 10, 25]}
-                    component="div"
-                    count={totalUsers}
-                    rowsPerPage={pageSize}
-                    page={currentPage}
-                    onPageChange={handlePageChange}
-                    onRowsPerPageChange={handleRowsPerPageChange}
-                />
+                                </TableHead>
+                                <TableBody>
+                                    {loading ? (
+                                        <TableRow>
+                                            <TableCell colSpan={4} align="center">
+                                                Loading...
+                                            </TableCell>
+                                        </TableRow>
+                                    ) : filteredUsers.length > 0 ? (
+                                        filteredUsers.map((user) => (
+                                            <TableRow key={user.id}>
+                                                <TableCell>{user.username}</TableCell>
+                                                <TableCell>{user.first_name}</TableCell>
+                                                <TableCell>{user.last_name}</TableCell>
+                                                <TableCell>
+                                                    <Button
+                                                        variant="contained"
+                                                        color="primary"
+                                                        onClick={() => toggleUpdateDialog(user.id, user.username, user.first_name, user.last_name)}
+                                                        style={{ marginRight: "10px" }}
+                                                    >
+                                                        Update
+                                                    </Button>
 
+                                                    {/* ซ่อนปุ่ม Change Password ถ้า user เป็น superadmin */}
+                                                    {user.role !== "superadmin" && (
+                                                        <Button
+                                                            variant="contained"
+                                                            color="primary"
+                                                            onClick={() => toggleChangeSomeonePasswordDialog(user.id, user.username)}
+                                                            style={{ marginRight: "10px" }}
+                                                        >
+                                                            Change Password
+                                                        </Button>
+                                                    )}
 
-                <h2>Device Management</h2>
-                <TextField
-                    label="Search Devices"
-                    variant="outlined"
-                    fullWidth
-                    margin="normal"
-                    value={deviceSearchTerm}
-                    onChange={handleDeviceSearch}
-                    InputProps={{
-                        startAdornment: (
-                            <InputAdornment position="start">
-                                <SearchIcon />
-                            </InputAdornment>
-                        ),
-                    }}
-                />
+                                                    {/* ซ่อนปุ่ม Delete ถ้า user เป็น superadmin */}
+                                                    {user.role !== "superadmin" && (
+                                                        <Button
+                                                            variant="contained"
+                                                            color="secondary"
+                                                            onClick={() => toggleDeleteDialog(user.id, user.username)}
+                                                        >
+                                                            Delete
+                                                        </Button>
+                                                    )}
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
+                                    ) : (
+                                        <TableRow>
+                                            <TableCell colSpan={4} align="center">
+                                                No users found.
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                        <TablePagination
+                            rowsPerPageOptions={[5, 10, 25]}
+                            component="div"
+                            count={totalUsers}
+                            rowsPerPage={pageSize}
+                            page={currentPage}
+                            onPageChange={handlePageChange}
+                            onRowsPerPageChange={handleRowsPerPageChange}
+                        />
+                    </>
+                )}
 
-                <TableContainer>
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>Device Name</TableCell>
-                                <TableCell>Location</TableCell>
-                                <TableCell>Status</TableCell>
-                                <TableCell>Set Time (min)</TableCell>
-                                <TableCell>Actions</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {deviceLoading ? (
-                                <TableRow>
-                                    <TableCell colSpan={4} align="center">Loading...</TableCell>
-                                </TableRow>
-                            ) : filteredDevices.length > 0 ? (
-                                filteredDevices.map((device) => (
-                                    <TableRow key={device.id}>
-                                        <TableCell>{device.device_name}</TableCell>
-                                        <TableCell>{device.location}</TableCell>
-                                        <TableCell>{device.device_status}</TableCell>
-                                        <TableCell>{device.device_settime}</TableCell>
+                {/* ตาราง Device */}
+                {activeTab === "devices" && (
+                    <>
+                        <TextField
+                            label="Search Devices"
+                            variant="outlined"
+                            fullWidth
+                            margin="normal"
+                            value={deviceSearchTerm}
+                            onChange={handleDeviceSearch}
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <SearchIcon />
+                                    </InputAdornment>
+                                ),
+                            }}
+                        />
+
+                        <TableContainer>
+                            <Table>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell>Device Name</TableCell>
+                                        <TableCell>Location</TableCell>
+                                        <TableCell>Status</TableCell>
+                                        <TableCell>Set Time (min)</TableCell>
+                                        <TableCell>Actions</TableCell>
                                     </TableRow>
-                                ))
-                            ) : (
-                                <TableRow>
-                                    <TableCell colSpan={4} align="center">No devices found.</TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
+                                </TableHead>
+                                <TableBody>
+                                    {deviceLoading ? (
+                                        <TableRow>
+                                            <TableCell colSpan={4} align="center">
+                                                Loading...
+                                            </TableCell>
+                                        </TableRow>
+                                    ) : filteredDevices.length > 0 ? (
+                                        filteredDevices.map((device) => (
+                                            <TableRow key={device.id}>
+                                                <TableCell>{device.device_name}</TableCell>
+                                                <TableCell>{device.location}</TableCell>
+                                                <TableCell>{device.device_status}</TableCell>
+                                                <TableCell>{device.device_settime}</TableCell>
+                                            </TableRow>
+                                        ))
+                                    ) : (
+                                        <TableRow>
+                                            <TableCell colSpan={4} align="center">
+                                                No devices found.
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
 
-                <TablePagination
-                    rowsPerPageOptions={[5, 10, 25]}
-                    component="div"
-                    count={totalDevices}
-                    rowsPerPage={deviceSize}
-                    page={devicePage}
-                    onPageChange={handleDevicePageChange}
-                    onRowsPerPageChange={handleDeviceRowsPerPageChange}
-                />
+                        <TablePagination
+                            rowsPerPageOptions={[5, 10, 25]}
+                            component="div"
+                            count={totalDevices}
+                            rowsPerPage={deviceSize}
+                            page={devicePage}
+                            onPageChange={handleDevicePageChange}
+                            onRowsPerPageChange={handleDeviceRowsPerPageChange}
+                        />
+                    </>
+                )}
             </div>
-
 
             {/* PopUp User Details */}
             <Dialog open={isUserDetailsDialogOpen} onClose={toggleUserDetailsDialog}>
