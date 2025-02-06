@@ -104,7 +104,7 @@ async def update_device_by_api_key(
     api_key: str,
     device: UpdatedDevice,
     session: Annotated[AsyncSession, Depends(get_session)],
-    current_user: Annotated[UserRead, Depends(get_current_active_user)],  
+    current_user: Annotated[UserRead, Depends(get_current_active_user)],
 ) -> DeviceRead:
     result = await session.exec(select(DBDevice).where(DBDevice.api_key == api_key))
     dbdevice = result.one_or_none()
@@ -121,32 +121,11 @@ async def update_device_by_api_key(
             status_code=400, detail="There is already a device with the same name."
         )
 
-    # อัปเดตเฉพาะ device_name และ location
+    # อัปเดตค่า device_name, location และ device_settime
     dbdevice.device_name = device.device_name
     dbdevice.location = device.location
+    dbdevice.device_settime = device.device_settime
 
-    session.add(dbdevice)
-    await session.commit()
-    await session.refresh(dbdevice)
-
-    return DeviceRead.model_validate(dbdevice)
-
-
-@router.put("/update_time/{api_key}")
-async def update_device_time(
-    api_key: str,
-    device: DeviceTimeUpdate,  
-    session: Annotated[AsyncSession, Depends(get_session)],
-    current_user: Annotated[UserRead, Depends(get_current_active_user)], 
-) -> DeviceRead:
-    result = await session.exec(select(DBDevice).where(DBDevice.api_key == api_key))
-    dbdevice = result.one_or_none()
-
-    if not dbdevice:
-        raise HTTPException(status_code=404, detail="Device not found.")
-
-    dbdevice.device_settime = device.device_settime  # อัปเดตค่าเวลา
-    
     session.add(dbdevice)
     await session.commit()
     await session.refresh(dbdevice)

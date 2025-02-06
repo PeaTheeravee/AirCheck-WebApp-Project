@@ -26,14 +26,11 @@ class CreatedDevice(BaseModel):
 class UpdatedDevice(BaseModel):
     device_name: str  
     location: str
+    device_settime: int
 
 
 class DeviceStatusUpdate(BaseModel):
     device_status: str  
-
-
-class DeviceTimeUpdate(BaseModel):
-    device_settime: int
 
 
 class DBDevice(SQLModel, table=True):
