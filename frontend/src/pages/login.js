@@ -9,7 +9,7 @@ const Login = () => {
 
     const handleLogin = async (e) => {
         e.preventDefault();
-        setError(""); // รีเซ็ตข้อความ error
+        setError(""); 
 
         try {
             const response = await fetch("http://localhost:8000/login", {
@@ -25,18 +25,20 @@ const Login = () => {
             });
 
             if (!response.ok) {
-                const errorData = await response.json(); // ดึงข้อความจาก detail
+                const errorData = await response.json();
                 throw new Error(errorData.detail || "Unknown error occurred");
             }
 
             const data = await response.json();
-            if (data.role === "superadmin") {
-                navigate("/adminhome"); // ถ้า role คือ superadmin ให้ไปหน้า adminhome
+            
+            // ✅ อัปเดตเงื่อนไขให้รองรับทั้ง "admin" และ "superadmin"
+            if (data.role === "superadmin" || data.role === "admin") {
+                navigate("/adminhome"); 
             } else {
-                setError("Access denied. Only superadmins are allowed.");
+                setError("Access denied. Only admins are allowed.");
             }
         } catch (err) {
-            setError(err.message); // แสดงข้อความ error จาก Backend
+            setError(err.message);
         }
     };
 
@@ -58,7 +60,7 @@ const Login = () => {
                 />
                 <button type="submit">Login</button>
             </form>
-            {error && <p style={{ color: "red" }}>{error}</p>} {/* แสดงข้อความ error */}
+            {error && <p style={{ color: "red" }}>{error}</p>}
         </div>
     );
 };
