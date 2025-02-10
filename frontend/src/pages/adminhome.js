@@ -26,8 +26,9 @@ import "./adminhome.css";
 const AdminHome = () => {
     const navigate = useNavigate();
     const [isDialogOpen] = useState(false);
-    const [activeTab, setActiveTab] = useState("users"); // ควบคุมตารางที่แสดง
+    const [activeTab, setActiveTab] = useState("devices"); // ควบคุมตารางที่แสดง
 
+    const [role, setRole] = useState("");
     const [userData, setUserData] = useState(null);
     const [users, setUsers] = useState([]);
     const [devices, setDevices] = useState([]);
@@ -121,6 +122,7 @@ const AdminHome = () => {
 
             const data = await response.json();
             setUserData(data);
+            setRole(data.role);
         } catch (err) {
             setError(err.message);
             setTimeout(() => setError(""), 2000); 
@@ -457,7 +459,13 @@ const AdminHome = () => {
     });
 
     //------------------------------------------------------------------------------------------------
-    
+
+    // ใช้ useEffect เมื่อโหลดหน้า
+    useEffect(() => {
+        fetchUserData();
+        fetchDevices();
+    }, [fetchDevices]);
+
     useEffect(() => {
         if (activeTab === "users") {
             fetchUserAll();
@@ -494,22 +502,24 @@ const AdminHome = () => {
 
             {/* Content/Main */}
             <div className="content">
-                {/* ปุ่ม Toggle สำหรับเลือกตาราง */}
-                <div className="toggle-buttons">
-                    <Button
-                        variant={activeTab === "users" ? "contained" : "outlined"}
-                        onClick={() => setActiveTab("users")}
-                        style={{ marginRight: "10px" }}
-                    >
-                        User Management
-                    </Button>
-                    <Button
-                        variant={activeTab === "devices" ? "contained" : "outlined"}
-                        onClick={() => setActiveTab("devices")}
-                    >
-                        Device Management
-                    </Button>
-                </div>
+                {/* แสดงเฉพาะ superadmin */}
+                {role === "superadmin" && (
+                    <div className="toggle-buttons">
+                        <Button
+                            variant={activeTab === "users" ? "contained" : "outlined"}
+                            onClick={() => setActiveTab("users")}
+                            style={{ marginRight: "10px" }}
+                        >
+                            User Management
+                        </Button>
+                        <Button
+                            variant={activeTab === "devices" ? "contained" : "outlined"}
+                            onClick={() => setActiveTab("devices")}
+                        >
+                            Device Management
+                        </Button>
+                    </div>
+                )}
 
                 {/* ตาราง User */}
                 {activeTab === "users" && (
