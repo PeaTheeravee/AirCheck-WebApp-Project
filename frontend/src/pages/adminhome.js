@@ -35,6 +35,8 @@ const AdminHome = () => {
 
     const [targetUserId, setTargetUserId] = useState(null); // เก็บ userId ใน state
     const [targetUserName, setTargetUserName] = useState(""); // แสดงชื่อ ใน Pop-Up
+    const [targetApiKey, setTargetApiKey] = useState(null); // เก็บ ApiKey ใน state
+    const [targetDeviceName, setTargetDeviceName] = useState(""); // แสดงชื่ออุปกรณ์ ใน Pop-Up
 
     const [error, setError] = useState("");
     const [successMessage, setSuccessMessage] = useState(""); 
@@ -43,7 +45,8 @@ const AdminHome = () => {
     const [newUser, setNewUser] = useState({username: "",firstName: "",lastName: "",password: ""});
     const [updateData, setUpdateData] = useState({username: "",firstName: "",lastName: "",});
     const [passwordData, setPasswordData] = useState({ currentPassword: "", newPassword: "" });
-
+    //------------------------------------------------------------------------------------------------
+    const [updateDeviceData, setUpdateDeviceData] = useState({ device_name: "", location: "", device_settime: "" });
 
     const [showPassword, setShowPassword] = useState({ current: false, new: false });
     const [isUserDetailsDialogOpen, setIsUserDetailsDialogOpen] = useState(false);
@@ -52,6 +55,8 @@ const AdminHome = () => {
     const [isChangePasswordYourselfDialogOpen, setIsChangePasswordYourselfDialogOpen] = useState(false);
     const [isChangeSomeonePasswordDialogOpen, setIsChangeSomeonePasswordDialogOpen] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    //------------------------------------------------------------------------------------------------
+    const [isUpdateDeviceDialogOpen, setIsUpdateDeviceDialogOpen] = useState(false);
 
     //สำหรับ ตารางผู้ใช้
     const [searchTerm, setSearchTerm] = useState("");
@@ -88,7 +93,7 @@ const AdminHome = () => {
     };
 
     const toggleDeleteDialog = (userId = null, username = "") => {
-        setTargetUserId(userId); // เก็บ userId ใน state
+        setTargetUserId(userId); // เก็บ ApiKey ใน state
         setTargetUserName(username);
         setIsDeleteDialogOpen(!isDeleteDialogOpen);
     };
@@ -104,6 +109,15 @@ const AdminHome = () => {
             setTargetUserName(username);
         }
         setIsUpdateDialogOpen(!isUpdateDialogOpen);
+    };
+    //------------------------------------------------------------------------------------------------
+    const toggleUpdateDeviceDialog = (apiKey = null, device_name = "", location = "", device_settime = "") => {
+        if (apiKey) {
+            setUpdateDeviceData({ device_name, location, device_settime });
+            setTargetApiKey(apiKey);
+            setTargetDeviceName(device_name);
+        }
+        setIsUpdateDeviceDialogOpen(!isUpdateDeviceDialogOpen);
     };
 
     //================================================================================================
@@ -396,6 +410,48 @@ const AdminHome = () => {
         }
     }, [devicePage, deviceSize]);
     
+    // ฟังก์ชันอัปเดตข้อมูลอุปกรณ์
+    const handleUpdateDevice = async () => {
+        if (!updateDeviceData.device_name.trim() || !updateDeviceData.location.trim()) {
+            setError("Device Name and Location are required!");
+            setTimeout(() => setError(""), 2000);
+            return;
+        }
+        
+        if (updateDeviceData.device_settime < 1) {
+            setError("Set Time must be at least 1 minute!");
+            setTimeout(() => setError(""), 2000);
+            return;
+        }         
+        
+        try {
+            const response = await fetch(`http://localhost:8000/devices/update/${targetApiKey}`, {
+                method: "PUT",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    device_name: updateDeviceData.device_name,
+                    location: updateDeviceData.location,
+                    device_settime: updateDeviceData.device_settime,
+                }),
+            });
+    
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || "Failed to update device.");
+            }
+    
+            setSuccessMessage("Device updated successfully!");
+            await fetchDevices(); // โหลดข้อมูลอุปกรณ์ใหม่
+            setTimeout(() => {
+                setSuccessMessage("");
+                toggleUpdateDeviceDialog(); // ปิด Pop-Up
+            }, 2000);
+        } catch (err) {
+            setError(err.message);
+            setTimeout(() => setError(""), 2000);
+        }
+    };
 
     // ฟังก์ชันสำหรับเปลี่ยนหน้า
     // สำหรับ ตารางผู้ใช้
@@ -662,11 +718,21 @@ const AdminHome = () => {
                                         </TableRow>
                                     ) : filteredDevices.length > 0 ? (
                                         filteredDevices.map((device) => (
-                                            <TableRow key={device.id}>
+                                            <TableRow key={device.api_key}>
                                                 <TableCell>{device.device_name}</TableCell>
                                                 <TableCell>{device.location}</TableCell>
                                                 <TableCell>{device.device_status}</TableCell>
                                                 <TableCell>{device.device_settime}</TableCell>
+                                                <TableCell>
+                                                    <Button
+                                                        variant="contained"
+                                                        color="primary"
+                                                        onClick={() => toggleUpdateDeviceDialog(device.api_key, device.device_name, device.location, device.device_settime)}
+                                                        style={{ marginRight: "10px" }}
+                                                    >
+                                                        Update
+                                                    </Button>
+                                                </TableCell>
                                             </TableRow>
                                         ))
                                     ) : (
@@ -934,6 +1000,51 @@ const AdminHome = () => {
                 <DialogActions>
                     <Button onClick={handleDeleteUser}>Delete</Button>
                     <Button onClick={toggleDeleteDialog}>Cancel</Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Pop-Up Update Device */}
+            <Dialog open={isUpdateDeviceDialogOpen} onClose={toggleUpdateDeviceDialog}>
+                <DialogTitle>
+                    The device you updated is <strong>{targetDeviceName}</strong>
+                </DialogTitle>
+                <DialogContent>
+                    <TextField
+                        label="Device Name"
+                        fullWidth
+                        margin="dense"
+                        value={updateDeviceData.device_name}
+                        onChange={(e) => setUpdateDeviceData({ ...updateDeviceData, device_name: e.target.value })}
+                    />
+                    <TextField
+                        label="Location"
+                        fullWidth
+                        margin="dense"
+                        value={updateDeviceData.location}
+                        onChange={(e) => setUpdateDeviceData({ ...updateDeviceData, location: e.target.value })}
+                    />
+                    <TextField
+                        label="Set Time (minutes)"
+                        type="number"
+                        fullWidth
+                        margin="dense"
+                        value={updateDeviceData.device_settime}
+                        onChange={(e) => setUpdateDeviceData({ ...updateDeviceData, device_settime: e.target.value })}
+                    />
+                    {error && ( 
+                        <p style={{ color: "red", marginTop: "10px" }}>
+                            {error}
+                        </p>
+                    )}
+                    {successMessage && ( 
+                        <p style={{ color: "green", marginTop: "10px" }}>
+                            {successMessage}
+                        </p>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleUpdateDevice} color="primary">Submit</Button>
+                    <Button onClick={toggleUpdateDeviceDialog}>Cancel</Button>
                 </DialogActions>
             </Dialog>
         </div>
