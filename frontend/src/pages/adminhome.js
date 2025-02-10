@@ -506,17 +506,17 @@ const AdminHome = () => {
                 {role === "superadmin" && (
                     <div className="toggle-buttons">
                         <Button
+                            variant={activeTab === "devices" ? "contained" : "outlined"}
+                            onClick={() => setActiveTab("devices")}
+                        >
+                            Device Management
+                        </Button>
+                        <Button
                             variant={activeTab === "users" ? "contained" : "outlined"}
                             onClick={() => setActiveTab("users")}
                             style={{ marginRight: "10px" }}
                         >
                             User Management
-                        </Button>
-                        <Button
-                            variant={activeTab === "devices" ? "contained" : "outlined"}
-                            onClick={() => setActiveTab("devices")}
-                        >
-                            Device Management
                         </Button>
                     </div>
                 )}
