@@ -47,6 +47,7 @@ const AdminHome = () => {
     const [passwordData, setPasswordData] = useState({ currentPassword: "", newPassword: "" });
     //------------------------------------------------------------------------------------------------
     const [updateDeviceData, setUpdateDeviceData] = useState({ device_name: "", location: "", device_settime: "" });
+    const [newDeviceData, setNewDeviceData] = useState({ device_name: "", location: ""});
 
     const [showPassword, setShowPassword] = useState({ current: false, new: false });
     const [isUserDetailsDialogOpen, setIsUserDetailsDialogOpen] = useState(false);
@@ -56,6 +57,7 @@ const AdminHome = () => {
     const [isChangeSomeonePasswordDialogOpen, setIsChangeSomeonePasswordDialogOpen] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     //------------------------------------------------------------------------------------------------
+    const [isCreateDeviceDialogOpen, setIsCreateDeviceDialogOpen] = useState(false);
     const [isUpdateDeviceDialogOpen, setIsUpdateDeviceDialogOpen] = useState(false);
     const [isDeleteDeviceDialogOpen, setIsDeleteDeviceDialogOpen] = useState(false);
 
@@ -112,6 +114,11 @@ const AdminHome = () => {
         setIsUpdateDialogOpen(!isUpdateDialogOpen);
     };
     //------------------------------------------------------------------------------------------------
+    const toggleCreateDeviceDialog = () => {
+        setNewDeviceData({ device_name: "", location: "" }); 
+        setIsCreateDeviceDialogOpen(!isCreateDeviceDialogOpen);
+    };   
+    
     const toggleUpdateDeviceDialog = (apiKey = null, device_name = "", location = "", device_settime = "") => {
         if (apiKey) {
             setUpdateDeviceData({ device_name, location, device_settime });
@@ -166,7 +173,7 @@ const AdminHome = () => {
                     username: newUser.username,
                     first_name: newUser.firstName,
                     last_name: newUser.lastName,
-                    password: newUser.password
+                    password: newUser.password,
                 }),
             });
     
@@ -415,7 +422,43 @@ const AdminHome = () => {
             setDeviceLoading(false);
         }
     }, [devicePage, deviceSize]);
+
+    // ฟังก์ชันสร้างอุปกรณ์
+    const handleCreateDevice = async () => {
+        if (!newDeviceData.device_name.trim() || !newDeviceData.location.trim()) {
+            setError("Device Name and Location are required!");
+            setTimeout(() => setError(""), 2000);
+            return;
+        }
+            
+        try {
+            const response = await fetch("http://localhost:8000/devices/create", {
+                method: "POST",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    device_name: newDeviceData.device_name,
+                    location: newDeviceData.location,
+                }),
+            });
     
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || "Failed to create device.");
+            }
+    
+            setSuccessMessage("Device created successfully!");
+            await fetchDevices(); // โหลดข้อมูลอุปกรณ์ใหม่
+            setTimeout(() => {
+                setSuccessMessage("");
+                toggleCreateDeviceDialog(); // ปิด Pop-Up
+            }, 2000);
+        } catch (err) {
+            setError(err.message);
+            setTimeout(() => setError(""), 2000);
+        }
+    };    
+
     // ฟังก์ชันอัปเดตข้อมูลอุปกรณ์
     const handleUpdateDevice = async () => {
         if (!updateDeviceData.device_name.trim() || !updateDeviceData.location.trim()) {
@@ -613,9 +656,14 @@ const AdminHome = () => {
                 {/* ตาราง User */}
                 {activeTab === "users" && (
                     <>
-                        <button className="create-button" onClick={toggleCreateDialog}>
-                            Create account
-                        </button>
+                        <Button
+                            variant="contained"
+                            color="success"
+                            onClick={toggleCreateDialog}
+                            style={{ marginBottom: "10px" }}
+                        >
+                            Create Account
+                        </Button>
 
                         <TextField
                             label="Search Users"
@@ -632,6 +680,7 @@ const AdminHome = () => {
                                 ),
                             }}
                         />
+
                         <TableContainer>
                             <Table>
                                 <TableHead>
@@ -658,7 +707,7 @@ const AdminHome = () => {
                                                 <TableCell>
                                                     <Button
                                                         variant="contained"
-                                                        color="primary"
+                                                        color="warning"
                                                         onClick={() => toggleUpdateDialog(user.id, user.username, user.first_name, user.last_name)}
                                                         style={{ marginRight: "10px" }}
                                                     >
@@ -669,7 +718,7 @@ const AdminHome = () => {
                                                     {user.role !== "superadmin" && (
                                                         <Button
                                                             variant="contained"
-                                                            color="primary"
+                                                            color="warning"
                                                             onClick={() => toggleChangeSomeonePasswordDialog(user.id, user.username)}
                                                             style={{ marginRight: "10px" }}
                                                         >
@@ -681,7 +730,7 @@ const AdminHome = () => {
                                                     {user.role !== "superadmin" && (
                                                         <Button
                                                             variant="contained"
-                                                            color="secondary"
+                                                            color="error"
                                                             onClick={() => toggleDeleteDialog(user.id, user.username)}
                                                         >
                                                             Delete
@@ -715,6 +764,15 @@ const AdminHome = () => {
                 {/* ตาราง Device */}
                 {activeTab === "devices" && (
                     <>
+                        <Button
+                            variant="contained"
+                            color="success"
+                            onClick={toggleCreateDeviceDialog}
+                            style={{ marginBottom: "10px" }}
+                        >
+                            Create Device
+                        </Button>
+
                         <TextField
                             label="Search Devices"
                             variant="outlined"
@@ -769,15 +827,16 @@ const AdminHome = () => {
                                                 <TableCell>
                                                     <Button
                                                         variant="contained"
-                                                        color="primary"
+                                                        color="warning"
                                                         onClick={() => toggleUpdateDeviceDialog(device.api_key, device.device_name, device.location, device.device_settime)}
                                                         style={{ marginRight: "10px" }}
                                                     >
                                                         Update
                                                     </Button>
+                                                    
                                                     <Button
                                                         variant="contained"
-                                                        color="secondary"
+                                                        color="error"
                                                         onClick={() => toggleDeleteDeviceDialog(device.api_key, device.device_name)}
                                                     >
                                                         Delete
@@ -865,8 +924,16 @@ const AdminHome = () => {
                         value={newUser.password}
                         onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
                     />
-                    {error && <p style={{ color: "red", marginTop: "10px" }}>{error}</p>}
-                    {successMessage && <p style={{ color: "green", marginTop: "10px" }}>{successMessage}</p>}
+                    {error && (
+                        <p style={{ color: "red", marginTop: "10px" }}>
+                            {error}
+                        </p>
+                    )}
+                    {successMessage && (
+                        <p style={{ color: "green", marginTop: "10px" }}>
+                            {successMessage}
+                        </p>
+                    )}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleCreateAccount} color="primary">Submit</Button>
@@ -1050,6 +1117,41 @@ const AdminHome = () => {
                 <DialogActions>
                     <Button onClick={handleDeleteUser}>Delete</Button>
                     <Button onClick={toggleDeleteDialog}>Cancel</Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Pop-Up Create Device */}
+            <Dialog open={isCreateDeviceDialogOpen} onClose={toggleCreateDeviceDialog}>
+                <DialogTitle>Create New Device</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        label="Device Name"
+                        fullWidth
+                        margin="dense"
+                        value={newDeviceData.device_name}
+                        onChange={(e) => setNewDeviceData({ ...newDeviceData, device_name: e.target.value })}
+                    />
+                    <TextField
+                        label="Location"
+                        fullWidth
+                        margin="dense"
+                        value={newDeviceData.location}
+                        onChange={(e) => setNewDeviceData({ ...newDeviceData, location: e.target.value })}
+                    />
+                    {error && (
+                        <p style={{ color: "red", marginTop: "10px" }}>
+                            {error}
+                        </p>
+                    )}
+                    {successMessage && (
+                        <p style={{ color: "green", marginTop: "10px" }}>
+                            {successMessage}
+                        </p>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCreateDevice}>Submit</Button>
+                    <Button onClick={toggleCreateDeviceDialog}>Cancel</Button>
                 </DialogActions>
             </Dialog>
 

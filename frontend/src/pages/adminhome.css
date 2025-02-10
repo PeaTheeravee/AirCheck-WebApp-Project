@@ -7,89 +7,12 @@
     color: white;
 }
 
-.profile-icon {
-    background-color: #007bff; /* สีพื้นหลัง */
-    color: white; /* สีไอคอน */
-    border: none; /* เอาขอบออก */
-    border-radius: 50%; /* ปุ่มทรงกลม */
-    padding: 12px;
-    cursor: pointer;
-    margin-right: 20px; /* ระยะห่าง */
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.profile-icon:hover {
-    background-color: #0056b3; /* สีเมื่อ hover */
-    box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.2); /* เงาเมื่อ hover */
-}
-
 .content {
     padding: 20px;
-}
-
-.create-button {
-    background-color: #7ae77a;
-    color: #000000;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
-    border-radius: 5px;
-    margin-bottom: 20px;
-    font-size: 16px;
 }
 
 .toggle-buttons {
     display: flex;
     gap: 10px; /* เพิ่มระยะห่างระหว่างปุ่ม */
     margin-bottom: 20px; /* เพิ่มระยะห่างระหว่างปุ่มและตาราง */
-}
-
-.create-button:hover {
-    background-color: #81e581;
-}
-
-.user-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-}
-
-.user-table th, .user-table td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: center;
-}
-
-.user-table th {
-    background-color: #007bff;
-    color: white;
-}
-
-.edit-button {
-    background-color: #ffd966;
-    border: none;
-    padding: 5px 10px;
-    cursor: pointer;
-    border-radius: 5px;
-}
-
-.edit-button:hover {
-    background-color: #f0c048;
-}
-
-.delete-button {
-    background-color: #ff6666;
-    border: none;
-    padding: 5px 10px;
-    cursor: pointer;
-    border-radius: 5px;
-    margin-left: 10px;
-}
-
-.delete-button:hover {
-    background-color: #e44b4b;
 }
