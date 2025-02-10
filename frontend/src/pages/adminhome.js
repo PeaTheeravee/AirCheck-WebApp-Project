@@ -57,6 +57,7 @@ const AdminHome = () => {
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     //------------------------------------------------------------------------------------------------
     const [isUpdateDeviceDialogOpen, setIsUpdateDeviceDialogOpen] = useState(false);
+    const [isDeleteDeviceDialogOpen, setIsDeleteDeviceDialogOpen] = useState(false);
 
     //สำหรับ ตารางผู้ใช้
     const [searchTerm, setSearchTerm] = useState("");
@@ -93,7 +94,7 @@ const AdminHome = () => {
     };
 
     const toggleDeleteDialog = (userId = null, username = "") => {
-        setTargetUserId(userId); // เก็บ ApiKey ใน state
+        setTargetUserId(userId); // เก็บ userId ใน state
         setTargetUserName(username);
         setIsDeleteDialogOpen(!isDeleteDialogOpen);
     };
@@ -114,12 +115,17 @@ const AdminHome = () => {
     const toggleUpdateDeviceDialog = (apiKey = null, device_name = "", location = "", device_settime = "") => {
         if (apiKey) {
             setUpdateDeviceData({ device_name, location, device_settime });
-            setTargetApiKey(apiKey);
+            setTargetApiKey(apiKey); // เก็บ ApiKey ใน state
             setTargetDeviceName(device_name);
         }
         setIsUpdateDeviceDialogOpen(!isUpdateDeviceDialogOpen);
     };
 
+    const toggleDeleteDeviceDialog = (apiKey = null, device_name = "") => {
+        setTargetApiKey(apiKey); // เก็บ ApiKey ใน state
+        setTargetDeviceName(device_name);
+        setIsDeleteDeviceDialogOpen(!isDeleteDeviceDialogOpen);
+    };
     //================================================================================================
 
     // ดึงข้อมูลผู้ใช้ที่ล็อกอินอยู่
@@ -453,6 +459,33 @@ const AdminHome = () => {
         }
     };
 
+    // ฟังก์ชันลบอุปกรณ์
+    const handleDeleteDevice = async () => {
+        try {
+            const response = await fetch(`http://localhost:8000/devices/delete/${targetApiKey}`, {
+                method: "DELETE",
+                credentials: "include",
+            });
+    
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || "Failed to delete device.");
+            }
+    
+            setSuccessMessage("Device deleted successfully!");
+            await fetchDevices(); // โหลดข้อมูลอุปกรณ์ใหม่
+            setTimeout(() => {
+                setSuccessMessage("");
+                toggleDeleteDeviceDialog(); // ปิด Pop-Up
+            }, 2000);
+        } catch (err) {
+            setError(err.message);
+            setTimeout(() => setError(""), 2000);
+        }
+    };    
+
+    //------------------------------------------------------------------------------------------------
+
     // ฟังก์ชันสำหรับเปลี่ยนหน้า
     // สำหรับ ตารางผู้ใช้
     const handlePageChange = (event, newPage) => {
@@ -741,6 +774,13 @@ const AdminHome = () => {
                                                         style={{ marginRight: "10px" }}
                                                     >
                                                         Update
+                                                    </Button>
+                                                    <Button
+                                                        variant="contained"
+                                                        color="secondary"
+                                                        onClick={() => toggleDeleteDeviceDialog(device.api_key, device.device_name)}
+                                                    >
+                                                        Delete
                                                     </Button>
                                                 </TableCell>
                                             </TableRow>
@@ -1055,6 +1095,29 @@ const AdminHome = () => {
                 <DialogActions>
                     <Button onClick={handleUpdateDevice} color="primary">Submit</Button>
                     <Button onClick={toggleUpdateDeviceDialog}>Cancel</Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Pop-Up Delete Device */}
+            <Dialog open={isDeleteDeviceDialogOpen} onClose={toggleDeleteDeviceDialog}>
+                <DialogTitle>
+                    Are you sure you want to delete the device <strong>{targetDeviceName}</strong>?
+                </DialogTitle>
+                <DialogContent>
+                    {error && (
+                        <p style={{ color: "red", marginTop: "10px", marginBottom: "0" }}>
+                            {error}
+                        </p>
+                    )}
+                    {successMessage && (
+                        <p style={{ color: "green", marginTop: "10px" }}>
+                            {successMessage}
+                        </p>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleDeleteDevice}>Delete</Button>
+                    <Button onClick={toggleDeleteDeviceDialog}>Cancel</Button>
                 </DialogActions>
             </Dialog>
         </div>
