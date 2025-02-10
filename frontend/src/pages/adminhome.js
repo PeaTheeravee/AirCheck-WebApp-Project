@@ -702,6 +702,7 @@ const AdminHome = () => {
                             <Table>
                                 <TableHead>
                                     <TableRow>
+                                        <TableCell>Device ID</TableCell>
                                         <TableCell>Device Name</TableCell>
                                         <TableCell>Location</TableCell>
                                         <TableCell>Status</TableCell>
@@ -719,6 +720,15 @@ const AdminHome = () => {
                                     ) : filteredDevices.length > 0 ? (
                                         filteredDevices.map((device) => (
                                             <TableRow key={device.api_key}>
+                                                <TableCell>
+                                                    {device.api_key}
+                                                    <IconButton 
+                                                        onClick={() => navigator.clipboard.writeText(device.api_key)}
+                                                        style={{ marginLeft: "10px" }}
+                                                    >
+                                                        📋
+                                                    </IconButton>                                               
+                                                </TableCell>
                                                 <TableCell>{device.device_name}</TableCell>
                                                 <TableCell>{device.location}</TableCell>
                                                 <TableCell>{device.device_status}</TableCell>
