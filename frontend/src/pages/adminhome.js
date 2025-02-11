@@ -48,6 +48,7 @@ const AdminHome = () => {
     //------------------------------------------------------------------------------------------------
     const [updateDeviceData, setUpdateDeviceData] = useState({ device_name: "", location: "", device_settime: "" });
     const [newDeviceData, setNewDeviceData] = useState({ device_name: "", location: ""});
+    const [monthsToDelete, setMonthsToDelete] = useState(1);
 
     const [showPassword, setShowPassword] = useState({ current: false, new: false });
     const [isUserDetailsDialogOpen, setIsUserDetailsDialogOpen] = useState(false);
@@ -60,6 +61,7 @@ const AdminHome = () => {
     const [isCreateDeviceDialogOpen, setIsCreateDeviceDialogOpen] = useState(false);
     const [isUpdateDeviceDialogOpen, setIsUpdateDeviceDialogOpen] = useState(false);
     const [isDeleteDeviceDialogOpen, setIsDeleteDeviceDialogOpen] = useState(false);
+    const [isDeleteDataDialogOpen, setIsDeleteDataDialogOpen] = useState(false);
 
     //สำหรับ ตารางผู้ใช้
     const [searchTerm, setSearchTerm] = useState("");
@@ -133,6 +135,14 @@ const AdminHome = () => {
         setTargetDeviceName(device_name);
         setIsDeleteDeviceDialogOpen(!isDeleteDeviceDialogOpen);
     };
+
+    const toggleDeleteDataDialog = (apiKey = null, device_name = "") => {
+        setMonthsToDelete(1);
+        setTargetApiKey(apiKey); // เก็บ ApiKey ใน state
+        setTargetDeviceName(device_name);
+        setIsDeleteDataDialogOpen(!isDeleteDataDialogOpen);
+    };
+    
     //================================================================================================
 
     // ดึงข้อมูลผู้ใช้ที่ล็อกอินอยู่
@@ -527,6 +537,36 @@ const AdminHome = () => {
         }
     };    
 
+    // ฟังก์ชันลบข้อมูลอุปกรณ์
+    const handleDeleteDataByMonth = async () => {
+        if (monthsToDelete < 1) {
+            setError("Months to delete must be at least 1.");
+            setTimeout(() => setError(""), 2000);
+            return;
+        }
+    
+        try {
+            const response = await fetch(`http://localhost:8000/devices/delete_by_month/${targetApiKey}?months_to_delete=${monthsToDelete}`, {
+                method: "DELETE",
+                credentials: "include",
+            });
+    
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || "Failed to delete data.");
+            }
+    
+            setSuccessMessage(`Deleted ${monthsToDelete} months of data successfully.`);
+            setTimeout(() => {
+                setSuccessMessage("");
+                toggleDeleteDataDialog(); // ปิด Pop-Up
+            }, 2000);
+        } catch (err) {
+            setError(err.message);
+            setTimeout(() => setError(""), 2000);
+        }
+    };
+    
     //------------------------------------------------------------------------------------------------
 
     // ฟังก์ชันสำหรับเปลี่ยนหน้า
@@ -838,15 +878,26 @@ const AdminHome = () => {
                                                         variant="contained"
                                                         color="error"
                                                         onClick={() => toggleDeleteDeviceDialog(device.api_key, device.device_name)}
+                                                        style={{ marginRight: "10px" }}
                                                     >
                                                         Delete
                                                     </Button>
+
+                                                    <Button
+                                                        variant="contained"
+                                                        color="error"
+                                                        onClick={() => toggleDeleteDataDialog(device.api_key, device.device_name)}
+                                                        style={{ marginRight: "10px" }}
+                                                    >
+                                                        Delete Data
+                                                    </Button>
+
                                                 </TableCell>
                                             </TableRow>
                                         ))
                                     ) : (
                                         <TableRow>
-                                            <TableCell colSpan={4} align="center">
+                                            <TableCell colSpan={6} align="center">
                                                 No devices found.
                                             </TableCell>
                                         </TableRow>
@@ -1181,7 +1232,13 @@ const AdminHome = () => {
                         fullWidth
                         margin="dense"
                         value={updateDeviceData.device_settime}
-                        onChange={(e) => setUpdateDeviceData({ ...updateDeviceData, device_settime: e.target.value })}
+                        onChange={(e) => {
+                            const value = parseInt(e.target.value, 10);
+                            setUpdateDeviceData({ 
+                                ...updateDeviceData, 
+                                device_settime: value < 1 ? 1 : value  // ป้องกันค่าต่ำกว่า 1
+                            });
+                        }}
                     />
                     {error && ( 
                         <p style={{ color: "red", marginTop: "10px" }}>
@@ -1220,6 +1277,40 @@ const AdminHome = () => {
                 <DialogActions>
                     <Button onClick={handleDeleteDevice}>Delete</Button>
                     <Button onClick={toggleDeleteDeviceDialog}>Cancel</Button>
+                </DialogActions>
+            </Dialog>
+            
+            {/* Pop-Up Delete Device Data */}
+            <Dialog open={isDeleteDataDialogOpen} onClose={toggleDeleteDataDialog}>
+                <DialogTitle>
+                    Are you sure you want to delete the device data <strong>{targetDeviceName}</strong>?
+                </DialogTitle>
+                <DialogContent>
+                    <TextField
+                        label="Months to Delete"
+                        type="number"
+                        fullWidth
+                        margin="dense"
+                        value={monthsToDelete}
+                        onChange={(e) => {
+                            const value = parseInt(e.target.value, 10);
+                            setMonthsToDelete(value < 1 ? 1 : value); // ป้องกันค่าต่ำกว่า 1
+                        }}
+                    />
+                    {error && (
+                        <p style={{ color: "red", marginTop: "10px", marginBottom: "0" }}>
+                            {error}
+                        </p>
+                    )}
+                    {successMessage && (
+                        <p style={{ color: "green", marginTop: "10px" }}>
+                            {successMessage}
+                        </p>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleDeleteDataByMonth}>Delete</Button>
+                    <Button onClick={toggleDeleteDataDialog}>Cancel</Button>
                 </DialogActions>
             </Dialog>
         </div>
