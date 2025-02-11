@@ -754,6 +754,7 @@ const AdminHome = () => {
                             <Table>
                                 <TableHead>
                                     <TableRow>
+                                        <TableCell>User ID</TableCell>
                                         <TableCell>Username</TableCell>
                                         <TableCell>First Name</TableCell>
                                         <TableCell>Last Name</TableCell>
@@ -770,6 +771,7 @@ const AdminHome = () => {
                                     ) : filteredUsers.length > 0 ? (
                                         filteredUsers.map((user) => (
                                             <TableRow key={user.id}>
+                                                <TableCell>{user.id}</TableCell>
                                                 <TableCell>{user.username}</TableCell>
                                                 <TableCell>{user.first_name}</TableCell>
                                                 <TableCell>{user.last_name}</TableCell>
@@ -810,7 +812,7 @@ const AdminHome = () => {
                                         ))
                                     ) : (
                                         <TableRow>
-                                            <TableCell colSpan={4} align="center">
+                                            <TableCell colSpan={5} align="center">
                                                 No users found.
                                             </TableCell>
                                         </TableRow>
@@ -867,6 +869,7 @@ const AdminHome = () => {
                                         <TableCell>Location</TableCell>
                                         <TableCell>Status</TableCell>
                                         <TableCell>Set Time (min)</TableCell>
+                                        <TableCell>Added By</TableCell>
                                         <TableCell>Actions</TableCell>
                                     </TableRow>
                                 </TableHead>
@@ -893,6 +896,7 @@ const AdminHome = () => {
                                                 <TableCell>{device.location}</TableCell>
                                                 <TableCell>{device.device_status}</TableCell>
                                                 <TableCell>{device.device_settime}</TableCell>
+                                                <TableCell>{device.user_id}</TableCell>
                                                 <TableCell>
                                                     <Button
                                                         variant="contained"
@@ -926,7 +930,7 @@ const AdminHome = () => {
                                         ))
                                     ) : (
                                         <TableRow>
-                                            <TableCell colSpan={6} align="center">
+                                            <TableCell colSpan={7} align="center">
                                                 No devices found.
                                             </TableCell>
                                         </TableRow>
