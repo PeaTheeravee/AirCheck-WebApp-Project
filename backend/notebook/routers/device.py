@@ -159,8 +159,8 @@ async def get_timestamps_by_api_key(
     result = await session.exec(select(DBScore.timestamp).where(DBScore.api_key == api_key))
     timestamps = result.all()
 
-    if not timestamps:
-        raise HTTPException(status_code=404, detail="No timestamps found for the provided API Key.")
+    #if not timestamps:
+    #    raise HTTPException(status_code=404, detail="No timestamps found for the provided API Key.")
 
     # แปลงเป็นปีและเดือนเท่านั้น
     year_months = [ts.strftime("%Y-%m") for ts in timestamps if ts]

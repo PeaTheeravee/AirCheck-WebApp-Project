@@ -58,6 +58,7 @@ const AdminHome = () => {
     const [isChangeSomeonePasswordDialogOpen, setIsChangeSomeonePasswordDialogOpen] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     //------------------------------------------------------------------------------------------------
+    const [timestamps, setTimestamps] = useState([]);
     const [isCreateDeviceDialogOpen, setIsCreateDeviceDialogOpen] = useState(false);
     const [isUpdateDeviceDialogOpen, setIsUpdateDeviceDialogOpen] = useState(false);
     const [isDeleteDeviceDialogOpen, setIsDeleteDeviceDialogOpen] = useState(false);
@@ -566,6 +567,27 @@ const AdminHome = () => {
             setTimeout(() => setError(""), 2000);
         }
     };
+
+    // ฟังก์ชันดึงข้อมูล timestamps ตาม API Key
+    const fetchTimestamps = useCallback(async () => {
+        try {
+            const response = await fetch(`http://localhost:8000/devices/timestamps/${targetApiKey}`, {
+                method: "GET",
+                credentials: "include",
+            });
+    
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || "Failed to fetch timestamps.");
+            }
+    
+            const data = await response.json();
+            setTimestamps(data);
+        } catch (err) {
+            setError(err.message);
+            setTimeout(() => setError(""), 2000);
+        }
+    }, [targetApiKey]);
     
     //------------------------------------------------------------------------------------------------
 
@@ -660,6 +682,13 @@ const AdminHome = () => {
         }
     }, [isUserDetailsDialogOpen]);
 
+    // เรียก API เมื่อ Pop-Up เปิดขึ้น
+    useEffect(() => {
+        if (isDeleteDataDialogOpen && targetApiKey) {
+            setTimestamps([]); // ✅ รีเซ็ต timestamps ก่อนโหลดใหม่
+            fetchTimestamps();
+        }
+    }, [isDeleteDataDialogOpen, targetApiKey, fetchTimestamps]);
 
     //================================================================================================
     return (
@@ -1286,6 +1315,19 @@ const AdminHome = () => {
                     Are you sure you want to delete the device data <strong>{targetDeviceName}</strong>?
                 </DialogTitle>
                 <DialogContent>
+                    {/* แสดง timestamps ที่ได้จาก API */}
+                    {timestamps.length > 0 ? (
+                        <div>
+                            <p><strong>Available Data:</strong></p>
+                            <ul>
+                                {timestamps.map((timestamp, index) => (
+                                    <li key={index}>{timestamp}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    ) : (
+                        <p>No data found for this device.</p>
+                    )}
                     <TextField
                         label="Months to Delete"
                         type="number"
