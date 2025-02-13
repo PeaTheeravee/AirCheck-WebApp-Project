@@ -49,7 +49,7 @@ async def create_device(
 @router.get("/all")
 async def read_devices(
     session: Annotated[AsyncSession, Depends(get_session)],
-    current_user: Annotated[UserRead, Depends(get_current_active_user)],
+    #current_user: Annotated[UserRead, Depends(get_current_active_user)],
     page: int = 1,  # หน้าปัจจุบัน (default = 1)
     size: int = 5,  # จำนวนรายการต่อหน้า (default = 5)
 ) -> DeviceList:
