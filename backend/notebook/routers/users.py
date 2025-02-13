@@ -83,7 +83,7 @@ async def get_all_users(
     session: Annotated[AsyncSession, Depends(get_session)],
     current_user: Annotated[UserRead, Depends(get_current_active_superuser)], 
     page: int = 1,  # หน้าปัจจุบัน (default = 1)
-    size: int = 5,  # จำนวนรายการต่อหน้า (default = 5)
+    size: int = 8,  # จำนวนรายการต่อหน้า (default = 8)
 ) -> UserList:
 
     # Query จำนวนรายการทั้งหมด

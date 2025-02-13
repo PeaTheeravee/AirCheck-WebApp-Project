@@ -654,12 +654,17 @@ const AdminHome = () => {
 
     //------------------------------------------------------------------------------------------------
 
-    // ใช้ useEffect เมื่อโหลดหน้า
+    // ดึงข้อมูลอุปกรณ์ทุกๆ 1 นาที
     useEffect(() => {
-        fetchUserData();
-        fetchDevices();
+        const interval = setInterval(fetchDevices, 60000);
+        return () => clearInterval(interval); 
     }, [fetchDevices]);
 
+    // ดึงข้อมูลผู้ใช้ตอนโหลดหน้า
+    useEffect(() => {
+        fetchUserData();
+    }, []);
+    
     useEffect(() => {
         if (activeTab === "users") {
             fetchUserAll();

@@ -18,9 +18,9 @@ const Home = () => {
     const [devices, setDevices] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(0);
-    const [pageSize, setPageSize] = useState(6);
+    const [pageSize, setPageSize] = useState(8);
 
-    // 📌 ดึงข้อมูลอุปกรณ์ทั้งหมด + ข้อมูลจาก `showdetect`
+    // ฟังก์ชันดึงข้อมูลอุปกรณ์
     const fetchDevices = useCallback(async () => {
         try {
             const response = await fetch("http://localhost:8000/devices/all", { credentials: "include" });
@@ -47,21 +47,21 @@ const Home = () => {
         }
     }, []);
 
-    // 📌 useEffect → ดึงข้อมูลครั้งแรก + ตั้ง interval ทุก 60 วินาที
+    // useEffect → ดึงข้อมูลครั้งแรก + ดึงข้อมูลอุปกรณ์ทุกๆ 1 นาที
     useEffect(() => {
         fetchDevices();
         const interval = setInterval(fetchDevices, 60000);
         return () => clearInterval(interval);
     }, [fetchDevices]);
 
-    // 📌 ค้นหาอุปกรณ์
+    // กรองข้อมูลในตารางอุปกรณ์โดยใช้ searchTerm
     const filteredDevices = devices.filter((device) => {
         const term = searchTerm.trim().toLowerCase();
         if (term === "") return true;
         return device.device_name.toLowerCase().includes(term) || device.location.toLowerCase().includes(term);
     });
 
-    // 📌 Pagination
+    // Pagination
     const paginatedDevices = filteredDevices.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
 
     return (
@@ -95,8 +95,8 @@ const Home = () => {
             <Grid container spacing={2} style={{ padding: "20px" }}>
                 {paginatedDevices.length > 0 ? (
                     paginatedDevices.map((device) => (
-                        <Grid item xs={12} sm={6} md={4} key={device.api_key}>
-                            <Card variant="outlined" sx={{ height: "100%" }}>
+                        <Grid item xs={12} sm={6} md={3}>
+                            <Card variant="outlined" sx={{ maxWidth: "350px", width: "100%" }}>
                                 <CardContent>
                                     <Typography variant="h6">{device.device_name}</Typography>
                                     <Typography variant="body2" color="textSecondary">📍 {device.location}</Typography>
@@ -117,7 +117,7 @@ const Home = () => {
 
             {/* 📌 Pagination */}
             <TablePagination
-                rowsPerPageOptions={[6, 12, 24]}
+                rowsPerPageOptions={[4, 8, 12]}
                 component="div"
                 count={filteredDevices.length}
                 rowsPerPage={pageSize}
