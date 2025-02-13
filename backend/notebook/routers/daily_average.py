@@ -15,7 +15,9 @@ async def get_daily_averages(
     session: Annotated[AsyncSession, Depends(get_session)],
 ) -> list[DailyAverageRead]:
     result = await session.exec(
-        select(DBDailyAverage).where(DBDailyAverage.api_key == api_key)
+        select(DBDailyAverage)
+        .where(DBDailyAverage.api_key == api_key)
+        #.order_by(DBDailyAverage.date)  # เรียงลำดับวันที่จากน้อยไปมาก
     )
     daily_averages = result.all()
 

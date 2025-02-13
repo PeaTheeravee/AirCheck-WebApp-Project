@@ -155,17 +155,14 @@ async def get_timestamps_by_api_key(
     session: Annotated[AsyncSession, Depends(get_session)],
     current_user: Annotated[UserRead, Depends(get_current_active_user)],  
 ) -> list[str]:
-    # ดึงข้อมูล timestamp ตาม API Key
-    result = await session.exec(select(DBScore.timestamp).where(DBScore.api_key == api_key))
-    timestamps = result.all()
-
-    #if not timestamps:
-    #    raise HTTPException(status_code=404, detail="No timestamps found for the provided API Key.")
+    # ดึงข้อมูล date ตาม API Key จาก DBDailyAverage
+    result = await session.exec(select(DBDailyAverage.date).where(DBDailyAverage.api_key == api_key))
+    dates = result.all()
 
     # แปลงเป็นปีและเดือนเท่านั้น
-    year_months = [ts.strftime("%Y-%m") for ts in timestamps if ts]
+    year_months = [d.strftime("%Y-%m") for d in dates if d]
 
-    # ลบข้อมูลที่ซ้ำกัน
+    # ลบข้อมูลที่ซ้ำกันและเรียงลำดับ
     unique_year_months = sorted(set(year_months))
 
     return unique_year_months
