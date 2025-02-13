@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import SearchIcon from "@mui/icons-material/Search";
@@ -9,8 +9,7 @@ import {
     Grid,
     TextField,
     InputAdornment,
-    Button,
-    TablePagination
+    TablePagination,
 } from "@mui/material";
 import "./home.css";
 
@@ -19,10 +18,10 @@ const Home = () => {
     const [devices, setDevices] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(0);
-    const [pageSize, setPageSize] = useState(6); // ตั้งค่าให้แสดง 6 อุปกรณ์ต่อหน้า
+    const [pageSize, setPageSize] = useState(6);
 
-    // 📌 ฟังก์ชันดึงข้อมูลอุปกรณ์ + showdetect
-    const fetchDevices = async () => {
+    // 📌 ดึงข้อมูลอุปกรณ์ทั้งหมด + ข้อมูลจาก `showdetect`
+    const fetchDevices = useCallback(async () => {
         try {
             const response = await fetch("http://localhost:8000/devices/all", { credentials: "include" });
             if (!response.ok) throw new Error("Failed to fetch devices.");
@@ -46,18 +45,14 @@ const Home = () => {
         } catch (err) {
             console.error(err);
         }
-    };
+    }, []);
 
     // 📌 useEffect → ดึงข้อมูลครั้งแรก + ตั้ง interval ทุก 60 วินาที
     useEffect(() => {
-        fetchDevices(); // ดึงข้อมูลครั้งแรก
-
-        const interval = setInterval(() => {
-            fetchDevices(); // ดึงข้อมูลทุกๆ 60 วินาที
-        }, 60000);
-
-        return () => clearInterval(interval); // cleanup ตอน component unmount
-    }, []);
+        fetchDevices();
+        const interval = setInterval(fetchDevices, 60000);
+        return () => clearInterval(interval);
+    }, [fetchDevices]);
 
     // 📌 ค้นหาอุปกรณ์
     const filteredDevices = devices.filter((device) => {
@@ -105,12 +100,12 @@ const Home = () => {
                                 <CardContent>
                                     <Typography variant="h6">{device.device_name}</Typography>
                                     <Typography variant="body2" color="textSecondary">📍 {device.location}</Typography>
-                                    <Typography variant="body2">PM2.5: {device.pm2_5}</Typography>
-                                    <Typography variant="body2">PM10: {device.pm10}</Typography>
-                                    <Typography variant="body2">CO2: {device.co2}</Typography>
-                                    <Typography variant="body2">TVOC: {device.tvoc}</Typography>
-                                    <Typography variant="body2">Humidity: {device.humidity}%</Typography>
-                                    <Typography variant="body2">Temperature: {device.temperature}°C</Typography>
+                                    <Typography variant="body2"><strong>ค่า PM 2.5 ที่วัดได้:</strong> {device.pm2_5} µg/m³</Typography>
+                                    <Typography variant="body2"><strong>ค่า PM 10 ที่วัดได้:</strong> {device.pm10} µg/m³</Typography>
+                                    <Typography variant="body2"><strong>ค่า CO2 ที่วัดได้:</strong> {device.co2} ppm</Typography>
+                                    <Typography variant="body2"><strong>ค่า TVOC ที่วัดได้:</strong> {device.tvoc} ppb</Typography>
+                                    <Typography variant="body2"><strong>ค่า อุณหภูมิ ที่วัดได้:</strong> {device.temperature}°C</Typography>
+                                    <Typography variant="body2"><strong>ค่า ความชื้นสัมพัทธ์ ที่วัดได้:</strong> {device.humidity}%</Typography>
                                 </CardContent>
                             </Card>
                         </Grid>
