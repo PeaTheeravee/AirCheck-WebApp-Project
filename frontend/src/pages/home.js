@@ -16,14 +16,19 @@ import "./home.css";
 const Home = () => {
     const navigate = useNavigate();
     const [devices, setDevices] = useState([]);
+
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(0);
     const [pageSize, setPageSize] = useState(8);
+    const [totalDevices, setTotalDevices] = useState(0); 
 
     // ฟังก์ชันดึงข้อมูลอุปกรณ์
     const fetchDevices = useCallback(async () => {
         try {
-            const response = await fetch("http://localhost:8000/devices/all", { credentials: "include" });
+            const response = await fetch(`http://localhost:8000/devices/all?page=${currentPage + 1}&size=${pageSize}`, { 
+                credentials: "include" 
+            });
+
             if (!response.ok) throw new Error("Failed to fetch devices.");
             const data = await response.json();
 
@@ -42,10 +47,45 @@ const Home = () => {
             );
 
             setDevices(devicesWithData.filter((d) => d)); // กรอง null ออก
+            setTotalDevices(data.total); // ✅ อัปเดตจำนวนอุปกรณ์ทั้งหมด
         } catch (err) {
             console.error(err);
         }
-    }, []);
+    }, [currentPage, pageSize]);
+
+    //------------------------------------------------------------------------------------------------
+
+    // ฟังก์ชันสำหรับเปลี่ยนหน้า สำหรับ อุปกรณ์
+    const handlePageChange = (event, newPage) => {
+        setCurrentPage(newPage);
+    };
+
+    // ฟังก์ชันสำหรับเปลี่ยนจำนวนรายการต่อหน้า
+    const handleRowsPerPageChange = (event) => {
+        setPageSize(parseInt(event.target.value, 10));
+        setCurrentPage(0); // รีเซ็ตหน้า
+    };
+
+    // ฟังก์ชันค้นหา สำหรับ อุปกรณ์
+    const handleSearch = (event) => {
+        setSearchTerm(event.target.value);
+        setCurrentPage(0); // รีเซ็ตหน้าเมื่อมีการค้นหา
+    };
+
+    // กรองข้อมูลในตารางอุปกรณ์โดยใช้ searchTerm
+    const filteredDevices = devices.filter((device) => {
+        // ตรวจสอบว่า searchTerm ไม่ว่าง และมีการ trim ค่า searchTerm
+        const term = searchTerm.trim().toLowerCase();
+        if (term === "") {
+            return true; // ถ้า searchTerm ว่าง แสดงอุปกรณ์ทั้งหมด
+        }
+        return(
+            device.device_name.toLowerCase().includes(term) || 
+            device.location.toLowerCase().includes(term)
+        );
+    });
+
+    //------------------------------------------------------------------------------------------------
 
     // useEffect → ดึงข้อมูลครั้งแรก + ดึงข้อมูลอุปกรณ์ทุกๆ 1 นาที
     useEffect(() => {
@@ -53,16 +93,6 @@ const Home = () => {
         const interval = setInterval(fetchDevices, 60000);
         return () => clearInterval(interval);
     }, [fetchDevices]);
-
-    // กรองข้อมูลในตารางอุปกรณ์โดยใช้ searchTerm
-    const filteredDevices = devices.filter((device) => {
-        const term = searchTerm.trim().toLowerCase();
-        if (term === "") return true;
-        return device.device_name.toLowerCase().includes(term) || device.location.toLowerCase().includes(term);
-    });
-
-    // Pagination
-    const paginatedDevices = filteredDevices.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
 
     return (
         <div>
@@ -81,7 +111,7 @@ const Home = () => {
                 fullWidth
                 margin="normal"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={handleSearch}
                 InputProps={{
                     startAdornment: (
                         <InputAdornment position="start">
@@ -93,9 +123,9 @@ const Home = () => {
 
             {/* 📌 แสดงข้อมูลอุปกรณ์ */}
             <Grid container spacing={2} style={{ padding: "20px" }}>
-                {paginatedDevices.length > 0 ? (
-                    paginatedDevices.map((device) => (
-                        <Grid item xs={12} sm={6} md={3}>
+                {filteredDevices.length > 0 ? (
+                    filteredDevices.map((device) => (
+                        <Grid item xs={12} sm={6} md={3} key={device.api_key}>
                             <Card variant="outlined" sx={{ maxWidth: "350px", width: "100%" }}>
                                 <CardContent>
                                     <Typography variant="h6">{device.device_name}</Typography>
@@ -114,19 +144,14 @@ const Home = () => {
                     <Typography variant="h6" style={{ margin: "20px" }}>No device data available.</Typography>
                 )}
             </Grid>
-
-            {/* 📌 Pagination */}
             <TablePagination
                 rowsPerPageOptions={[4, 8, 12]}
                 component="div"
-                count={filteredDevices.length}
+                count={totalDevices} 
                 rowsPerPage={pageSize}
                 page={currentPage}
-                onPageChange={(event, newPage) => setCurrentPage(newPage)}
-                onRowsPerPageChange={(event) => {
-                    setPageSize(parseInt(event.target.value, 10));
-                    setCurrentPage(0);
-                }}
+                onPageChange={handlePageChange}
+                onRowsPerPageChange={handleRowsPerPageChange}
             />
         </div>
     );
