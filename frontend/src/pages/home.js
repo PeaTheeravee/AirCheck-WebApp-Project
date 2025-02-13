@@ -21,45 +21,52 @@ const Home = () => {
     const [currentPage, setCurrentPage] = useState(0);
     const [pageSize, setPageSize] = useState(6); // ตั้งค่าให้แสดง 6 อุปกรณ์ต่อหน้า
 
-    // 📌 ดึงข้อมูลอุปกรณ์ทั้งหมด + ข้อมูลจาก `showdetect`
+    // 📌 ฟังก์ชันดึงข้อมูลอุปกรณ์ + showdetect
+    const fetchDevices = async () => {
+        try {
+            const response = await fetch("http://localhost:8000/devices/all", { credentials: "include" });
+            if (!response.ok) throw new Error("Failed to fetch devices.");
+            const data = await response.json();
+
+            // 📌 ดึงข้อมูล showdetect ของแต่ละอุปกรณ์
+            const devicesWithData = await Promise.all(
+                data.devices.map(async (device) => {
+                    try {
+                        const detectResponse = await fetch(`http://localhost:8000/showdetect/${device.api_key}`);
+                        if (!detectResponse.ok) return null;
+                        const detectData = await detectResponse.json();
+                        return { ...device, ...detectData };
+                    } catch {
+                        return null;
+                    }
+                })
+            );
+
+            setDevices(devicesWithData.filter((d) => d)); // กรอง null ออก
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    // 📌 useEffect → ดึงข้อมูลครั้งแรก + ตั้ง interval ทุก 60 วินาที
     useEffect(() => {
-        const fetchDevices = async () => {
-            try {
-                const response = await fetch("http://localhost:8000/devices/all", { credentials: "include" });
-                if (!response.ok) throw new Error("Failed to fetch devices.");
-                const data = await response.json();
+        fetchDevices(); // ดึงข้อมูลครั้งแรก
 
-                // 📌 ดึงข้อมูล showdetect ของแต่ละอุปกรณ์
-                const devicesWithData = await Promise.all(
-                    data.devices.map(async (device) => {
-                        try {
-                            const detectResponse = await fetch(`http://localhost:8000/showdetect/${device.api_key}`);
-                            if (!detectResponse.ok) return null;
-                            const detectData = await detectResponse.json();
-                            return { ...device, ...detectData };
-                        } catch {
-                            return null;
-                        }
-                    })
-                );
+        const interval = setInterval(() => {
+            fetchDevices(); // ดึงข้อมูลทุกๆ 60 วินาที
+        }, 60000);
 
-                setDevices(devicesWithData.filter((d) => d)); // กรอง null ออก
-            } catch (err) {
-                console.error(err);
-            }
-        };
-
-        fetchDevices();
+        return () => clearInterval(interval); // cleanup ตอน component unmount
     }, []);
 
-    // 📌 ค้นหาข้อมูลอุปกรณ์
+    // 📌 ค้นหาอุปกรณ์
     const filteredDevices = devices.filter((device) => {
         const term = searchTerm.trim().toLowerCase();
-        if (term === "") return true; // ถ้าไม่มีการค้นหา แสดงทั้งหมด
+        if (term === "") return true;
         return device.device_name.toLowerCase().includes(term) || device.location.toLowerCase().includes(term);
     });
 
-    // 📌 คำนวณ Pagination
+    // 📌 Pagination
     const paginatedDevices = filteredDevices.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
 
     return (
@@ -89,7 +96,7 @@ const Home = () => {
                 }}
             />
 
-            {/* 📌 แสดงข้อมูลอุปกรณ์ใน MUI Card */}
+            {/* 📌 แสดงข้อมูลอุปกรณ์ */}
             <Grid container spacing={2} style={{ padding: "20px" }}>
                 {paginatedDevices.length > 0 ? (
                     paginatedDevices.map((device) => (
@@ -123,7 +130,7 @@ const Home = () => {
                 onPageChange={(event, newPage) => setCurrentPage(newPage)}
                 onRowsPerPageChange={(event) => {
                     setPageSize(parseInt(event.target.value, 10));
-                    setCurrentPage(0); // รีเซ็ตไปหน้าแรกเมื่อเปลี่ยนขนาดหน้า
+                    setCurrentPage(0);
                 }}
             />
         </div>
