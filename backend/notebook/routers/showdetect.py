@@ -8,16 +8,37 @@ from notebook.models import get_session
 
 router = APIRouter(prefix="/showdetect", tags=["showdetect"])
 
-@router.get("/{api_key}")
-async def get_showdetect_by_api_key(
-    api_key: str,
+@router.get("/all")
+async def get_all_showdetects(
     session: Annotated[AsyncSession, Depends(get_session)],
-) -> ShowRead:
-    # ค้นหาข้อมูลล่าสุดสำหรับ api_key
-    result = await session.exec(select(DBShow).where(DBShow.api_key == api_key))
-    show = result.one_or_none()
+    page: int = 1,  # หน้าปัจจุบัน (default = 1)
+    size: int = 8,  # จำนวนรายการต่อหน้า (default = 8)
+) -> ShowList:
 
-    if not show:
-        raise HTTPException(status_code=404, detail=f"No detect data found for API Key: {api_key}.")
+    # Query จำนวนรายการทั้งหมด
+    total_showdetects_query = await session.exec(select(DBShow))
+    total_showdetects = len(total_showdetects_query.all())  # จำนวนทั้งหมด
 
-    return ShowRead.model_validate(show)  
+    # คำนวณ offset และ limit สำหรับ pagination
+    offset = (page - 1) * size
+
+    # Query รายการ showdetect
+    result = await session.exec(
+        select(DBShow).offset(offset).limit(size)
+    )
+    showdetects = result.all()
+
+    if not showdetects:
+        raise HTTPException(status_code=404, detail="No showdetect data found.")
+
+    # คำนวณจำนวนหน้าทั้งหมด
+    total_pages = (total_showdetects + size - 1) // size
+
+    # สร้าง Response พร้อมข้อมูล Pagination
+    return ShowList(
+        shows=[ShowRead.model_validate(show) for show in showdetects],
+        total=total_showdetects,
+        page=page,
+        size=size,
+        total_pages=total_pages,
+    )

@@ -141,7 +141,9 @@ const Home = () => {
                         </Grid>
                     ))
                 ) : (
-                    <Typography variant="h6" style={{ margin: "20px" }}>No device data available.</Typography>
+                    <Typography variant="h6" style={{ margin: "20px" }}>
+                        No device data available.
+                    </Typography>
                 )}
             </Grid>
             <TablePagination
