@@ -67,14 +67,14 @@ const AdminHome = () => {
     //สำหรับ ตารางผู้ใช้
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(0);
-    const [pageSize, setPageSize] = useState(5);
+    const [pageSize, setPageSize] = useState(8);
     const [totalUsers, setTotalUsers] = useState(0);
     const [loading, setLoading] = useState(false);
 
     //สำหรับ ตารางอุปกรณ์
     const [deviceSearchTerm, setDeviceSearchTerm] = useState("");
     const [devicePage, setDevicePage] = useState(0);
-    const [deviceSize, setDeviceSize] = useState(5);
+    const [deviceSize, setDeviceSize] = useState(8);
     const [totalDevices, setTotalDevices] = useState(0);
     const [deviceLoading, setDeviceLoading] = useState(false);
 
@@ -826,7 +826,7 @@ const AdminHome = () => {
                             </Table>
                         </TableContainer>
                         <TablePagination
-                            rowsPerPageOptions={[5, 10, 25]}
+                            rowsPerPageOptions={[8, 12, 16]}
                             component="div"
                             count={totalUsers}
                             rowsPerPage={pageSize}
@@ -945,7 +945,7 @@ const AdminHome = () => {
                         </TableContainer>
 
                         <TablePagination
-                            rowsPerPageOptions={[5, 10, 25]}
+                            rowsPerPageOptions={[8, 12, 16]}
                             component="div"
                             count={totalDevices}
                             rowsPerPage={deviceSize}
