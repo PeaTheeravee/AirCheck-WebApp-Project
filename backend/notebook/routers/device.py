@@ -61,9 +61,9 @@ async def read_devices(
     # คำนวณ offset และ limit สำหรับ pagination
     offset = (page - 1) * size
 
-    # Query รายการของผู้ใช้
+    # Query รายการของอุปกรณ์และเรียงตาม ID จากเก่าไปใหม่
     result = await session.exec(
-        select(DBDevice).offset(offset).limit(size)
+        select(DBDevice).order_by(DBDevice.id.asc()).offset(offset).limit(size)
     )
     dbdevices = result.all()
 

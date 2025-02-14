@@ -22,9 +22,9 @@ async def get_all_showdetects(
     # คำนวณ offset และ limit สำหรับ pagination
     offset = (page - 1) * size
 
-    # Query รายการ showdetect
+    # Query รายการ showdetect และเรียงลำดับตาม ID จากเก่าไปใหม่
     result = await session.exec(
-        select(DBShow).offset(offset).limit(size)
+        select(DBShow).order_by(DBShow.id.asc()).offset(offset).limit(size)
     )
     showdetects = result.all()
 

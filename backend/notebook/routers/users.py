@@ -93,9 +93,9 @@ async def get_all_users(
     # คำนวณ offset และ limit สำหรับ pagination
     offset = (page - 1) * size
 
-    # Query รายการของผู้ใช้
+    # Query รายการของผู้ใช้และเรียงตาม ID จากเก่าไปใหม่
     result = await session.exec(
-        select(DBUser).offset(offset).limit(size)
+        select(DBUser).order_by(DBUser.id.asc()).offset(offset).limit(size)
     )
     users = result.all()
 
