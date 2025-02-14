@@ -19,9 +19,11 @@ const Home = () => {
     const [showdetects, setShowdetects] = useState([]);
 
     const [searchTerm, setSearchTerm] = useState("");
+
     const [currentPage, setCurrentPage] = useState(0);
     const [pageSize, setPageSize] = useState(8);
-    const [totalDevices, setTotalDevices] = useState(0);
+    const [totalPage, setTotalPage] = useState(0);
+
     const [loading, setLoading] = useState(false);
 
     // ✅ ฟังก์ชันดึงข้อมูลอุปกรณ์ (ใช้ Pagination)
@@ -40,7 +42,7 @@ const Home = () => {
 
             const data = await response.json();
             setDevices(data.devices);
-            setTotalDevices(data.total);
+            setTotalPage(data.total);
         } catch (err) {
             console.error("Error fetching devices:", err.message);
         } finally {
@@ -63,6 +65,7 @@ const Home = () => {
 
             const data = await response.json();
             setShowdetects(data.shows);
+            setTotalPage(data.total);
         } catch (err) {
             console.error("Error fetching showdetect data:", err.message);
         }
@@ -181,7 +184,7 @@ const Home = () => {
             <TablePagination
                 rowsPerPageOptions={[8, 12, 16]}
                 component="div"
-                count={totalDevices}
+                count={totalPage}
                 rowsPerPage={pageSize}
                 page={currentPage}
                 onPageChange={handlePageChange}
