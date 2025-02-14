@@ -16,6 +16,7 @@ import "./home.css";
 const Home = () => {
     const navigate = useNavigate();
     const [showdetects, setShowdetects] = useState([]);
+    const [devices, setDevices] = useState([]); 
 
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(0);
@@ -23,7 +24,25 @@ const Home = () => {
     const [totalShowdetects, setTotalShowdetects] = useState(0);
     const [loading, setLoading] = useState(false);
 
-    // ฟังก์ชันดึงข้อมูล showdetect
+    // ✅ ฟังก์ชันดึงข้อมูล devices
+    const fetchDevices = useCallback(async () => {
+        try {
+            const response = await fetch("http://localhost:8000/devices/all?page=1&size=100", {
+                method: "GET",
+                credentials: "include",
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to fetch devices.");
+            }
+
+            const data = await response.json();
+            setDevices(data.devices); // ✅ เก็บ devices ทั้งหมด
+        } catch (err) {
+            console.error("Error fetching devices:", err.message);
+        }
+    }, []);
+
     const fetchShowdetects = useCallback(async () => {
         setLoading(true);
         try {
@@ -37,18 +56,29 @@ const Home = () => {
             }
 
             const data = await response.json();
-            setShowdetects(data.shows);
+
+            // ✅ แมตช์ api_key กับ devices เพื่อเพิ่ม device_name และ location
+            const enrichedShowdetects = data.shows.map(showdetect => {
+                const device = devices.find(dev => dev.api_key === showdetect.api_key);
+                return {
+                    ...showdetect,
+                    device_name: device ? device.device_name : "Unknown Device",
+                    location: device ? device.location : "Unknown Location",
+                };
+            });
+
+            setShowdetects(enrichedShowdetects);
             setTotalShowdetects(data.total);
         } catch (err) {
             console.error("Error fetching showdetect data:", err.message);
         } finally {
             setLoading(false);
         }
-    }, [currentPage, pageSize]);
+    }, [currentPage, pageSize, devices]);
 
     //------------------------------------------------------------------------------------------------
 
-    // ฟังก์ชันสำหรับเปลี่ยนหน้า 
+    // ฟังก์ชันสำหรับเปลี่ยนหน้า
     const handlePageChange = (event, newPage) => {
         setCurrentPage(newPage);
     };
@@ -56,20 +86,21 @@ const Home = () => {
     // ฟังก์ชันสำหรับเปลี่ยนจำนวนรายการต่อหน้า
     const handleRowsPerPageChange = (event) => {
         setPageSize(parseInt(event.target.value, 10));
-        setCurrentPage(0);
+        setCurrentPage(0); // รีเซ็ตหน้า
     };
 
-    // ฟังก์ชันค้นหา 
+    // ฟังก์ชันค้นหา
     const handleSearch = (event) => {
         setSearchTerm(event.target.value);
-        setCurrentPage(0);
+        setCurrentPage(0); // รีเซ็ตหน้าเมื่อมีการค้นหา
     };
 
-    // กรองข้อมูล showdetect โดยใช้ searchTerm
+    // กรองข้อมูลในตารางอุปกรณ์โดยใช้ searchTerm
     const filteredShowdetects = showdetects.filter((showdetect) => {
+        // ตรวจสอบว่า searchTerm ไม่ว่าง และมีการ trim ค่า searchTerm
         const term = searchTerm.trim().toLowerCase();
         if (term === "") {
-            return true;
+            return true; // ถ้า searchTerm ว่าง แสดงผู้ใช้ทั้งหมด
         }
         return (
             showdetect.device_name.toLowerCase().includes(term) ||
@@ -79,12 +110,16 @@ const Home = () => {
 
     //------------------------------------------------------------------------------------------------
 
-    // useEffect → ดึงข้อมูลครั้งแรก + ดึงข้อมูลทุกๆ 1 นาที
+    // ดึงข้อมูลอุปกรณ์ทุกๆ 1 นาที
     useEffect(() => {
-        fetchShowdetects();
+        const fetchData = async () => {
+            await fetchDevices();
+            await fetchShowdetects();
+        };
+        fetchData();
         const interval = setInterval(fetchShowdetects, 60000);
         return () => clearInterval(interval);
-    }, [fetchShowdetects]);
+    }, [fetchDevices, fetchShowdetects]);
 
     return (
         <div>
@@ -138,6 +173,8 @@ const Home = () => {
                     <Typography variant="h6" style={{ margin: "20px" }}>No showdetect data available.</Typography>
                 )}
             </Grid>
+
+            {/* Pagination */}
             <TablePagination
                 rowsPerPageOptions={[8, 12, 16]}
                 component="div"
