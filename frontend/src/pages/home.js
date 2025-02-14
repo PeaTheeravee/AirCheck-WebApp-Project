@@ -16,6 +16,7 @@ import "./home.css";
 const Home = () => {
     const navigate = useNavigate();
     const [devices, setDevices] = useState([]); 
+    const [showdetects, setShowdetects] = useState([]);
 
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(0);
@@ -44,6 +45,26 @@ const Home = () => {
             console.error("Error fetching devices:", err.message);
         } finally {
             setLoading(false);
+        }
+    }, [currentPage, pageSize]);
+
+    // ✅ ฟังก์ชันดึงข้อมูล showdetects
+    const fetchShowdetects = useCallback(async () => {
+        try {
+            const response = await fetch(`http://localhost:8000/showdetect/all?page=${currentPage + 1}&size=${pageSize}`, {
+                method: "GET",
+                credentials: "include",
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || "Failed to fetch showdetect data.");
+            }
+
+            const data = await response.json();
+            setShowdetects(data.shows);
+        } catch (err) {
+            console.error("Error fetching showdetect data:", err.message);
         }
     }, [currentPage, pageSize]);
 
@@ -76,18 +97,36 @@ const Home = () => {
         );
     });
 
+    // ✅ รวมข้อมูล showdetect กับ devices
+    const devicesWithShowdetects = filteredDevices.map(device => {
+        const matchingShowdetect = showdetects.find(show => show.api_key === device.api_key);
+        return {
+            ...device,
+            pm2_5: matchingShowdetect ? matchingShowdetect.pm2_5 : "N/A",
+            pm10: matchingShowdetect ? matchingShowdetect.pm10 : "N/A",
+            co2: matchingShowdetect ? matchingShowdetect.co2 : "N/A",
+            tvoc: matchingShowdetect ? matchingShowdetect.tvoc : "N/A",
+            humidity: matchingShowdetect ? matchingShowdetect.humidity : "N/A",
+            temperature: matchingShowdetect ? matchingShowdetect.temperature : "N/A",
+        };
+    });
+
     //------------------------------------------------------------------------------------------------
     
-    // โหลด Devices ตอนแรก & เมื่อเปลี่ยนหน้า
+    // โหลด Devices & Showdetects ตอนแรก & เมื่อเปลี่ยนหน้า
     useEffect(() => {
         fetchDevices();
-    }, [fetchDevices]);
+        fetchShowdetects();
+    }, [fetchDevices, fetchShowdetects]);
 
-    // ดึง Devices ทุกๆ 1 นาที
+    // ✅ อัปเดต Devices & Showdetects ทุกๆ 1 นาที
     useEffect(() => {
-        const interval = setInterval(fetchDevices, 60000);
+        const interval = setInterval(() => {
+            fetchDevices();
+            fetchShowdetects();
+        }, 60000);
         return () => clearInterval(interval);
-    }, [fetchDevices]);
+    }, [fetchDevices, fetchShowdetects]);
 
     return (
         <div>
@@ -117,13 +156,19 @@ const Home = () => {
             <Grid container spacing={2} style={{ padding: "20px" }}>
                 {loading ? (
                     <Typography variant="h6" style={{ margin: "20px" }}>Loading devices...</Typography>
-                ) : filteredDevices.length > 0 ? (
-                    filteredDevices.map((device) => (
+                ) : devicesWithShowdetects.length > 0 ? (
+                    devicesWithShowdetects.map((device) => (
                         <Grid item xs={12} sm={6} md={3} key={device.api_key}>
                             <Card variant="outlined" sx={{ maxWidth: "350px", width: "100%" }}>
                                 <CardContent>
                                     <Typography variant="h6">{device.device_name}</Typography>
                                     <Typography variant="body2" color="textSecondary">📍 {device.location}</Typography>
+                                    <Typography variant="body2"><strong>PM 2.5:</strong> {device.pm2_5} µg/m³</Typography>
+                                    <Typography variant="body2"><strong>PM 10:</strong> {device.pm10} µg/m³</Typography>
+                                    <Typography variant="body2"><strong>CO2:</strong> {device.co2} ppm</Typography>
+                                    <Typography variant="body2"><strong>TVOC:</strong> {device.tvoc} ppb</Typography>
+                                    <Typography variant="body2"><strong>Temp:</strong> {device.temperature}°C</Typography>
+                                    <Typography variant="body2"><strong>Humidity:</strong> {device.humidity}%</Typography>
                                 </CardContent>
                             </Card>
                         </Grid>
