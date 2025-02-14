@@ -20,36 +20,29 @@ const Home = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(0);
     const [pageSize, setPageSize] = useState(8);
-    const [totalDevices, setTotalDevices] = useState(0); 
+    const [totalDevices, setTotalDevices] = useState(0);
+    const [loading, setLoading] = useState(false);
 
     // ฟังก์ชันดึงข้อมูลอุปกรณ์
     const fetchDevices = useCallback(async () => {
+        setLoading(true); // เริ่มโหลดข้อมูล
         try {
-            const response = await fetch(`http://localhost:8000/devices/all?page=${currentPage + 1}&size=${pageSize}`, { 
-                credentials: "include" 
+            const response = await fetch(`http://localhost:8000/showdetect/all?page=${currentPage + 1}&size=${pageSize}`, {
+                method: "GET",
+                credentials: "include",
             });
 
-            if (!response.ok) throw new Error("Failed to fetch devices.");
+            if (!response.ok) {
+                throw new Error("Failed to fetch showdetect data.");
+            }
+
             const data = await response.json();
-
-            // 📌 ดึงข้อมูล showdetect ของแต่ละอุปกรณ์
-            const devicesWithData = await Promise.all(
-                data.devices.map(async (device) => {
-                    try {
-                        const detectResponse = await fetch(`http://localhost:8000/showdetect/${device.api_key}`);
-                        if (!detectResponse.ok) return null;
-                        const detectData = await detectResponse.json();
-                        return { ...device, ...detectData };
-                    } catch {
-                        return null;
-                    }
-                })
-            );
-
-            setDevices(devicesWithData.filter((d) => d)); // กรอง null ออก
-            setTotalDevices(data.total); // ✅ อัปเดตจำนวนอุปกรณ์ทั้งหมด
+            setDevices(data.shows);
+            setTotalDevices(data.total);
         } catch (err) {
-            console.error(err);
+            console.error("Error fetching showdetect data:", err.message);
+        } finally {
+            setLoading(false); // จบโหลดข้อมูล
         }
     }, [currentPage, pageSize]);
 
@@ -121,9 +114,11 @@ const Home = () => {
                 }}
             />
 
-            {/* 📌 แสดงข้อมูลอุปกรณ์ */}
+            {/* แสดงข้อมูลอุปกรณ์ */}
             <Grid container spacing={2} style={{ padding: "20px" }}>
-                {filteredDevices.length > 0 ? (
+                {loading ? (
+                    <Typography variant="h6" style={{ margin: "20px" }}>Loading devices...</Typography>
+                ) : filteredDevices.length > 0 ? (
                     filteredDevices.map((device) => (
                         <Grid item xs={12} sm={6} md={3} key={device.api_key}>
                             <Card variant="outlined" sx={{ maxWidth: "350px", width: "100%" }}>
@@ -141,13 +136,11 @@ const Home = () => {
                         </Grid>
                     ))
                 ) : (
-                    <Typography variant="h6" style={{ margin: "20px" }}>
-                        No device data available.
-                    </Typography>
+                    <Typography variant="h6" style={{ margin: "20px" }}>No device data available.</Typography>
                 )}
             </Grid>
             <TablePagination
-                rowsPerPageOptions={[4, 8, 12]}
+                rowsPerPageOptions={[8, 12, 16]}
                 component="div"
                 count={totalDevices} 
                 rowsPerPage={pageSize}
