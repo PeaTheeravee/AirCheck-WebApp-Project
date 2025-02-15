@@ -308,9 +308,15 @@ const Home = () => {
             <Dialog 
                 open={isScoreDialogOpen} 
                 onClose={toggleScoreDialog}
-                maxWidth="md"
+                maxWidth={false} 
                 fullWidth
-                sx={{ "& .MuiDialog-paper": { width: "850px", padding: "20px" } }} 
+                sx={{ 
+                    "& .MuiDialog-paper": { 
+                        width: activeTab === "average" ? "90vw" : "850px",  
+                        maxWidth: "1500px", 
+                        padding: "20px" 
+                    } 
+                }}
             >
                 <DialogTitle>
                     Device Score Data - {targetDeviceName}
