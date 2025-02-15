@@ -10,6 +10,11 @@ import {
     TextField,
     InputAdornment,
     TablePagination,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    Button
 } from "@mui/material";
 import "./home.css";
 
@@ -19,12 +24,13 @@ const Home = () => {
     const [showdetects, setShowdetects] = useState([]);
 
     const [searchTerm, setSearchTerm] = useState("");
-
     const [currentPage, setCurrentPage] = useState(0);
     const [pageSize, setPageSize] = useState(8);
     const [totalPage, setTotalPage] = useState(0);
-
     const [loading, setLoading] = useState(false);
+
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const toggleDialog = () => {setIsDialogOpen(!isDialogOpen);};
 
     // ✅ ฟังก์ชันดึงข้อมูลอุปกรณ์ (ใช้ Pagination)
     const fetchDevices = useCallback(async () => {
@@ -162,7 +168,11 @@ const Home = () => {
                 ) : devicesWithShowdetects.length > 0 ? (
                     devicesWithShowdetects.map((device) => (
                         <Grid item xs={12} sm={6} md={3} key={device.api_key}>
-                            <Card variant="outlined" sx={{ maxWidth: "350px", width: "100%" }}>
+                            <Card 
+                                variant="outlined" 
+                                sx={{ maxWidth: "350px", width: "100%", cursor: "pointer" }}
+                                onClick={toggleDialog}
+                            >
                                 <CardContent>
                                     <Typography variant="h6">{device.device_name}</Typography>
                                     <Typography variant="body2" color="textSecondary">📍 {device.location}</Typography>
@@ -190,6 +200,16 @@ const Home = () => {
                 onPageChange={handlePageChange}
                 onRowsPerPageChange={handleRowsPerPageChange}
             />
+            {/* ✅ Popup เมื่อกด Card */}
+            <Dialog open={isDialogOpen} onClose={toggleDialog}>
+                <DialogTitle>Hello</DialogTitle>
+                <DialogContent>
+                    <Typography variant="body1">This is a sample popup!</Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={toggleDialog}>Close</Button>
+                </DialogActions>
+            </Dialog>
         </div>
     );
 };
