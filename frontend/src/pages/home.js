@@ -292,43 +292,47 @@ const Home = () => {
                 onClose={toggleScoreDialog}
                 maxWidth="md"
                 fullWidth
+                sx={{ "& .MuiDialog-paper": { width: "850px", padding: "20px" } }} 
             >
                 <DialogTitle>
                     Device Score Data - {targetDeviceName}
                 </DialogTitle>
 
-                <div style={{ display: "flex", justifyContent: "center", gap: "10px", marginBottom: "10px" }}>
-                    <Button 
-                        variant={activeTab === "score" ? "contained" : "outlined"} 
-                        onClick={() => setActiveTab("score")}
-                    >
-                        Score Data
-                    </Button>
-                    <Button 
-                        variant={activeTab === "average" ? "contained" : "outlined"} 
-                        onClick={() => setActiveTab("average")}
-                    >
-                        Daily Averages
-                    </Button>
-                </div>  
-                    
-                {/* ✅ Dropdown จะปรากฏเฉพาะเมื่อเลือก "Daily Averages" */}
-                {activeTab === "average" && (
-                    <FormControl fullWidth style={{ marginBottom: "10px" }}>
-                        <InputLabel>Select Parameter</InputLabel>
-                        <Select
-                            value={selectedParameter}
-                            onChange={(e) => setSelectedParameter(e.target.value)}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+                    {/* ปุ่ม Toggle */}
+                    <div>
+                        <Button 
+                            variant={activeTab === "score" ? "contained" : "outlined"} 
+                            onClick={() => setActiveTab("score")}
+                            sx={{ marginRight: "5px" }} // ✅ เพิ่มระยะห่างปุ่ม
                         >
-                            <MenuItem value="avg_pm2_5">PM2.5</MenuItem>
-                            <MenuItem value="avg_pm10">PM10</MenuItem>
-                            <MenuItem value="avg_co2">CO2</MenuItem>
-                            <MenuItem value="avg_tvoc">TVOC</MenuItem>
-                            <MenuItem value="avg_humidity">Humidity</MenuItem>
-                            <MenuItem value="avg_temperature">Temperature</MenuItem>
-                        </Select>
-                    </FormControl>
-                )}
+                            Score Data
+                        </Button>
+                        <Button 
+                            variant={activeTab === "average" ? "contained" : "outlined"} 
+                            onClick={() => setActiveTab("average")}
+                        >
+                            Daily Averages
+                        </Button>
+                    </div>
+
+                    {/* Dropdown จะปรากฏเฉพาะเมื่อเลือก "Daily Averages" */}
+                    {activeTab === "average" && (
+                        <FormControl sx={{ width: "250px" }}> {/* ✅ กำหนดขนาดที่พอดี */}
+                            <Select
+                                value={selectedParameter}
+                                onChange={(e) => setSelectedParameter(e.target.value)}
+                            >
+                                <MenuItem value="avg_pm2_5">PM2.5</MenuItem>
+                                <MenuItem value="avg_pm10">PM10</MenuItem>
+                                <MenuItem value="avg_co2">CO2</MenuItem>
+                                <MenuItem value="avg_tvoc">TVOC</MenuItem>
+                                <MenuItem value="avg_humidity">Humidity</MenuItem>
+                                <MenuItem value="avg_temperature">Temperature</MenuItem>
+                            </Select>
+                        </FormControl>
+                    )}
+                </div>
 
                 <DialogContent>
                     {activeTab === "score" ? (
@@ -403,6 +407,7 @@ const Home = () => {
                         )
                     )}
                 </DialogContent>
+
                 <DialogActions>
                     <Button onClick={toggleScoreDialog}>Close</Button>
                 </DialogActions>
