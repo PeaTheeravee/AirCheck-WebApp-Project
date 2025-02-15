@@ -20,7 +20,11 @@ import {
     TableCell,
     TableContainer,
     TableHead,
-    TableRow
+    TableRow,
+    Select, 
+    MenuItem, 
+    FormControl, 
+    InputLabel
 } from "@mui/material";
 import { 
     LineChart, 
@@ -37,7 +41,9 @@ import "./home.css";
 const Home = () => {
     const navigate = useNavigate();
     const [isScoreDialogOpen, setIsScoreDialogOpen] = useState(false);
+
     const [activeTab, setActiveTab] = useState("score");
+    const [selectedParameter, setSelectedParameter] = useState("avg_pm2_5");
 
     const [devices, setDevices] = useState([]);
     const [showdetects, setShowdetects] = useState([]);
@@ -281,7 +287,12 @@ const Home = () => {
             />
 
             {/* ✅ Popup แสดงข้อมูล Score */}
-            <Dialog open={isScoreDialogOpen} onClose={toggleScoreDialog}>
+            <Dialog 
+                open={isScoreDialogOpen} 
+                onClose={toggleScoreDialog}
+                maxWidth="md"
+                fullWidth
+            >
                 <DialogTitle>
                     Device Score Data - {targetDeviceName}
                 </DialogTitle>
@@ -299,7 +310,25 @@ const Home = () => {
                     >
                         Daily Averages
                     </Button>
-                </div>      
+                </div>  
+                    
+                {/* ✅ Dropdown จะปรากฏเฉพาะเมื่อเลือก "Daily Averages" */}
+                {activeTab === "average" && (
+                    <FormControl fullWidth style={{ marginBottom: "10px" }}>
+                        <InputLabel>Select Parameter</InputLabel>
+                        <Select
+                            value={selectedParameter}
+                            onChange={(e) => setSelectedParameter(e.target.value)}
+                        >
+                            <MenuItem value="avg_pm2_5">PM2.5</MenuItem>
+                            <MenuItem value="avg_pm10">PM10</MenuItem>
+                            <MenuItem value="avg_co2">CO2</MenuItem>
+                            <MenuItem value="avg_tvoc">TVOC</MenuItem>
+                            <MenuItem value="avg_humidity">Humidity</MenuItem>
+                            <MenuItem value="avg_temperature">Temperature</MenuItem>
+                        </Select>
+                    </FormControl>
+                )}
 
                 <DialogContent>
                     {activeTab === "score" ? (
@@ -361,12 +390,12 @@ const Home = () => {
                                     <YAxis />
                                     <Tooltip />
                                     <Legend />
-                                    <Line type="monotone" dataKey="avg_pm2_5" stroke="#ff0000" name="PM2.5" />
-                                    <Line type="monotone" dataKey="avg_pm10" stroke="#ffa500" name="PM10" />
-                                    <Line type="monotone" dataKey="avg_co2" stroke="#008000" name="CO2" />
-                                    <Line type="monotone" dataKey="avg_tvoc" stroke="#800080" name="TVOC" />
-                                    <Line type="monotone" dataKey="avg_humidity" stroke="#0000ff" name="Humidity" />
-                                    <Line type="monotone" dataKey="avg_temperature" stroke="#ff69b4" name="Temperature" />
+                                    <Line 
+                                        type="monotone" 
+                                        dataKey={selectedParameter} 
+                                        stroke="#ff0000" 
+                                        name={selectedParameter.replace("avg_", "").toUpperCase()} 
+                                    />
                                 </LineChart>
                             </ResponsiveContainer>
                         ) : (
