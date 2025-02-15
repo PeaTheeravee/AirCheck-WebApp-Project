@@ -45,6 +45,7 @@ const Home = () => {
     const [selectedParameter, setSelectedParameter] = useState("avg_pm2_5");
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); // ค่าเริ่มต้นเป็นปีปัจจุบัน
     const [selectedMonth, setSelectedMonth] = useState((new Date().getMonth() + 1).toString().padStart(2, "0")); // ค่าเริ่มต้นเป็นเดือนปัจจุบัน
+    const [availableYears, setAvailableYears] = useState([]); // ✅ เก็บรายการปีที่มีอยู่
 
     const [devices, setDevices] = useState([]);
     const [showdetects, setShowdetects] = useState([]);
@@ -73,6 +74,7 @@ const Home = () => {
 
     //================================================================================================
 
+    // กรองข้อมูลในกราฟให้เเสดงเฉพาะปี-เดือนที่เลือก
     const filteredAverages = dailyAverages.filter((data) => {
         const dataYearMonth = data.date.slice(0, 7); // ตัดเฉพาะ YYYY-MM
         return dataYearMonth === `${selectedYear}-${selectedMonth}`;
@@ -230,6 +232,12 @@ const Home = () => {
         }
     }, [isScoreDialogOpen, targetApiKey, fetchScoreData, fetchDailyAverages]);
 
+    useEffect(() => {
+        if (dailyAverages.length > 0) {
+            const years = [...new Set(dailyAverages.map(data => data.date.slice(0, 4)))]; // ดึงปีจากข้อมูล
+            setAvailableYears(years.sort((a, b) => b - a)); // เรียงปีจากมากไปน้อย
+        }
+    }, [dailyAverages]);
     //================================================================================================
 
     return (
@@ -337,7 +345,7 @@ const Home = () => {
                                 value={selectedYear}
                                 onChange={(e) => setSelectedYear(e.target.value)}
                             >
-                                {[2023, 2024, 2025].map((year) => (
+                                {availableYears.map((year) => ( // ใช้ปีที่ได้จาก fetchDailyAverages
                                     <MenuItem key={year} value={year}>{year}</MenuItem>
                                 ))}
                             </Select>
