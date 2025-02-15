@@ -44,6 +44,8 @@ const Home = () => {
 
     const [activeTab, setActiveTab] = useState("score");
     const [selectedParameter, setSelectedParameter] = useState("avg_pm2_5");
+    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); // ค่าเริ่มต้นเป็นปีปัจจุบัน
+    const [selectedMonth, setSelectedMonth] = useState((new Date().getMonth() + 1).toString().padStart(2, "0")); // ค่าเริ่มต้นเป็นเดือนปัจจุบัน
 
     const [devices, setDevices] = useState([]);
     const [showdetects, setShowdetects] = useState([]);
@@ -72,6 +74,11 @@ const Home = () => {
 
     //================================================================================================
 
+    const filteredAverages = dailyAverages.filter((data) => {
+        const dataYearMonth = data.date.slice(0, 7); // ตัดเฉพาะ YYYY-MM
+        return dataYearMonth === `${selectedYear}-${selectedMonth}`;
+    });
+    
     // ฟังก์ชันดึงข้อมูลอุปกรณ์ (ใช้ Pagination)
     const fetchDevices = useCallback(async () => {
         setLoading(true);
@@ -298,13 +305,13 @@ const Home = () => {
                     Device Score Data - {targetDeviceName}
                 </DialogTitle>
 
+                {/* ปุ่ม Toggle สลับระหว่าง Score Data / Daily Averages */}
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-                    {/* ปุ่ม Toggle */}
                     <div>
                         <Button 
                             variant={activeTab === "score" ? "contained" : "outlined"} 
                             onClick={() => setActiveTab("score")}
-                            sx={{ marginRight: "5px" }} // ✅ เพิ่มระยะห่างปุ่ม
+                            sx={{ marginRight: "5px" }}
                         >
                             Score Data
                         </Button>
@@ -315,10 +322,51 @@ const Home = () => {
                             Daily Averages
                         </Button>
                     </div>
+                </div>
 
-                    {/* Dropdown จะปรากฏเฉพาะเมื่อเลือก "Daily Averages" */}
-                    {activeTab === "average" && (
-                        <FormControl sx={{ width: "250px" }}> {/* ✅ กำหนดขนาดที่พอดี */}
+                {/* แสดงเฉพาะเมื่อเลือก "Daily Averages" */}
+                {activeTab === "average" && (
+                    <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
+                        
+                        {/* เลือกปี */}
+                        <FormControl sx={{ width: "120px" }} size="small">
+                            <Select
+                                value={selectedYear}
+                                onChange={(e) => setSelectedYear(e.target.value)}
+                            >
+                                {[2023, 2024, 2025].map((year) => (
+                                    <MenuItem key={year} value={year}>{year}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+
+                        {/* เลือกเดือน */}
+                        <FormControl sx={{ width: "120px" }} size="small">
+                            <Select
+                                value={selectedMonth}
+                                onChange={(e) => setSelectedMonth(e.target.value)}
+                            >
+                                {[
+                                    { value: "01", label: "January" },
+                                    { value: "02", label: "February" },
+                                    { value: "03", label: "March" },
+                                    { value: "04", label: "April" },
+                                    { value: "05", label: "May" },
+                                    { value: "06", label: "June" },
+                                    { value: "07", label: "July" },
+                                    { value: "08", label: "August" },
+                                    { value: "09", label: "September" },
+                                    { value: "10", label: "October" },
+                                    { value: "11", label: "November" },
+                                    { value: "12", label: "December" },
+                                ].map((month) => (
+                                    <MenuItem key={month.value} value={month.value}>{month.label}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+
+                        {/* เลือกค่าที่จะแสดง*/}
+                        <FormControl sx={{ width: "120px" }} size="small">
                             <Select
                                 value={selectedParameter}
                                 onChange={(e) => setSelectedParameter(e.target.value)}
@@ -331,12 +379,12 @@ const Home = () => {
                                 <MenuItem value="avg_temperature">Temperature</MenuItem>
                             </Select>
                         </FormControl>
-                    )}
-                </div>
+                    </div>
+                )}
 
                 <DialogContent>
                     {activeTab === "score" ? (
-                        // ✅ แสดง Score Data
+                        // แสดง Score Data
                         scoreData ? (
                             <TableContainer>
                                 <Table>
@@ -385,10 +433,10 @@ const Home = () => {
                             <Typography>Loading...</Typography>
                         )
                     ) : (
-                        // ✅ แสดง Daily Averages Graph
-                        dailyAverages.length > 0 ? (
+                        // แสดง Daily Averages Graph
+                        filteredAverages.length > 0 ? (
                             <ResponsiveContainer width="100%" height={300}>
-                                <LineChart data={dailyAverages}>
+                                <LineChart data={filteredAverages}>
                                     <CartesianGrid strokeDasharray="3 3" />
                                     <XAxis dataKey="date" />
                                     <YAxis />
