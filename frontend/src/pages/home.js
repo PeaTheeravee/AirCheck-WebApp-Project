@@ -14,7 +14,13 @@ import {
     DialogTitle,
     DialogContent,
     DialogActions,
-    Button
+    Button,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow
 } from "@mui/material";
 import "./home.css";
 
@@ -30,7 +36,19 @@ const Home = () => {
     const [loading, setLoading] = useState(false);
 
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const toggleDialog = () => {setIsDialogOpen(!isDialogOpen);};
+    const [selectedDevice, setSelectedDevice] = useState(null);  // ✅ เก็บอุปกรณ์ที่เลือก
+    const [scoreData, setScoreData] = useState(null);  // ✅ เก็บข้อมูลจาก API /scores/{api_key}
+
+    const handleOpenDialog = (device) => {
+        setSelectedDevice(device);
+        fetchScoreData(device.api_key); // ✅ โหลดข้อมูล Score ตาม api_key
+        setIsDialogOpen(true);
+    };
+    
+    const handleCloseDialog = () => {
+        setIsDialogOpen(false);
+        setScoreData(null);
+    };
 
     // ✅ ฟังก์ชันดึงข้อมูลอุปกรณ์ (ใช้ Pagination)
     const fetchDevices = useCallback(async () => {
@@ -77,6 +95,23 @@ const Home = () => {
         }
     }, [currentPage, pageSize]);
 
+    const fetchScoreData = async (apiKey) => {
+        try {
+            const response = await fetch(`http://localhost:8000/scores/${apiKey}`, {
+                method: "GET",
+                credentials: "include",
+            });
+    
+            if (!response.ok) {
+                throw new Error(`Failed to fetch score data for API Key: ${apiKey}`);
+            }
+    
+            const data = await response.json();
+            setScoreData(data);
+        } catch (err) {
+            console.error(err.message);
+        }
+    };
     //------------------------------------------------------------------------------------------------
 
     // ฟังก์ชันสำหรับเปลี่ยนหน้า
@@ -171,7 +206,7 @@ const Home = () => {
                             <Card 
                                 variant="outlined" 
                                 sx={{ maxWidth: "350px", width: "100%", cursor: "pointer" }}
-                                onClick={toggleDialog}
+                                onClick={() => handleOpenDialog(device)}
                             >
                                 <CardContent>
                                     <Typography variant="h6">{device.device_name}</Typography>
@@ -200,14 +235,61 @@ const Home = () => {
                 onPageChange={handlePageChange}
                 onRowsPerPageChange={handleRowsPerPageChange}
             />
-            {/* ✅ Popup เมื่อกด Card */}
-            <Dialog open={isDialogOpen} onClose={toggleDialog}>
-                <DialogTitle>Hello</DialogTitle>
+
+            {/* ✅ Popup แสดงข้อมูล Score */}
+            <Dialog open={isDialogOpen} onClose={handleCloseDialog}>
+            <DialogTitle>Device Score Data - {selectedDevice ? selectedDevice.device_name : "Loading..."}</DialogTitle>
                 <DialogContent>
-                    <Typography variant="body1">This is a sample popup!</Typography>
+                    {scoreData ? (
+                        <TableContainer>
+                            <Table>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell>Parameter</TableCell>
+                                        <TableCell>Quality Level</TableCell>
+                                        <TableCell>Fixed Value</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    <TableRow>
+                                        <TableCell>PM2.5</TableCell>
+                                        <TableCell>{scoreData.pm2_5_quality_level}</TableCell>
+                                        <TableCell>{scoreData.pm2_5_fix}</TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell>PM10</TableCell>
+                                        <TableCell>{scoreData.pm10_quality_level}</TableCell>
+                                        <TableCell>{scoreData.pm10_fix}</TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell>CO2</TableCell>
+                                        <TableCell>{scoreData.co2_quality_level}</TableCell>
+                                        <TableCell>{scoreData.co2_fix}</TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell>TVOC</TableCell>
+                                        <TableCell>{scoreData.tvoc_quality_level}</TableCell>
+                                        <TableCell>{scoreData.tvoc_fix}</TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell>Humidity</TableCell>
+                                        <TableCell>{scoreData.humidity_quality_level}</TableCell>
+                                        <TableCell>{scoreData.humidity_fix}</TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell>Temperature</TableCell>
+                                        <TableCell>{scoreData.temperature_quality_level}</TableCell>
+                                        <TableCell>{scoreData.temperature_fix}</TableCell>
+                                    </TableRow>
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    ) : (
+                        <Typography>Loading...</Typography>
+                    )}
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={toggleDialog}>Close</Button>
+                    <Button onClick={handleCloseDialog}>Close</Button>
                 </DialogActions>
             </Dialog>
         </div>
