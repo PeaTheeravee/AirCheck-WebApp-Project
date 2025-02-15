@@ -24,7 +24,6 @@ import {
     Select, 
     MenuItem, 
     FormControl, 
-    InputLabel
 } from "@mui/material";
 import { 
     LineChart, 
@@ -224,6 +223,10 @@ const Home = () => {
         if (isScoreDialogOpen && targetApiKey) {
             fetchScoreData();
             fetchDailyAverages();
+            setSelectedYear(new Date().getFullYear()); // รีเซ็ตเป็นปีปัจจุบัน
+            setSelectedMonth((new Date().getMonth() + 1).toString().padStart(2, "0")); // รีเซ็ตเป็นเดือนปัจจุบัน
+            setActiveTab("score"); // รีเซ็ตเป็น "score" โดยค่าเริ่มต้น
+            setSelectedParameter("avg_pm2_5"); // รีเซ็ตเป็นค่า PM2.5
         }
     }, [isScoreDialogOpen, targetApiKey, fetchScoreData, fetchDailyAverages]);
 
