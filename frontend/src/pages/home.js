@@ -99,21 +99,21 @@ const Home = () => {
         }
     }, [currentPage, pageSize]);
 
-    const fetchScoreData = async () => {
+    const fetchScoreData = useCallback(async () => {
         try {
             const response = await fetch(`http://localhost:8000/scores/${targetApiKey}`, {
                 method: "GET",
                 credentials: "include",
             });
-
+    
             if (!response.ok) throw new Error("Failed to fetch score data.");
-
+    
             const data = await response.json();
             setScoreData(data);
         } catch (err) {
             console.error(err.message);
         }
-    };
+    }, [targetApiKey]);
 
     //------------------------------------------------------------------------------------------------
 
@@ -179,9 +179,9 @@ const Home = () => {
 
     useEffect(() => {
         if (isScoreDialogOpen && targetApiKey) {
-            fetchScoreData(); 
+            fetchScoreData();
         }
-    }, [isScoreDialogOpen, targetApiKey]);
+    }, [isScoreDialogOpen, targetApiKey, fetchScoreData]);
 
     //================================================================================================
 
