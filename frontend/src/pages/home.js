@@ -441,7 +441,10 @@ const Home = () => {
                             <ResponsiveContainer width="100%" height={300}>
                                 <LineChart data={filteredAverages}>
                                     <CartesianGrid strokeDasharray="3 3" />
-                                    <XAxis dataKey="date" />
+                                    <XAxis 
+                                        dataKey="date" 
+                                        tickFormatter={(date) => date.split("-")[2]} // แสดงเฉพาะ "วัน"
+                                    />
                                     <YAxis />
                                     <Tooltip />
                                     <Legend />
