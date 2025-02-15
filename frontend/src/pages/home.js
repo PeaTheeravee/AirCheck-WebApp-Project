@@ -22,6 +22,16 @@ import {
     TableHead,
     TableRow
 } from "@mui/material";
+import { 
+    LineChart, 
+    Line, 
+    XAxis, 
+    YAxis, 
+    Tooltip, 
+    Legend, 
+    CartesianGrid, 
+    ResponsiveContainer 
+} from "recharts";
 import "./home.css";
 
 const Home = () => {
@@ -31,6 +41,7 @@ const Home = () => {
     const [devices, setDevices] = useState([]);
     const [showdetects, setShowdetects] = useState([]);
     const [scoreData, setScoreData] = useState(null);
+    const [dailyAverages, setDailyAverages] = useState([]);
 
     const [targetApiKey, setTargetApiKey] = useState(null);
     const [targetDeviceName, setTargetDeviceName] = useState("");
@@ -54,7 +65,7 @@ const Home = () => {
 
     //================================================================================================
 
-    // ✅ ฟังก์ชันดึงข้อมูลอุปกรณ์ (ใช้ Pagination)
+    // ฟังก์ชันดึงข้อมูลอุปกรณ์ (ใช้ Pagination)
     const fetchDevices = useCallback(async () => {
         setLoading(true);
         try {
@@ -78,7 +89,7 @@ const Home = () => {
         }
     }, [currentPage, pageSize]);
 
-    // ✅ ฟังก์ชันดึงข้อมูล showdetects
+    // ฟังก์ชันดึงข้อมูล showdetects
     const fetchShowdetects = useCallback(async () => {
         try {
             const response = await fetch(`http://localhost:8000/showdetect/all?page=${currentPage + 1}&size=${pageSize}`, {
@@ -99,6 +110,7 @@ const Home = () => {
         }
     }, [currentPage, pageSize]);
 
+    // ฟังก์ชันดึงข้อมูล score
     const fetchScoreData = useCallback(async () => {
         try {
             const response = await fetch(`http://localhost:8000/scores/${targetApiKey}`, {
@@ -114,6 +126,23 @@ const Home = () => {
             console.error(err.message);
         }
     }, [targetApiKey]);
+
+    // ฟังก์ชันดึงข้อมูล ค่าเฉลี่ยรายวัน
+    const fetchDailyAverages = useCallback(async () => {
+        try {
+            const response = await fetch(`http://localhost:8000/avg/daily_averages/${targetApiKey}`, {
+                method: "GET",
+                credentials: "include",
+            });
+    
+            if (!response.ok) throw new Error("Failed to fetch daily averages.");
+    
+            const data = await response.json();
+            setDailyAverages(data);
+        } catch (err) {
+            console.error(err.message);
+        }
+    }, [targetApiKey]); 
 
     //------------------------------------------------------------------------------------------------
 
@@ -180,8 +209,9 @@ const Home = () => {
     useEffect(() => {
         if (isScoreDialogOpen && targetApiKey) {
             fetchScoreData();
+            fetchDailyAverages();
         }
-    }, [isScoreDialogOpen, targetApiKey, fetchScoreData]);
+    }, [isScoreDialogOpen, targetApiKey, fetchScoreData, fetchDailyAverages]);
 
     //================================================================================================
 
@@ -302,6 +332,25 @@ const Home = () => {
                     ) : (
                         <Typography>Loading...</Typography>
                     )}
+
+                    {/*Line Chart ของค่าเฉลี่ยรายวัน */}
+                    {dailyAverages.length > 0 && (
+                        <ResponsiveContainer width="100%" height={300}>
+                            <LineChart data={dailyAverages}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="date" />
+                                <YAxis />
+                                <Tooltip />
+                                <Legend />
+                                <Line type="monotone" dataKey="avg_pm2_5" stroke="#ff0000" name="PM2.5" />
+                                <Line type="monotone" dataKey="avg_pm10" stroke="#ffa500" name="PM10" />
+                                <Line type="monotone" dataKey="avg_co2" stroke="#008000" name="CO2" />
+                                <Line type="monotone" dataKey="avg_tvoc" stroke="#800080" name="TVOC" />
+                                <Line type="monotone" dataKey="avg_humidity" stroke="#0000ff" name="Humidity" />
+                                <Line type="monotone" dataKey="avg_temperature" stroke="#ff69b4" name="Temperature" />
+                            </LineChart>
+                        </ResponsiveContainer>
+                    )}                 
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={toggleScoreDialog}>Close</Button>
