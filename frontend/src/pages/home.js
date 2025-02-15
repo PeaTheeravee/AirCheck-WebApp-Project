@@ -26,29 +26,33 @@ import "./home.css";
 
 const Home = () => {
     const navigate = useNavigate();
-    const [devices, setDevices] = useState([]); 
-    const [showdetects, setShowdetects] = useState([]);
+    const [isScoreDialogOpen, setIsScoreDialogOpen] = useState(false);
 
+    const [devices, setDevices] = useState([]);
+    const [showdetects, setShowdetects] = useState([]);
+    const [scoreData, setScoreData] = useState(null);
+
+    const [targetApiKey, setTargetApiKey] = useState(null);
+    const [targetDeviceName, setTargetDeviceName] = useState("");
+
+    //------------------------------------------------------------------------------------------------
+    
+    //สำหรับ เเสดงข้อมูลอุปกรณ์
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(0);
     const [pageSize, setPageSize] = useState(8);
     const [totalPage, setTotalPage] = useState(0);
     const [loading, setLoading] = useState(false);
 
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [selectedDevice, setSelectedDevice] = useState(null);  // ✅ เก็บอุปกรณ์ที่เลือก
-    const [scoreData, setScoreData] = useState(null);  // ✅ เก็บข้อมูลจาก API /scores/{api_key}
+    //------------------------------------------------------------------------------------------------
 
-    const handleOpenDialog = (device) => {
-        setSelectedDevice(device);
-        fetchScoreData(device.api_key); // ✅ โหลดข้อมูล Score ตาม api_key
-        setIsDialogOpen(true);
+    const toggleScoreDialog = (apiKey = null, device_name = "") => {
+        setTargetApiKey(apiKey); // เก็บ ApiKey ใน state
+        setTargetDeviceName(device_name);
+        setIsScoreDialogOpen(!isScoreDialogOpen);
     };
-    
-    const handleCloseDialog = () => {
-        setIsDialogOpen(false);
-        setScoreData(null);
-    };
+
+    //================================================================================================
 
     // ✅ ฟังก์ชันดึงข้อมูลอุปกรณ์ (ใช้ Pagination)
     const fetchDevices = useCallback(async () => {
@@ -95,23 +99,22 @@ const Home = () => {
         }
     }, [currentPage, pageSize]);
 
-    const fetchScoreData = async (apiKey) => {
+    const fetchScoreData = async () => {
         try {
-            const response = await fetch(`http://localhost:8000/scores/${apiKey}`, {
+            const response = await fetch(`http://localhost:8000/scores/${targetApiKey}`, {
                 method: "GET",
                 credentials: "include",
             });
-    
-            if (!response.ok) {
-                throw new Error(`Failed to fetch score data for API Key: ${apiKey}`);
-            }
-    
+
+            if (!response.ok) throw new Error("Failed to fetch score data.");
+
             const data = await response.json();
             setScoreData(data);
         } catch (err) {
             console.error(err.message);
         }
     };
+
     //------------------------------------------------------------------------------------------------
 
     // ฟังก์ชันสำหรับเปลี่ยนหน้า
@@ -141,6 +144,8 @@ const Home = () => {
         );
     });
 
+    //================================================================================================
+
     // ✅ รวมข้อมูล showdetect กับ devices
     const devicesWithShowdetects = filteredDevices.map(device => {
         const matchingShowdetect = showdetects.find(show => show.api_key === device.api_key);
@@ -155,7 +160,7 @@ const Home = () => {
         };
     });
 
-    //------------------------------------------------------------------------------------------------
+    //================================================================================================
     
     // โหลด Devices & Showdetects ตอนแรก & เมื่อเปลี่ยนหน้า
     useEffect(() => {
@@ -163,7 +168,7 @@ const Home = () => {
         fetchShowdetects();
     }, [fetchDevices, fetchShowdetects]);
 
-    // ✅ อัปเดต Devices & Showdetects ทุกๆ 1 นาที
+    // อัปเดต Devices & Showdetects ทุกๆ 1 นาที
     useEffect(() => {
         const interval = setInterval(() => {
             fetchDevices();
@@ -171,6 +176,14 @@ const Home = () => {
         }, 60000);
         return () => clearInterval(interval);
     }, [fetchDevices, fetchShowdetects]);
+
+    useEffect(() => {
+        if (isScoreDialogOpen && targetApiKey) {
+            fetchScoreData(); 
+        }
+    }, [isScoreDialogOpen, targetApiKey]);
+
+    //================================================================================================
 
     return (
         <div>
@@ -206,7 +219,7 @@ const Home = () => {
                             <Card 
                                 variant="outlined" 
                                 sx={{ maxWidth: "350px", width: "100%", cursor: "pointer" }}
-                                onClick={() => handleOpenDialog(device)}
+                                onClick={() => toggleScoreDialog(device.api_key, device.device_name)}
                             >
                                 <CardContent>
                                     <Typography variant="h6">{device.device_name}</Typography>
@@ -237,8 +250,10 @@ const Home = () => {
             />
 
             {/* ✅ Popup แสดงข้อมูล Score */}
-            <Dialog open={isDialogOpen} onClose={handleCloseDialog}>
-            <DialogTitle>Device Score Data - {selectedDevice ? selectedDevice.device_name : "Loading..."}</DialogTitle>
+            <Dialog open={isScoreDialogOpen} onClose={toggleScoreDialog}>
+                <DialogTitle>
+                    Device Score Data - {targetDeviceName}
+                </DialogTitle>
                 <DialogContent>
                     {scoreData ? (
                         <TableContainer>
@@ -289,7 +304,7 @@ const Home = () => {
                     )}
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleCloseDialog}>Close</Button>
+                    <Button onClick={toggleScoreDialog}>Close</Button>
                 </DialogActions>
             </Dialog>
         </div>
