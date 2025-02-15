@@ -37,6 +37,7 @@ import "./home.css";
 const Home = () => {
     const navigate = useNavigate();
     const [isScoreDialogOpen, setIsScoreDialogOpen] = useState(false);
+    const [activeTab, setActiveTab] = useState("score");
 
     const [devices, setDevices] = useState([]);
     const [showdetects, setShowdetects] = useState([]);
@@ -284,73 +285,94 @@ const Home = () => {
                 <DialogTitle>
                     Device Score Data - {targetDeviceName}
                 </DialogTitle>
-                <DialogContent>
-                    {scoreData ? (
-                        <TableContainer>
-                            <Table>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell>Parameter</TableCell>
-                                        <TableCell>Quality Level</TableCell>
-                                        <TableCell>Fixed Value</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    <TableRow>
-                                        <TableCell>PM2.5</TableCell>
-                                        <TableCell>{scoreData.pm2_5_quality_level}</TableCell>
-                                        <TableCell>{scoreData.pm2_5_fix}</TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell>PM10</TableCell>
-                                        <TableCell>{scoreData.pm10_quality_level}</TableCell>
-                                        <TableCell>{scoreData.pm10_fix}</TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell>CO2</TableCell>
-                                        <TableCell>{scoreData.co2_quality_level}</TableCell>
-                                        <TableCell>{scoreData.co2_fix}</TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell>TVOC</TableCell>
-                                        <TableCell>{scoreData.tvoc_quality_level}</TableCell>
-                                        <TableCell>{scoreData.tvoc_fix}</TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell>Humidity</TableCell>
-                                        <TableCell>{scoreData.humidity_quality_level}</TableCell>
-                                        <TableCell>{scoreData.humidity_fix}</TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell>Temperature</TableCell>
-                                        <TableCell>{scoreData.temperature_quality_level}</TableCell>
-                                        <TableCell>{scoreData.temperature_fix}</TableCell>
-                                    </TableRow>
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                    ) : (
-                        <Typography>Loading...</Typography>
-                    )}
 
-                    {/*Line Chart ของค่าเฉลี่ยรายวัน */}
-                    {dailyAverages.length > 0 && (
-                        <ResponsiveContainer width="100%" height={300}>
-                            <LineChart data={dailyAverages}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="date" />
-                                <YAxis />
-                                <Tooltip />
-                                <Legend />
-                                <Line type="monotone" dataKey="avg_pm2_5" stroke="#ff0000" name="PM2.5" />
-                                <Line type="monotone" dataKey="avg_pm10" stroke="#ffa500" name="PM10" />
-                                <Line type="monotone" dataKey="avg_co2" stroke="#008000" name="CO2" />
-                                <Line type="monotone" dataKey="avg_tvoc" stroke="#800080" name="TVOC" />
-                                <Line type="monotone" dataKey="avg_humidity" stroke="#0000ff" name="Humidity" />
-                                <Line type="monotone" dataKey="avg_temperature" stroke="#ff69b4" name="Temperature" />
-                            </LineChart>
-                        </ResponsiveContainer>
-                    )}                 
+                <div style={{ display: "flex", justifyContent: "center", gap: "10px", marginBottom: "10px" }}>
+                    <Button 
+                        variant={activeTab === "score" ? "contained" : "outlined"} 
+                        onClick={() => setActiveTab("score")}
+                    >
+                        Score Data
+                    </Button>
+                    <Button 
+                        variant={activeTab === "average" ? "contained" : "outlined"} 
+                        onClick={() => setActiveTab("average")}
+                    >
+                        Daily Averages
+                    </Button>
+                </div>      
+
+                <DialogContent>
+                    {activeTab === "score" ? (
+                        // ✅ แสดง Score Data
+                        scoreData ? (
+                            <TableContainer>
+                                <Table>
+                                    <TableHead>
+                                        <TableRow>
+                                            <TableCell>Parameter</TableCell>
+                                            <TableCell>Quality Level</TableCell>
+                                            <TableCell>Fixed Value</TableCell>
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        <TableRow>
+                                            <TableCell>PM2.5</TableCell>
+                                            <TableCell>{scoreData.pm2_5_quality_level}</TableCell>
+                                            <TableCell>{scoreData.pm2_5_fix}</TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                            <TableCell>PM10</TableCell>
+                                            <TableCell>{scoreData.pm10_quality_level}</TableCell>
+                                            <TableCell>{scoreData.pm10_fix}</TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                            <TableCell>CO2</TableCell>
+                                            <TableCell>{scoreData.co2_quality_level}</TableCell>
+                                            <TableCell>{scoreData.co2_fix}</TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                            <TableCell>TVOC</TableCell>
+                                            <TableCell>{scoreData.tvoc_quality_level}</TableCell>
+                                            <TableCell>{scoreData.tvoc_fix}</TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                            <TableCell>Humidity</TableCell>
+                                            <TableCell>{scoreData.humidity_quality_level}</TableCell>
+                                            <TableCell>{scoreData.humidity_fix}</TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                            <TableCell>Temperature</TableCell>
+                                            <TableCell>{scoreData.temperature_quality_level}</TableCell>
+                                            <TableCell>{scoreData.temperature_fix}</TableCell>
+                                        </TableRow>
+                                    </TableBody>
+                                </Table>
+                            </TableContainer>
+                        ) : (
+                            <Typography>Loading...</Typography>
+                        )
+                    ) : (
+                        // ✅ แสดง Daily Averages Graph
+                        dailyAverages.length > 0 ? (
+                            <ResponsiveContainer width="100%" height={300}>
+                                <LineChart data={dailyAverages}>
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis dataKey="date" />
+                                    <YAxis />
+                                    <Tooltip />
+                                    <Legend />
+                                    <Line type="monotone" dataKey="avg_pm2_5" stroke="#ff0000" name="PM2.5" />
+                                    <Line type="monotone" dataKey="avg_pm10" stroke="#ffa500" name="PM10" />
+                                    <Line type="monotone" dataKey="avg_co2" stroke="#008000" name="CO2" />
+                                    <Line type="monotone" dataKey="avg_tvoc" stroke="#800080" name="TVOC" />
+                                    <Line type="monotone" dataKey="avg_humidity" stroke="#0000ff" name="Humidity" />
+                                    <Line type="monotone" dataKey="avg_temperature" stroke="#ff69b4" name="Temperature" />
+                                </LineChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <Typography>No Data Available</Typography>
+                        )
+                    )}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={toggleScoreDialog}>Close</Button>
