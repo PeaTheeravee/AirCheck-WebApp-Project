@@ -748,7 +748,11 @@ const AdminHome = () => {
                             margin="normal"
                             value={searchTerm}
                             onChange={handleSearch}
+                            InputLabelProps={{
+                                style: { fontSize: "25px" }, 
+                            }}
                             InputProps={{
+                                style: { fontSize: "25px" },
                                 startAdornment: (
                                     <InputAdornment position="start">
                                         <SearchIcon />
@@ -858,7 +862,11 @@ const AdminHome = () => {
                             margin="normal"
                             value={deviceSearchTerm}
                             onChange={handleDeviceSearch}
+                            InputLabelProps={{
+                                style: { fontSize: "25px" }, 
+                            }}
                             InputProps={{
+                                style: { fontSize: "25px" },
                                 startAdornment: (
                                     <InputAdornment position="start">
                                         <SearchIcon />

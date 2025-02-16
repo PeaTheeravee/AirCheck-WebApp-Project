@@ -272,7 +272,11 @@ const Home = () => {
                     value={searchTerm}
                     onChange={handleSearch}
                     sx={{ marginTop: 3, marginBottom: 3, }}
+                    InputLabelProps={{
+                        style: { fontSize: "25px" }, 
+                    }}
                     InputProps={{
+                        style: { fontSize: "25px" },
                         startAdornment: (
                             <InputAdornment position="start">
                                 <SearchIcon />
