@@ -709,10 +709,10 @@ const AdminHome = () => {
             </header>
 
             {/* Content/Main */}
-            <div className="content">
+            <div style={{ padding: "20px" }}>
                 {/* แสดงเฉพาะ superadmin */}
                 {role === "superadmin" && (
-                    <div className="toggle-buttons">
+                    <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
                         <Button
                             variant={activeTab === "devices" ? "contained" : "outlined"}
                             onClick={() => setActiveTab("devices")}

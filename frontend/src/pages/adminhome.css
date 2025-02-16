@@ -6,13 +6,3 @@
     background-color: #282c34;
     color: white;
 }
-
-.content {
-    padding: 20px;
-}
-
-.toggle-buttons {
-    display: flex;
-    gap: 10px; /* เพิ่มระยะห่างระหว่างปุ่ม */
-    margin-bottom: 20px; /* เพิ่มระยะห่างระหว่างปุ่มและตาราง */
-}

@@ -313,7 +313,7 @@ const Home = () => {
                 sx={{ 
                     "& .MuiDialog-paper": { 
                         width: activeTab === "average" ? "90vw" : "850px",  
-                        maxWidth: "1500px", 
+                        maxWidth: "1700px", 
                         padding: "20px" 
                     } 
                 }}
