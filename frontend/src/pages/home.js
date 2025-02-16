@@ -385,7 +385,12 @@ const Home = () => {
 
                 {/* แสดงเฉพาะเมื่อเลือก "Daily Averages" */}
                 {activeTab === "average" && (
-                    <div style={{ display: "flex", gap: "10px"}}>
+                    <div style={{ 
+                        display: "flex", 
+                        gap: "20px",
+                        marginTop: "10px",
+                        marginBottom: "20px",   
+                    }}>
                         
                         {/* เลือกปี */}
                         <FormControl sx={{ width: "140px" }} size="small">
