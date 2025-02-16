@@ -274,10 +274,29 @@ const Home = () => {
                         <Typography variant="h6" style={{ margin: "20px" }}>Loading devices...</Typography>
                     ) : devicesWithShowdetects.length > 0 ? (
                         devicesWithShowdetects.map((device) => (
-                            <Grid item xs={12} sm={6} md={3} key={device.api_key}>
+                            <Grid 
+                                item xs={12} 
+                                sm={6} 
+                                md={3} 
+                                key={device.api_key}
+                                sx={{ 
+                                    display: "flex", 
+                                    justifyContent: "center" ,
+                                    marginBottom: "30px",
+                                }}
+                            >
+                                
                                 <Card 
                                     variant="outlined" 
-                                    sx={{ maxWidth: "350px", width: "100%", cursor: "pointer" }}
+                                    sx={{ 
+                                        maxWidth: "250px", 
+                                        width: "100%", 
+                                        cursor: "pointer",
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        alignItems: "center",
+                                        padding: "10px",
+                                    }}
                                     onClick={() => toggleScoreDialog(device.api_key, device.device_name)}
                                 >
                                     <CardContent>
