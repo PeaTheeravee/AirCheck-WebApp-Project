@@ -242,6 +242,7 @@ const Home = () => {
 
     return (
         <div>
+            {/* Header */}
             <header className="header">
                 <h1>Welcome to My Application!</h1>
                 <button className="profile-icon" onClick={() => navigate("/login")}>
@@ -249,60 +250,64 @@ const Home = () => {
                 </button>
             </header>
 
-            <TextField
-                label="Search Devices"
-                variant="outlined"
-                fullWidth
-                margin="normal"
-                value={searchTerm}
-                onChange={handleSearch}
-                InputProps={{
-                    startAdornment: (
-                        <InputAdornment position="start">
-                            <SearchIcon />
-                        </InputAdornment>
-                    ),
-                }}
-            />
+            {/* Content/Main */}
+            <div style={{ padding: "20px" }}>
+                <TextField
+                    label="Search Devices"
+                    variant="outlined"
+                    fullWidth
+                    margin="normal"
+                    value={searchTerm}
+                    onChange={handleSearch}
+                    sx={{ marginTop: 3, marginBottom: 3, }}
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <SearchIcon />
+                            </InputAdornment>
+                        ),
+                    }}
+                />
 
-            <Grid container spacing={2} style={{ padding: "20px" }}>
-                {loading ? (
-                    <Typography variant="h6" style={{ margin: "20px" }}>Loading devices...</Typography>
-                ) : devicesWithShowdetects.length > 0 ? (
-                    devicesWithShowdetects.map((device) => (
-                        <Grid item xs={12} sm={6} md={3} key={device.api_key}>
-                            <Card 
-                                variant="outlined" 
-                                sx={{ maxWidth: "350px", width: "100%", cursor: "pointer" }}
-                                onClick={() => toggleScoreDialog(device.api_key, device.device_name)}
-                            >
-                                <CardContent>
-                                    <Typography variant="h6">{device.device_name}</Typography>
-                                    <Typography variant="body2" color="textSecondary">📍 {device.location}</Typography>
-                                    <Typography variant="body2"><strong>PM 2.5:</strong> {device.pm2_5} µg/m³</Typography>
-                                    <Typography variant="body2"><strong>PM 10:</strong> {device.pm10} µg/m³</Typography>
-                                    <Typography variant="body2"><strong>CO2:</strong> {device.co2} ppm</Typography>
-                                    <Typography variant="body2"><strong>TVOC:</strong> {device.tvoc} ppb</Typography>
-                                    <Typography variant="body2"><strong>Temp:</strong> {device.temperature}°C</Typography>
-                                    <Typography variant="body2"><strong>Humidity:</strong> {device.humidity}%</Typography>
-                                </CardContent>
-                            </Card>
-                        </Grid>
-                    ))
-                ) : (
-                    <Typography variant="h6" style={{ margin: "20px" }}>No devices available.</Typography>
-                )}
-            </Grid>
+                <Grid container spacing={2} style={{ padding: "20px" }}>
+                    {loading ? (
+                        <Typography variant="h6" style={{ margin: "20px" }}>Loading devices...</Typography>
+                    ) : devicesWithShowdetects.length > 0 ? (
+                        devicesWithShowdetects.map((device) => (
+                            <Grid item xs={12} sm={6} md={3} key={device.api_key}>
+                                <Card 
+                                    variant="outlined" 
+                                    sx={{ maxWidth: "350px", width: "100%", cursor: "pointer" }}
+                                    onClick={() => toggleScoreDialog(device.api_key, device.device_name)}
+                                >
+                                    <CardContent>
+                                        <Typography variant="h6">{device.device_name}</Typography>
+                                        <Typography variant="body2" color="textSecondary">📍 {device.location}</Typography>
+                                        <Typography variant="body2"><strong>PM 2.5:</strong> {device.pm2_5} µg/m³</Typography>
+                                        <Typography variant="body2"><strong>PM 10:</strong> {device.pm10} µg/m³</Typography>
+                                        <Typography variant="body2"><strong>CO2:</strong> {device.co2} ppm</Typography>
+                                        <Typography variant="body2"><strong>TVOC:</strong> {device.tvoc} ppb</Typography>
+                                        <Typography variant="body2"><strong>Temp:</strong> {device.temperature}°C</Typography>
+                                        <Typography variant="body2"><strong>Humidity:</strong> {device.humidity}%</Typography>
+                                    </CardContent>
+                                </Card>
+                            </Grid>
+                        ))
+                    ) : (
+                        <Typography variant="h6" style={{ margin: "20px" }}>No devices available.</Typography>
+                    )}
+                </Grid>
 
-            <TablePagination
-                rowsPerPageOptions={[8, 12, 16]}
-                component="div"
-                count={totalPage}
-                rowsPerPage={pageSize}
-                page={currentPage}
-                onPageChange={handlePageChange}
-                onRowsPerPageChange={handleRowsPerPageChange}
-            />
+                <TablePagination
+                    rowsPerPageOptions={[8, 12, 16]}
+                    component="div"
+                    count={totalPage}
+                    rowsPerPage={pageSize}
+                    page={currentPage}
+                    onPageChange={handlePageChange}
+                    onRowsPerPageChange={handleRowsPerPageChange}
+                />
+            </div>
 
             {/* ✅ Popup แสดงข้อมูล Score */}
             <Dialog 
