@@ -305,7 +305,7 @@ const Home = () => {
                                 <Card 
                                     variant="outlined" 
                                     sx={{ 
-                                        maxWidth: "340px", 
+                                        maxWidth: "350px", 
                                         width: "100%", 
                                         cursor: "pointer",
                                         display: "flex",
@@ -316,15 +316,15 @@ const Home = () => {
                                     onClick={() => toggleScoreDialog(device.api_key, device.device_name)}
                                 >
                                     <CardContent>
-                                        <Typography variant="h6">{device.device_name}</Typography>
-                                        <Typography variant="body2" color="textSecondary">📍 {device.location}</Typography>
-                                        <Typography variant="body2"><strong>PM 2.5:</strong> {device.pm2_5} µg/m³</Typography>
-                                        <Typography variant="body2"><strong>PM 10:</strong> {device.pm10} µg/m³</Typography>
-                                        <Typography variant="body2"><strong>CO2:</strong> {device.co2} ppm</Typography>
-                                        <Typography variant="body2"><strong>TVOC:</strong> {device.tvoc} ppb</Typography>
-                                        <Typography variant="body2"><strong>Temp:</strong> {device.temperature}°C</Typography>
-                                        <Typography variant="body2"><strong>Humidity:</strong> {device.humidity}%</Typography>
-                                        <Typography variant="body2"><strong>Last Updated:</strong> {formatTimestamp(device.timestamp)}</Typography>
+                                        <Typography variant="h6" sx={{ fontSize: "25px", fontWeight: "bold" }}>{device.device_name}</Typography>
+                                        <Typography variant="body2" color="textSecondary" sx={{ fontSize: "22px" }}>📍 {device.location}</Typography>
+                                        <Typography variant="body2" sx={{ fontSize: "19px" }}><strong>PM 2.5:</strong> {device.pm2_5} µg/m³</Typography>
+                                        <Typography variant="body2" sx={{ fontSize: "19px" }}><strong>PM 10:</strong> {device.pm10} µg/m³</Typography>
+                                        <Typography variant="body2" sx={{ fontSize: "19px" }}><strong>CO2:</strong> {device.co2} ppm</Typography>
+                                        <Typography variant="body2" sx={{ fontSize: "19px" }}><strong>TVOC:</strong> {device.tvoc} ppb</Typography>
+                                        <Typography variant="body2" sx={{ fontSize: "19px" }}><strong>Temp:</strong> {device.temperature}°C</Typography>
+                                        <Typography variant="body2" sx={{ fontSize: "19px" }}><strong>Humidity:</strong> {device.humidity}%</Typography>
+                                        <Typography variant="body2" sx={{ fontSize: "19px" }}><strong>Last Updated:</strong> {formatTimestamp(device.timestamp)}</Typography>
                                     </CardContent>
                                 </Card>
                             </Grid>
