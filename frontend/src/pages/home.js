@@ -385,25 +385,29 @@ const Home = () => {
 
                 {/* แสดงเฉพาะเมื่อเลือก "Daily Averages" */}
                 {activeTab === "average" && (
-                    <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
+                    <div style={{ display: "flex", gap: "10px"}}>
                         
                         {/* เลือกปี */}
-                        <FormControl sx={{ width: "120px" }} size="small">
+                        <FormControl sx={{ width: "140px" }} size="small">
                             <Select
                                 value={selectedYear}
                                 onChange={(e) => setSelectedYear(e.target.value)}
+                                sx={{ fontSize: "18px", padding: "4px 8px" }}
                             >
                                 {availableYears.map((year) => ( // ใช้ปีที่ได้จาก fetchDailyAverages
-                                    <MenuItem key={year} value={year}>{year}</MenuItem>
+                                    <MenuItem key={year} value={year} sx={{ fontSize: "18px" }}>
+                                        {year}
+                                    </MenuItem>
                                 ))}
                             </Select>
                         </FormControl>
 
                         {/* เลือกเดือน */}
-                        <FormControl sx={{ width: "120px" }} size="small">
+                        <FormControl sx={{ width: "140px" }} size="small">
                             <Select
                                 value={selectedMonth}
                                 onChange={(e) => setSelectedMonth(e.target.value)}
+                                sx={{ fontSize: "18px", padding: "4px 8px" }}
                             >
                                 {[
                                     { value: "01", label: "January" },
@@ -419,23 +423,26 @@ const Home = () => {
                                     { value: "11", label: "November" },
                                     { value: "12", label: "December" },
                                 ].map((month) => (
-                                    <MenuItem key={month.value} value={month.value}>{month.label}</MenuItem>
+                                    <MenuItem key={month.value} value={month.value} sx={{ fontSize: "18px" }}>
+                                        {month.label}
+                                    </MenuItem>
                                 ))}
                             </Select>
                         </FormControl>
 
                         {/* เลือกค่าที่จะแสดง*/}
-                        <FormControl sx={{ width: "120px" }} size="small">
+                        <FormControl sx={{ width: "140px" }} size="small">
                             <Select
                                 value={selectedParameter}
                                 onChange={(e) => setSelectedParameter(e.target.value)}
+                                sx={{ fontSize: "18px", padding: "4px 8px" }}
                             >
-                                <MenuItem value="avg_pm2_5">PM2.5</MenuItem>
-                                <MenuItem value="avg_pm10">PM10</MenuItem>
-                                <MenuItem value="avg_co2">CO2</MenuItem>
-                                <MenuItem value="avg_tvoc">TVOC</MenuItem>
-                                <MenuItem value="avg_humidity">Humidity</MenuItem>
-                                <MenuItem value="avg_temperature">Temperature</MenuItem>
+                                <MenuItem value="avg_pm2_5" sx={{ fontSize: "18px" }}>PM2.5</MenuItem>
+                                <MenuItem value="avg_pm10" sx={{ fontSize: "18px" }}>PM10</MenuItem>
+                                <MenuItem value="avg_co2" sx={{ fontSize: "18px" }}>CO2</MenuItem>
+                                <MenuItem value="avg_tvoc" sx={{ fontSize: "18px" }}>TVOC</MenuItem>
+                                <MenuItem value="avg_humidity" sx={{ fontSize: "18px" }}>Humidity</MenuItem>
+                                <MenuItem value="avg_temperature" sx={{ fontSize: "18px" }}>Temperature</MenuItem>
                             </Select>
                         </FormControl>
                     </div>
