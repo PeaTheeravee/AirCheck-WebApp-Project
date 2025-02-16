@@ -80,6 +80,17 @@ const Home = () => {
         return dataYearMonth === `${selectedYear}-${selectedMonth}`;
     });
     
+    const formatTimestamp = (timestamp) => {
+        const date = new Date(timestamp);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0"); // เติม 0 ถ้าตัวเลขเป็นหลักเดียว
+        const day = String(date.getDate()).padStart(2, "0");
+        const hours = String(date.getHours()).padStart(2, "0");
+        const minutes = String(date.getMinutes()).padStart(2, "0");
+    
+        return `${year}/${month}/${day} - ${hours}:${minutes}`;
+    };
+
     // ฟังก์ชันดึงข้อมูลอุปกรณ์ (ใช้ Pagination)
     const fetchDevices = useCallback(async () => {
         setLoading(true);
@@ -201,6 +212,7 @@ const Home = () => {
             tvoc: matchingShowdetect ? matchingShowdetect.tvoc : "N/A",
             humidity: matchingShowdetect ? matchingShowdetect.humidity : "N/A",
             temperature: matchingShowdetect ? matchingShowdetect.temperature : "N/A",
+            timestamp: matchingShowdetect ? matchingShowdetect.timestamp : "N/A",
         };
     });
 
@@ -289,7 +301,7 @@ const Home = () => {
                                 <Card 
                                     variant="outlined" 
                                     sx={{ 
-                                        maxWidth: "250px", 
+                                        maxWidth: "340px", 
                                         width: "100%", 
                                         cursor: "pointer",
                                         display: "flex",
@@ -308,6 +320,7 @@ const Home = () => {
                                         <Typography variant="body2"><strong>TVOC:</strong> {device.tvoc} ppb</Typography>
                                         <Typography variant="body2"><strong>Temp:</strong> {device.temperature}°C</Typography>
                                         <Typography variant="body2"><strong>Humidity:</strong> {device.humidity}%</Typography>
+                                        <Typography variant="body2"><strong>Last Updated:</strong> {formatTimestamp(device.timestamp)}</Typography>
                                     </CardContent>
                                 </Card>
                             </Grid>
