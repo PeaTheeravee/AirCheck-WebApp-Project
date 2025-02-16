@@ -761,11 +761,11 @@ const AdminHome = () => {
                             <Table>
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell>User ID</TableCell>
-                                        <TableCell>Username</TableCell>
-                                        <TableCell>First Name</TableCell>
-                                        <TableCell>Last Name</TableCell>
-                                        <TableCell>Actions</TableCell>
+                                        <TableCell sx={{ minWidth: 100, maxWidth: 120 }}>User ID</TableCell>
+                                        <TableCell sx={{ minWidth: 100, maxWidth: 120 }}>Username</TableCell>
+                                        <TableCell sx={{ minWidth: 100, maxWidth: 120 }}>First Name</TableCell>
+                                        <TableCell sx={{ minWidth: 100, maxWidth: 120 }}>Last Name</TableCell>
+                                        <TableCell sx={{ minWidth: 100, maxWidth: 120 }}>Actions</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -871,13 +871,13 @@ const AdminHome = () => {
                             <Table>
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell>Device ID</TableCell>
-                                        <TableCell>Device Name</TableCell>
-                                        <TableCell>Location</TableCell>
-                                        <TableCell>Status</TableCell>
-                                        <TableCell>Set Time (min)</TableCell>
-                                        <TableCell>Added By</TableCell>
-                                        <TableCell>Actions</TableCell>
+                                        <TableCell sx={{ minWidth: 100, maxWidth: 120 }}>Device ID</TableCell>
+                                        <TableCell sx={{ minWidth: 100, maxWidth: 120 }}>Device Name</TableCell>
+                                        <TableCell sx={{ minWidth: 100, maxWidth: 120 }}>Location</TableCell>
+                                        <TableCell sx={{ minWidth: 100, maxWidth: 120 }}>Status</TableCell>
+                                        <TableCell sx={{ minWidth: 100, maxWidth: 120 }}>Set Time (min)</TableCell>
+                                        <TableCell sx={{ minWidth: 100, maxWidth: 120 }}>Added By</TableCell>
+                                        <TableCell sx={{ minWidth: 100, maxWidth: 120 }}>Actions</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
