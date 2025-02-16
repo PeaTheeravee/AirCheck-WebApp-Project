@@ -702,7 +702,7 @@ const AdminHome = () => {
         <div>
             {/* Header */}
             <header className="header">
-                <h1>Admin Home</h1>
+                <h1 className="title">Admin Home</h1>
                 <button className="profile-icon" onClick={setIsUserDetailsDialogOpen}>
                     <AccountCircleIcon fontSize="large" />
                 </button>

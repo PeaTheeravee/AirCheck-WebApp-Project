@@ -256,7 +256,7 @@ const Home = () => {
         <div>
             {/* Header */}
             <header className="header">
-                <h1>Welcome to My Application!</h1>
+                <h1 className="title">Welcome to My Application!</h1>
                 <button className="profile-icon" onClick={() => navigate("/login")}>
                     <AccountCircleIcon fontSize="large" />
                 </button>
