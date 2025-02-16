@@ -35,7 +35,7 @@ import {
     CartesianGrid, 
     ResponsiveContainer 
 } from "recharts";
-import "./home.css";
+import "./decorate.css";
 
 const Home = () => {
     const navigate = useNavigate();
@@ -242,7 +242,7 @@ const Home = () => {
 
     return (
         <div>
-            <header className="home-header">
+            <header className="header">
                 <h1>Welcome to My Application!</h1>
                 <button className="profile-icon" onClick={() => navigate("/login")}>
                     <AccountCircleIcon fontSize="large" />

@@ -21,7 +21,7 @@ import {
 
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import "./adminhome.css";
+import "./decorate.css";
 
 const AdminHome = () => {
     const navigate = useNavigate();
@@ -701,7 +701,7 @@ const AdminHome = () => {
     return (
         <div>
             {/* Header */}
-            <header className="admin-header">
+            <header className="header">
                 <h1>Admin Home</h1>
                 <button className="profile-icon" onClick={setIsUserDetailsDialogOpen}>
                     <AccountCircleIcon fontSize="large" />
