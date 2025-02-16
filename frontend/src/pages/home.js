@@ -353,13 +353,13 @@ const Home = () => {
                 fullWidth
                 sx={{ 
                     "& .MuiDialog-paper": { 
-                        width: activeTab === "average" ? "90vw" : "850px",  
+                        width: activeTab === "average" ? "90vw" : "1200px",  
                         maxWidth: "1700px", 
                         padding: "20px" 
                     } 
                 }}
             >
-                <DialogTitle>
+                <DialogTitle sx={{ fontSize: "33px", fontWeight: "bold" }}>
                     Device Score Data - {targetDeviceName}
                 </DialogTitle>
 
@@ -448,41 +448,41 @@ const Home = () => {
                                 <Table>
                                     <TableHead>
                                         <TableRow>
-                                            <TableCell>Parameter</TableCell>
-                                            <TableCell>Quality Level</TableCell>
-                                            <TableCell>Fixed Value</TableCell>
+                                            <TableCell sx={{ fontSize: "25px", fontWeight: "bold" }}>Parameter</TableCell>
+                                            <TableCell sx={{ fontSize: "25px", fontWeight: "bold" }}>Quality Level</TableCell>
+                                            <TableCell sx={{ fontSize: "25px", fontWeight: "bold" }}>Fixed Value</TableCell>
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
                                         <TableRow>
-                                            <TableCell>PM2.5</TableCell>
-                                            <TableCell>{scoreData.pm2_5_quality_level}</TableCell>
-                                            <TableCell>{scoreData.pm2_5_fix}</TableCell>
+                                            <TableCell sx={{ fontSize: "20px" }}>PM2.5</TableCell>
+                                            <TableCell sx={{ fontSize: "20px" }}>{scoreData.pm2_5_quality_level}</TableCell>
+                                            <TableCell sx={{ fontSize: "20px" }}>{scoreData.pm2_5_fix}</TableCell>
                                         </TableRow>
                                         <TableRow>
-                                            <TableCell>PM10</TableCell>
-                                            <TableCell>{scoreData.pm10_quality_level}</TableCell>
-                                            <TableCell>{scoreData.pm10_fix}</TableCell>
+                                            <TableCell sx={{ fontSize: "20px" }}>PM10</TableCell>
+                                            <TableCell sx={{ fontSize: "20px" }}>{scoreData.pm10_quality_level}</TableCell>
+                                            <TableCell sx={{ fontSize: "20px" }}>{scoreData.pm10_fix}</TableCell>
                                         </TableRow>
                                         <TableRow>
-                                            <TableCell>CO2</TableCell>
-                                            <TableCell>{scoreData.co2_quality_level}</TableCell>
-                                            <TableCell>{scoreData.co2_fix}</TableCell>
+                                            <TableCell sx={{ fontSize: "20px" }}>CO2</TableCell>
+                                            <TableCell sx={{ fontSize: "20px" }}>{scoreData.co2_quality_level}</TableCell>
+                                            <TableCell sx={{ fontSize: "20px" }}>{scoreData.co2_fix}</TableCell>
                                         </TableRow>
                                         <TableRow>
-                                            <TableCell>TVOC</TableCell>
-                                            <TableCell>{scoreData.tvoc_quality_level}</TableCell>
-                                            <TableCell>{scoreData.tvoc_fix}</TableCell>
+                                            <TableCell sx={{ fontSize: "20px" }}>TVOC</TableCell>
+                                            <TableCell sx={{ fontSize: "20px" }}>{scoreData.tvoc_quality_level}</TableCell>
+                                            <TableCell sx={{ fontSize: "20px" }}>{scoreData.tvoc_fix}</TableCell>
                                         </TableRow>
                                         <TableRow>
-                                            <TableCell>Humidity</TableCell>
-                                            <TableCell>{scoreData.humidity_quality_level}</TableCell>
-                                            <TableCell>{scoreData.humidity_fix}</TableCell>
+                                            <TableCell sx={{ fontSize: "20px" }}>Humidity</TableCell>
+                                            <TableCell sx={{ fontSize: "20px" }}>{scoreData.humidity_quality_level}</TableCell>
+                                            <TableCell sx={{ fontSize: "20px" }}>{scoreData.humidity_fix}</TableCell>
                                         </TableRow>
                                         <TableRow>
-                                            <TableCell>Temperature</TableCell>
-                                            <TableCell>{scoreData.temperature_quality_level}</TableCell>
-                                            <TableCell>{scoreData.temperature_fix}</TableCell>
+                                            <TableCell sx={{ fontSize: "20px" }}>Temperature</TableCell>
+                                            <TableCell sx={{ fontSize: "20px" }}>{scoreData.temperature_quality_level}</TableCell>
+                                            <TableCell sx={{ fontSize: "20px" }}>{scoreData.temperature_fix}</TableCell>
                                         </TableRow>
                                     </TableBody>
                                 </Table>
