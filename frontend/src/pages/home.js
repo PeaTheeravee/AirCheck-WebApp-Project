@@ -369,13 +369,14 @@ const Home = () => {
                         <Button 
                             variant={activeTab === "score" ? "contained" : "outlined"} 
                             onClick={() => setActiveTab("score")}
-                            sx={{ marginRight: "5px" }}
+                            sx={{ fontSize: "18px", padding: "8px 16px", marginRight: "20px" }}
                         >
                             Score Data
                         </Button>
                         <Button 
                             variant={activeTab === "average" ? "contained" : "outlined"} 
                             onClick={() => setActiveTab("average")}
+                            sx={{ fontSize: "18px", padding: "8px 16px"}}
                         >
                             Daily Averages
                         </Button>
@@ -518,7 +519,7 @@ const Home = () => {
                 </DialogContent>
 
                 <DialogActions>
-                    <Button onClick={toggleScoreDialog}>Close</Button>
+                    <Button onClick={toggleScoreDialog} sx={{ fontSize: "18px" }}>Close</Button>
                 </DialogActions>
             </Dialog>
         </div>
