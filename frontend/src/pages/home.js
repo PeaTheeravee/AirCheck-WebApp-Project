@@ -287,7 +287,7 @@ const Home = () => {
 
                 <Grid container spacing={2} style={{ padding: "20px" }}>
                     {loading ? (
-                        <Typography variant="h6" style={{ margin: "20px" }}>Loading devices...</Typography>
+                        <Typography sx={{ fontSize: "25px" }} style={{ margin: "20px" }}>Loading devices...</Typography>
                     ) : devicesWithShowdetects.length > 0 ? (
                         devicesWithShowdetects.map((device) => (
                             <Grid 
@@ -330,7 +330,7 @@ const Home = () => {
                             </Grid>
                         ))
                     ) : (
-                        <Typography variant="h6" style={{ margin: "20px" }}>No devices available.</Typography>
+                        <Typography sx={{ fontSize: "25px" }} style={{ margin: "20px" }}>No devices available.</Typography>
                     )}
                 </Grid>
 
@@ -489,7 +489,7 @@ const Home = () => {
                                 </Table>
                             </TableContainer>
                         ) : (
-                            <Typography>Loading...</Typography>
+                            <Typography sx={{ fontSize: "25px" }}>Loading...</Typography>
                         )
                     ) : (
                         // แสดง Daily Averages Graph
@@ -513,7 +513,7 @@ const Home = () => {
                                 </LineChart>
                             </ResponsiveContainer>
                         ) : (
-                            <Typography>No Data Available</Typography>
+                            <Typography sx={{ fontSize: "25px" }}>No Data Available</Typography>
                         )
                     )}
                 </DialogContent>
