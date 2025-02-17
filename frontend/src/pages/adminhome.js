@@ -23,10 +23,10 @@ import {
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import "./decorate.css";
 
-const HtableStyle = {
+const HStyle = {
     fontSize: "25px", 
-};
-const TtableStyle = {
+}; 
+const TStyle = {
     fontSize: "20px", 
 };
 
@@ -775,11 +775,11 @@ const AdminHome = () => {
                             <Table>
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell style={HtableStyle}>User ID</TableCell>
-                                        <TableCell style={HtableStyle}>Username</TableCell>
-                                        <TableCell style={HtableStyle}>First Name</TableCell>
-                                        <TableCell style={HtableStyle}>Last Name</TableCell>
-                                        <TableCell style={HtableStyle}>Actions</TableCell>
+                                        <TableCell style={HStyle}>User ID</TableCell>
+                                        <TableCell style={HStyle}>Username</TableCell>
+                                        <TableCell style={HStyle}>First Name</TableCell>
+                                        <TableCell style={HStyle}>Last Name</TableCell>
+                                        <TableCell style={HStyle}>Actions</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -792,10 +792,10 @@ const AdminHome = () => {
                                     ) : filteredUsers.length > 0 ? (
                                         filteredUsers.map((user) => (
                                             <TableRow key={user.id}>
-                                                <TableCell style={TtableStyle}>{user.id}</TableCell>
-                                                <TableCell style={TtableStyle}>{user.username}</TableCell>
-                                                <TableCell style={TtableStyle}>{user.first_name}</TableCell>
-                                                <TableCell style={TtableStyle}>{user.last_name}</TableCell>
+                                                <TableCell style={TStyle}>{user.id}</TableCell>
+                                                <TableCell style={TStyle}>{user.username}</TableCell>
+                                                <TableCell style={TStyle}>{user.first_name}</TableCell>
+                                                <TableCell style={TStyle}>{user.last_name}</TableCell>
                                                 <TableCell>
                                                     <Button
                                                         variant="contained"
@@ -836,7 +836,7 @@ const AdminHome = () => {
                                         ))
                                     ) : (
                                         <TableRow>
-                                            <TableCell style={TtableStyle} colSpan={5} align="center">
+                                            <TableCell style={TStyle} colSpan={5} align="center">
                                                 No users found.
                                             </TableCell>
                                         </TableRow>
@@ -894,13 +894,13 @@ const AdminHome = () => {
                             <Table>
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell style={HtableStyle}>Device ID</TableCell>
-                                        <TableCell style={HtableStyle}>Device Name</TableCell>
-                                        <TableCell style={HtableStyle}>Location</TableCell>
-                                        <TableCell style={HtableStyle}>Status</TableCell>
-                                        <TableCell style={HtableStyle}>Set Time (min)</TableCell>
-                                        <TableCell style={HtableStyle}>Added By</TableCell>
-                                        <TableCell style={HtableStyle}>Actions</TableCell>
+                                        <TableCell style={HStyle}>Device ID</TableCell>
+                                        <TableCell style={HStyle}>Device Name</TableCell>
+                                        <TableCell style={HStyle}>Location</TableCell>
+                                        <TableCell style={HStyle}>Status</TableCell>
+                                        <TableCell style={HStyle}>Set Time (min)</TableCell>
+                                        <TableCell style={HStyle}>Added By</TableCell>
+                                        <TableCell style={HStyle}>Actions</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -913,7 +913,7 @@ const AdminHome = () => {
                                     ) : filteredDevices.length > 0 ? (
                                         filteredDevices.map((device) => (
                                             <TableRow key={device.api_key}>
-                                                <TableCell style={TtableStyle}>
+                                                <TableCell style={TStyle}>
                                                     {device.api_key}
                                                     <IconButton 
                                                         onClick={() => navigator.clipboard.writeText(device.api_key)}
@@ -921,11 +921,11 @@ const AdminHome = () => {
                                                         📋
                                                     </IconButton>                                               
                                                 </TableCell>
-                                                <TableCell style={TtableStyle}>{device.device_name}</TableCell>
-                                                <TableCell style={TtableStyle}>{device.location}</TableCell>
-                                                <TableCell style={TtableStyle}>{device.device_status}</TableCell>
-                                                <TableCell style={TtableStyle}>{device.device_settime}</TableCell>
-                                                <TableCell style={TtableStyle}>{device.user_id}</TableCell>
+                                                <TableCell style={TStyle}>{device.device_name}</TableCell>
+                                                <TableCell style={TStyle}>{device.location}</TableCell>
+                                                <TableCell style={TStyle}>{device.device_status}</TableCell>
+                                                <TableCell style={TStyle}>{device.device_settime}</TableCell>
+                                                <TableCell style={TStyle}>{device.user_id}</TableCell>
                                                 <TableCell>
                                                     <Button
                                                         variant="contained"
@@ -962,7 +962,7 @@ const AdminHome = () => {
                                         ))
                                     ) : (
                                         <TableRow>
-                                            <TableCell style={TtableStyle} colSpan={7} align="center">
+                                            <TableCell style={TStyle} colSpan={7} align="center">
                                                 No devices found.
                                             </TableCell>
                                         </TableRow>
@@ -986,30 +986,32 @@ const AdminHome = () => {
 
             {/* PopUp User Details */}
             <Dialog open={isUserDetailsDialogOpen} onClose={toggleUserDetailsDialog}>
-                <DialogTitle>
+                <DialogTitle style={HStyle}>
                     User Details
                     <Button onClick={toggleUserDetailsDialog} style={{ float: "right" }}>X</Button>
                 </DialogTitle>
                 <DialogContent>
                     {userData ? (
                         <>
-                            <p><strong>Username:</strong> {userData.username}</p>
-                            <p><strong>First Name:</strong> {userData.first_name}</p>
-                            <p><strong>Last Name:</strong> {userData.last_name}</p>
+                            <p style={TStyle}>Username: {userData.username}</p>
+                            <p style={TStyle}>First Name: {userData.first_name}</p>
+                            <p style={TStyle}>Last Name: {userData.last_name}</p>
                         </>
                     ) : (
                         <p>Loading...</p>
                     )}
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={toggleChangePasswordYourselfDialog}>Change Password</Button> {/* เปิด Pop-Up Change Password */}
-                    <Button onClick={handleLogout}>Logout</Button> {/* Logout */}
+                    <Button onClick={toggleChangePasswordYourselfDialog} sx={{ fontSize: "18px" }}>Change Password</Button> {/* เปิด Pop-Up Change Password */}
+                    <Button onClick={handleLogout} sx={{ fontSize: "18px" }}>Logout</Button> {/* Logout */}
                 </DialogActions>
             </Dialog>
 
             {/* Pop-Up Create Account */}
             <Dialog open={isCreateDialogOpen} onClose={toggleCreateDialog}>
-                <DialogTitle>Create New Account</DialogTitle>
+                <DialogTitle style={HStyle}>
+                    Create New Account
+                </DialogTitle>
                 <DialogContent>
                     <TextField
                         label="Username"
@@ -1017,6 +1019,8 @@ const AdminHome = () => {
                         margin="dense"
                         value={newUser.username}
                         onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
+                        InputProps={{ style: { fontSize: "20px" } }} 
+                        InputLabelProps={{ style: { fontSize: "20px" } }} 
                     />
                     <TextField
                         label="First Name"
@@ -1024,6 +1028,8 @@ const AdminHome = () => {
                         margin="dense"
                         value={newUser.firstName}
                         onChange={(e) => setNewUser({ ...newUser, firstName: e.target.value })}
+                        InputProps={{ style: { fontSize: "20px" } }} 
+                        InputLabelProps={{ style: { fontSize: "20px" } }} 
                     />
                     <TextField
                         label="Last Name"
@@ -1031,6 +1037,8 @@ const AdminHome = () => {
                         margin="dense"
                         value={newUser.lastName}
                         onChange={(e) => setNewUser({ ...newUser, lastName: e.target.value })}
+                        InputProps={{ style: { fontSize: "20px" } }} 
+                        InputLabelProps={{ style: { fontSize: "20px" } }} 
                     />
                     <TextField
                         label="Password"
@@ -1039,6 +1047,8 @@ const AdminHome = () => {
                         margin="dense"
                         value={newUser.password}
                         onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                        InputProps={{ style: { fontSize: "20px" } }} 
+                        InputLabelProps={{ style: { fontSize: "20px" } }} 
                     />
                     {error && (
                         <p style={{ color: "red", marginTop: "10px" }}>
@@ -1052,14 +1062,16 @@ const AdminHome = () => {
                     )}
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleCreateAccount} color="primary">Submit</Button>
-                    <Button onClick={toggleCreateDialog}>Cancel</Button>
+                    <Button onClick={handleCreateAccount} sx={{ fontSize: "18px" }}>Submit</Button>
+                    <Button onClick={toggleCreateDialog} sx={{ fontSize: "18px" }}>Cancel</Button>
                 </DialogActions>
             </Dialog>
 
             {/* Pop-Up Change Password Yourself */}
             <Dialog open={isChangePasswordYourselfDialogOpen} onClose={toggleChangePasswordYourselfDialog}>
-                <DialogTitle>Change Password</DialogTitle>
+                <DialogTitle style={HStyle}>
+                    Change Password
+                </DialogTitle>
                 <DialogContent>
                     <TextField
                         label="Current Password"
@@ -1069,6 +1081,7 @@ const AdminHome = () => {
                         value={passwordData.currentPassword}
                         onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
                         InputProps={{
+                            style: { fontSize: "20px" },
                             endAdornment: (
                                 <InputAdornment position="end">
                                     <IconButton onClick={() => handleTogglePassword("current")}>
@@ -1077,6 +1090,7 @@ const AdminHome = () => {
                                 </InputAdornment>
                             ),
                         }}
+                        InputLabelProps={{ style: { fontSize: "20px" } }}
                     />
                     <TextField
                         label="New Password"
@@ -1086,6 +1100,7 @@ const AdminHome = () => {
                         value={passwordData.newPassword}
                         onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
                         InputProps={{
+                            style: { fontSize: "20px" },
                             endAdornment: (
                                 <InputAdornment position="end">
                                     <IconButton onClick={() => handleTogglePassword("new")}>
@@ -1094,6 +1109,7 @@ const AdminHome = () => {
                                 </InputAdornment>
                             ),
                         }}
+                        InputLabelProps={{ style: { fontSize: "20px" } }}
                     />
                     {error && (
                         <p style={{ color: "red", marginTop: "10px", marginBottom: "0" }}>
@@ -1107,14 +1123,14 @@ const AdminHome = () => {
                     )}
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleChangePasswordYourself}>Submit</Button>
-                    <Button onClick={toggleChangePasswordYourselfDialog}>Back</Button>
+                    <Button onClick={handleChangePasswordYourself} sx={{ fontSize: "18px" }}>Submit</Button>
+                    <Button onClick={toggleChangePasswordYourselfDialog} sx={{ fontSize: "18px" }}>Back</Button>
                 </DialogActions>
             </Dialog>  
 
             {/* Pop-Up Change Someone Password */}
             <Dialog open={isChangeSomeonePasswordDialogOpen} onClose={toggleChangeSomeonePasswordDialog}>
-                <DialogTitle>
+                <DialogTitle style={HStyle}>
                     The user password you changed is <strong>{targetUserName}</strong>
                 </DialogTitle>
                 <DialogContent>
@@ -1126,6 +1142,7 @@ const AdminHome = () => {
                         value={passwordData.newPassword}
                         onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
                         InputProps={{
+                            style: { fontSize: "20px" },
                             endAdornment: (
                                 <InputAdornment position="end">
                                     <IconButton onClick={() => handleTogglePassword("new")}>
@@ -1134,6 +1151,7 @@ const AdminHome = () => {
                                 </InputAdornment>
                             ),
                         }}
+                        InputLabelProps={{ style: { fontSize: "20px" } }}
                     />
                     <TextField
                         label="Confirm New Password"
@@ -1143,6 +1161,7 @@ const AdminHome = () => {
                         value={passwordData.confirmNewPassword || ""}
                         onChange={(e) => setPasswordData({ ...passwordData, confirmNewPassword: e.target.value })}
                         InputProps={{
+                            style: { fontSize: "20px" },
                             endAdornment: (
                                 <InputAdornment position="end">
                                     <IconButton onClick={() => handleTogglePassword("confirm")}>
@@ -1151,6 +1170,7 @@ const AdminHome = () => {
                                 </InputAdornment>
                             ),
                         }}
+                        InputLabelProps={{ style: { fontSize: "20px" } }}
                     />
                     {error && (
                         <p style={{ color: "red", marginTop: "10px", marginBottom: "0" }}>
@@ -1164,14 +1184,14 @@ const AdminHome = () => {
                     )}
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleChangeSomeonePassword}>Submit</Button>
-                    <Button onClick={toggleChangeSomeonePasswordDialog}>Cancel</Button>
+                    <Button onClick={handleChangeSomeonePassword} sx={{ fontSize: "18px" }}>Submit</Button>
+                    <Button onClick={toggleChangeSomeonePasswordDialog} sx={{ fontSize: "18px" }}>Cancel</Button>
                 </DialogActions>
             </Dialog>
                       
             {/* Pop-Up Update User */}
             <Dialog open={isUpdateDialogOpen} onClose={toggleUpdateDialog}>
-                <DialogTitle>
+                <DialogTitle style={HStyle}>
                     The user you updated is <strong>{targetUserName}</strong>
                 </DialogTitle>
                 <DialogContent>
@@ -1181,6 +1201,8 @@ const AdminHome = () => {
                         margin="dense"
                         value={updateData.username} 
                         onChange={(e) => setUpdateData({ ...updateData, username: e.target.value })}
+                        InputProps={{ style: { fontSize: "20px" } }} 
+                        InputLabelProps={{ style: { fontSize: "20px" } }} 
                     />
                     <TextField
                         label="First Name"
@@ -1188,6 +1210,8 @@ const AdminHome = () => {
                         margin="dense"
                         value={updateData.firstName}
                         onChange={(e) => setUpdateData({ ...updateData, firstName: e.target.value })}
+                        InputProps={{ style: { fontSize: "20px" } }} 
+                        InputLabelProps={{ style: { fontSize: "20px" } }} 
                     />
                     <TextField
                         label="Last Name"
@@ -1195,6 +1219,8 @@ const AdminHome = () => {
                         margin="dense"
                         value={updateData.lastName}
                         onChange={(e) => setUpdateData({ ...updateData, lastName: e.target.value })}
+                        InputProps={{ style: { fontSize: "20px" } }} 
+                        InputLabelProps={{ style: { fontSize: "20px" } }} 
                     />
                     {error && (
                         <p style={{ color: "red", marginTop: "10px", marginBottom: "0" }}>
@@ -1208,14 +1234,14 @@ const AdminHome = () => {
                     )}
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleUpdateUser}>Submit</Button>
-                    <Button onClick={toggleUpdateDialog}>Cancel</Button>
+                    <Button onClick={handleUpdateUser} sx={{ fontSize: "18px" }}>Submit</Button>
+                    <Button onClick={toggleUpdateDialog} sx={{ fontSize: "18px" }}>Cancel</Button>
                 </DialogActions>
             </Dialog>
 
             {/* Pop-Up Delete User */}
             <Dialog open={isDeleteDialogOpen} onClose={toggleDeleteDialog}>
-                <DialogTitle>
+                <DialogTitle style={HStyle}>
                     Are you sure you want to delete the user <strong>{targetUserName}</strong>?
                 </DialogTitle>
                 <DialogContent>
@@ -1231,14 +1257,16 @@ const AdminHome = () => {
                     )}
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleDeleteUser}>Delete</Button>
-                    <Button onClick={toggleDeleteDialog}>Cancel</Button>
+                    <Button onClick={handleDeleteUser} sx={{ fontSize: "18px" }}>Delete</Button>
+                    <Button onClick={toggleDeleteDialog} sx={{ fontSize: "18px" }}>Cancel</Button>
                 </DialogActions>
             </Dialog>
 
             {/* Pop-Up Create Device */}
             <Dialog open={isCreateDeviceDialogOpen} onClose={toggleCreateDeviceDialog}>
-                <DialogTitle>Create New Device</DialogTitle>
+                <DialogTitle style={HStyle}>
+                    Create New Device
+                </DialogTitle>
                 <DialogContent>
                     <TextField
                         label="Device Name"
@@ -1246,6 +1274,8 @@ const AdminHome = () => {
                         margin="dense"
                         value={newDeviceData.device_name}
                         onChange={(e) => setNewDeviceData({ ...newDeviceData, device_name: e.target.value })}
+                        InputProps={{ style: { fontSize: "20px" } }} 
+                        InputLabelProps={{ style: { fontSize: "20px" } }} 
                     />
                     <TextField
                         label="Location"
@@ -1253,6 +1283,8 @@ const AdminHome = () => {
                         margin="dense"
                         value={newDeviceData.location}
                         onChange={(e) => setNewDeviceData({ ...newDeviceData, location: e.target.value })}
+                        InputProps={{ style: { fontSize: "20px" } }} 
+                        InputLabelProps={{ style: { fontSize: "20px" } }} 
                     />
                     {error && (
                         <p style={{ color: "red", marginTop: "10px" }}>
@@ -1266,14 +1298,14 @@ const AdminHome = () => {
                     )}
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleCreateDevice}>Submit</Button>
-                    <Button onClick={toggleCreateDeviceDialog}>Cancel</Button>
+                    <Button onClick={handleCreateDevice} sx={{ fontSize: "18px" }}>Submit</Button>
+                    <Button onClick={toggleCreateDeviceDialog} sx={{ fontSize: "18px" }}>Cancel</Button>
                 </DialogActions>
             </Dialog>
 
             {/* Pop-Up Update Device */}
             <Dialog open={isUpdateDeviceDialogOpen} onClose={toggleUpdateDeviceDialog}>
-                <DialogTitle>
+                <DialogTitle style={HStyle}>
                     The device you updated is <strong>{targetDeviceName}</strong>
                 </DialogTitle>
                 <DialogContent>
@@ -1283,6 +1315,8 @@ const AdminHome = () => {
                         margin="dense"
                         value={updateDeviceData.device_name}
                         onChange={(e) => setUpdateDeviceData({ ...updateDeviceData, device_name: e.target.value })}
+                        InputProps={{ style: { fontSize: "20px" } }} 
+                        InputLabelProps={{ style: { fontSize: "20px" } }} 
                     />
                     <TextField
                         label="Location"
@@ -1290,6 +1324,8 @@ const AdminHome = () => {
                         margin="dense"
                         value={updateDeviceData.location}
                         onChange={(e) => setUpdateDeviceData({ ...updateDeviceData, location: e.target.value })}
+                        InputProps={{ style: { fontSize: "20px" } }} 
+                        InputLabelProps={{ style: { fontSize: "20px" } }} 
                     />
                     <TextField
                         label="Set Time (minutes)"
@@ -1304,6 +1340,8 @@ const AdminHome = () => {
                                 device_settime: value < 1 ? 1 : value  // ป้องกันค่าต่ำกว่า 1
                             });
                         }}
+                        InputProps={{ style: { fontSize: "20px" } }} 
+                        InputLabelProps={{ style: { fontSize: "20px" } }} 
                     />
                     {error && ( 
                         <p style={{ color: "red", marginTop: "10px" }}>
@@ -1317,14 +1355,14 @@ const AdminHome = () => {
                     )}
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleUpdateDevice} color="primary">Submit</Button>
-                    <Button onClick={toggleUpdateDeviceDialog}>Cancel</Button>
+                    <Button onClick={handleUpdateDevice} sx={{ fontSize: "18px" }}>Submit</Button>
+                    <Button onClick={toggleUpdateDeviceDialog} sx={{ fontSize: "18px" }}>Cancel</Button>
                 </DialogActions>
             </Dialog>
 
             {/* Pop-Up Delete Device */}
             <Dialog open={isDeleteDeviceDialogOpen} onClose={toggleDeleteDeviceDialog}>
-                <DialogTitle>
+                <DialogTitle style={HStyle}>
                     Are you sure you want to delete the device <strong>{targetDeviceName}</strong>?
                 </DialogTitle>
                 <DialogContent>
@@ -1340,14 +1378,14 @@ const AdminHome = () => {
                     )}
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleDeleteDevice}>Delete</Button>
-                    <Button onClick={toggleDeleteDeviceDialog}>Cancel</Button>
+                    <Button onClick={handleDeleteDevice} sx={{ fontSize: "18px" }}>Delete</Button>
+                    <Button onClick={toggleDeleteDeviceDialog} sx={{ fontSize: "18px" }}>Cancel</Button>
                 </DialogActions>
             </Dialog>
             
             {/* Pop-Up Delete Device Data */}
             <Dialog open={isDeleteDataDialogOpen} onClose={toggleDeleteDataDialog}>
-                <DialogTitle>
+                <DialogTitle style={HStyle}>
                     Are you sure you want to delete the device data <strong>{targetDeviceName}</strong>?
                 </DialogTitle>
                 <DialogContent>
@@ -1374,6 +1412,8 @@ const AdminHome = () => {
                             const value = parseInt(e.target.value, 10);
                             setMonthsToDelete(value < 1 ? 1 : value); // ป้องกันค่าต่ำกว่า 1
                         }}
+                        InputProps={{ style: { fontSize: "20px" } }} 
+                        InputLabelProps={{ style: { fontSize: "20px" } }} 
                     />
                     {error && (
                         <p style={{ color: "red", marginTop: "10px", marginBottom: "0" }}>
@@ -1387,8 +1427,8 @@ const AdminHome = () => {
                     )}
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleDeleteDataByMonth}>Delete</Button>
-                    <Button onClick={toggleDeleteDataDialog}>Cancel</Button>
+                    <Button onClick={handleDeleteDataByMonth} sx={{ fontSize: "18px" }}>Delete</Button>
+                    <Button onClick={toggleDeleteDataDialog} sx={{ fontSize: "18px" }}>Cancel</Button>
                 </DialogActions>
             </Dialog>
         </div>
