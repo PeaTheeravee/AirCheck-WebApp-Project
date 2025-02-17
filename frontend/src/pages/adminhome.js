@@ -1023,6 +1023,7 @@ const AdminHome = () => {
                         onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
                         InputProps={{ style: { fontSize: "20px" } }} 
                         InputLabelProps={{ style: { fontSize: "20px" } }} 
+                        sx={{ marginBottom: "10px" }}
                     />
                     <TextField
                         label="First Name"
@@ -1032,6 +1033,7 @@ const AdminHome = () => {
                         onChange={(e) => setNewUser({ ...newUser, firstName: e.target.value })}
                         InputProps={{ style: { fontSize: "20px" } }} 
                         InputLabelProps={{ style: { fontSize: "20px" } }} 
+                        sx={{ marginBottom: "10px" }}
                     />
                     <TextField
                         label="Last Name"
@@ -1041,6 +1043,7 @@ const AdminHome = () => {
                         onChange={(e) => setNewUser({ ...newUser, lastName: e.target.value })}
                         InputProps={{ style: { fontSize: "20px" } }} 
                         InputLabelProps={{ style: { fontSize: "20px" } }} 
+                        sx={{ marginBottom: "10px" }}
                     />
                     <TextField
                         label="Password"
@@ -1053,12 +1056,12 @@ const AdminHome = () => {
                         InputLabelProps={{ style: { fontSize: "20px" } }} 
                     />
                     {error && (
-                        <p style={{ color: "red", marginTop: "10px" }}>
+                        <p style={{ color: "red", marginTop: "10px", fontSize: "20px" }}>
                             {error}
                         </p>
                     )}
                     {successMessage && (
-                        <p style={{ color: "green", marginTop: "10px" }}>
+                        <p style={{ color: "green", marginTop: "10px", fontSize: "20px" }}>
                             {successMessage}
                         </p>
                     )}
@@ -1093,6 +1096,7 @@ const AdminHome = () => {
                             ),
                         }}
                         InputLabelProps={{ style: { fontSize: "20px" } }}
+                        sx={{ marginBottom: "10px" }}
                     />
                     <TextField
                         label="New Password"
@@ -1114,12 +1118,12 @@ const AdminHome = () => {
                         InputLabelProps={{ style: { fontSize: "20px" } }}
                     />
                     {error && (
-                        <p style={{ color: "red", marginTop: "10px", marginBottom: "0" }}>
+                        <p style={{ color: "red", marginTop: "10px", fontSize: "20px" }}>
                             {error}
                         </p>
                     )}
                     {successMessage && (
-                        <p style={{ color: "green", marginTop: "10px" }}>
+                        <p style={{ color: "green", marginTop: "10px", fontSize: "20px" }}>
                             {successMessage}
                         </p>
                     )}
@@ -1154,6 +1158,7 @@ const AdminHome = () => {
                             ),
                         }}
                         InputLabelProps={{ style: { fontSize: "20px" } }}
+                        sx={{ marginBottom: "10px" }}
                     />
                     <TextField
                         label="Confirm New Password"
@@ -1175,12 +1180,12 @@ const AdminHome = () => {
                         InputLabelProps={{ style: { fontSize: "20px" } }}
                     />
                     {error && (
-                        <p style={{ color: "red", marginTop: "10px", marginBottom: "0" }}>
+                        <p style={{ color: "red", marginTop: "10px", fontSize: "20px" }}>
                             {error}
                         </p>
                     )}
                     {successMessage && (
-                        <p style={{ color: "green", marginTop: "10px" }}>
+                        <p style={{ color: "green", marginTop: "10px", fontSize: "20px" }}>
                             {successMessage}
                         </p>
                     )}
@@ -1205,6 +1210,7 @@ const AdminHome = () => {
                         onChange={(e) => setUpdateData({ ...updateData, username: e.target.value })}
                         InputProps={{ style: { fontSize: "20px" } }} 
                         InputLabelProps={{ style: { fontSize: "20px" } }} 
+                        sx={{ marginBottom: "20px" }}
                     />
                     <TextField
                         label="First Name"
@@ -1214,6 +1220,7 @@ const AdminHome = () => {
                         onChange={(e) => setUpdateData({ ...updateData, firstName: e.target.value })}
                         InputProps={{ style: { fontSize: "20px" } }} 
                         InputLabelProps={{ style: { fontSize: "20px" } }} 
+                        sx={{ marginBottom: "20px" }}
                     />
                     <TextField
                         label="Last Name"
@@ -1225,12 +1232,12 @@ const AdminHome = () => {
                         InputLabelProps={{ style: { fontSize: "20px" } }} 
                     />
                     {error && (
-                        <p style={{ color: "red", marginTop: "10px", marginBottom: "0" }}>
+                        <p style={{ color: "red", marginTop: "10px", fontSize: "20px" }}>
                             {error}
                         </p>
                     )}
                     {successMessage && (
-                        <p style={{ color: "green", marginTop: "10px" }}>
+                        <p style={{ color: "green", marginTop: "10px", fontSize: "20px" }}>
                             {successMessage}
                         </p>
                     )}
@@ -1248,12 +1255,12 @@ const AdminHome = () => {
                 </DialogTitle>
                 <DialogContent>
                     {error && (
-                        <p style={{ color: "red", marginTop: "10px", marginBottom: "0" }}>
+                        <p style={{ color: "red", marginTop: "10px", fontSize: "20px" }}>
                             {error}
                         </p>
                     )}
                     {successMessage && (
-                        <p style={{ color: "green", marginTop: "10px" }}>
+                        <p style={{ color: "green", marginTop: "10px", fontSize: "20px" }}>
                             {successMessage}
                         </p>
                     )}
@@ -1278,6 +1285,7 @@ const AdminHome = () => {
                         onChange={(e) => setNewDeviceData({ ...newDeviceData, device_name: e.target.value })}
                         InputProps={{ style: { fontSize: "20px" } }} 
                         InputLabelProps={{ style: { fontSize: "20px" } }} 
+                        sx={{ marginBottom: "10px" }}
                     />
                     <TextField
                         label="Location"
@@ -1289,12 +1297,12 @@ const AdminHome = () => {
                         InputLabelProps={{ style: { fontSize: "20px" } }} 
                     />
                     {error && (
-                        <p style={{ color: "red", marginTop: "10px" }}>
+                        <p style={{ color: "red", marginTop: "10px", fontSize: "20px" }}>
                             {error}
                         </p>
                     )}
                     {successMessage && (
-                        <p style={{ color: "green", marginTop: "10px" }}>
+                        <p style={{ color: "green", marginTop: "10px", fontSize: "20px" }}>
                             {successMessage}
                         </p>
                     )}
@@ -1319,6 +1327,7 @@ const AdminHome = () => {
                         onChange={(e) => setUpdateDeviceData({ ...updateDeviceData, device_name: e.target.value })}
                         InputProps={{ style: { fontSize: "20px" } }} 
                         InputLabelProps={{ style: { fontSize: "20px" } }} 
+                        sx={{ marginBottom: "20px" }}
                     />
                     <TextField
                         label="Location"
@@ -1328,6 +1337,7 @@ const AdminHome = () => {
                         onChange={(e) => setUpdateDeviceData({ ...updateDeviceData, location: e.target.value })}
                         InputProps={{ style: { fontSize: "20px" } }} 
                         InputLabelProps={{ style: { fontSize: "20px" } }} 
+                        sx={{ marginBottom: "20px" }}
                     />
                     <TextField
                         label="Set Time (minutes)"
@@ -1346,12 +1356,12 @@ const AdminHome = () => {
                         InputLabelProps={{ style: { fontSize: "20px" } }} 
                     />
                     {error && ( 
-                        <p style={{ color: "red", marginTop: "10px" }}>
+                        <p style={{ color: "red", marginTop: "10px", fontSize: "20px" }}>
                             {error}
                         </p>
                     )}
                     {successMessage && ( 
-                        <p style={{ color: "green", marginTop: "10px" }}>
+                        <p style={{ color: "green", marginTop: "10px", fontSize: "20px" }}>
                             {successMessage}
                         </p>
                     )}
@@ -1369,12 +1379,12 @@ const AdminHome = () => {
                 </DialogTitle>
                 <DialogContent>
                     {error && (
-                        <p style={{ color: "red", marginTop: "10px", marginBottom: "0" }}>
+                        <p style={{ color: "red", marginTop: "10px", fontSize: "20px" }}>
                             {error}
                         </p>
                     )}
                     {successMessage && (
-                        <p style={{ color: "green", marginTop: "10px" }}>
+                        <p style={{ color: "green", marginTop: "10px", fontSize: "20px" }}>
                             {successMessage}
                         </p>
                     )}
@@ -1426,12 +1436,12 @@ const AdminHome = () => {
                         sx={{ marginTop: "30px" }} 
                     />
                     {error && (
-                        <p style={{ color: "red", marginTop: "10px", marginBottom: "0" }}>
+                        <p style={{ color: "red", marginTop: "10px", fontSize: "20px" }}>
                             {error}
                         </p>
                     )}
                     {successMessage && (
-                        <p style={{ color: "green", marginTop: "10px" }}>
+                        <p style={{ color: "green", marginTop: "10px", fontSize: "20px" }}>
                             {successMessage}
                         </p>
                     )}
