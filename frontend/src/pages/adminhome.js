@@ -1394,8 +1394,15 @@ const AdminHome = () => {
                         <div style={TStyle}>
                             <p style={{ marginTop: "0px"}}>Available Data:</p>
                             <ul>
-                                {timestamps.map((timestamp, index) => (
-                                    <li key={index}>{timestamp}</li>
+                                {timestamps.reduce((acc, timestamp, index) => {
+                                    if (index % 5 === 0) {
+                                    acc.push([timestamp]);
+                                    } else {
+                                    acc[acc.length - 1].push(timestamp);
+                                    }
+                                    return acc;
+                                }, []).map((pair, index) => (
+                                    <div key={index}>{pair.join(' , ')}</div>
                                 ))}
                             </ul>
                         </div>
