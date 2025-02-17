@@ -702,7 +702,7 @@ const AdminHome = () => {
         <div>
             {/* Header */}
             <header className="header">
-                <h1 className="title">Admin Home</h1>
+                <h1 className="title" sx={{ marginBottom: "30px" }}>Admin Home</h1>
                 <button className="profile-icon" onClick={setIsUserDetailsDialogOpen}>
                     <AccountCircleIcon fontSize="large" />
                 </button>
@@ -712,17 +712,18 @@ const AdminHome = () => {
             <div style={{ padding: "20px" }}>
                 {/* แสดงเฉพาะ superadmin */}
                 {role === "superadmin" && (
-                    <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+                    <div style={{ display: "flex", marginBottom: "20px"}}>
                         <Button
                             variant={activeTab === "devices" ? "contained" : "outlined"}
                             onClick={() => setActiveTab("devices")}
+                            sx={{ fontSize: "18px", padding: "8px 16px", marginRight: "20px" }}
                         >
                             Device Management
                         </Button>
                         <Button
                             variant={activeTab === "users" ? "contained" : "outlined"}
                             onClick={() => setActiveTab("users")}
-                            style={{ marginRight: "10px" }}
+                            sx={{ fontSize: "18px", padding: "8px 16px"}}
                         >
                             User Management
                         </Button>
@@ -748,6 +749,7 @@ const AdminHome = () => {
                             margin="normal"
                             value={searchTerm}
                             onChange={handleSearch}
+                            sx={{ marginTop: 3, marginBottom: 3, }}
                             InputLabelProps={{
                                 style: { fontSize: "25px" }, 
                             }}
@@ -862,6 +864,7 @@ const AdminHome = () => {
                             margin="normal"
                             value={deviceSearchTerm}
                             onChange={handleDeviceSearch}
+                            sx={{ marginTop: 3, marginBottom: 3, }}
                             InputLabelProps={{
                                 style: { fontSize: "25px" }, 
                             }}
