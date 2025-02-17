@@ -514,7 +514,12 @@ const Home = () => {
                                         tickFormatter={(date) => date.split("-")[2]} // แสดงเฉพาะ "วัน"
                                     />
                                     <YAxis />
-                                    <Tooltip />
+                                    <Tooltip 
+                                        labelFormatter={(label) => {
+                                            const [year, month, day] = label.split("-");
+                                            return `${day}/${month}/${year}`;
+                                        }}
+                                    />
                                     <Legend />
                                     <Line 
                                         type="monotone" 
