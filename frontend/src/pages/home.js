@@ -81,17 +81,13 @@ const Home = () => {
     });
     
     const formatTimestamp = (timestamp) => {
-        if (!timestamp || isNaN(new Date(timestamp).getTime())) {
-            return "----";
-        }
-    
         const date = new Date(timestamp);
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, "0"); // เติม 0 ถ้าตัวเลขเป็นหลักเดียว
         const day = String(date.getDate()).padStart(2, "0");
         const hours = String(date.getHours()).padStart(2, "0");
         const minutes = String(date.getMinutes()).padStart(2, "0");
-    
+        if (isNaN(date.getTime())) return "----"; 
         return `${day}/${month}/${year} - ${hours}:${minutes}`;
     };
 
@@ -216,7 +212,7 @@ const Home = () => {
             tvoc: matchingShowdetect ? matchingShowdetect.tvoc : "----",
             humidity: matchingShowdetect ? matchingShowdetect.humidity : "----",
             temperature: matchingShowdetect ? matchingShowdetect.temperature : "----",
-            timestamp: matchingShowdetect,
+            timestamp: matchingShowdetect ? matchingShowdetect.timestamp : "----",
         };
     });
 
@@ -328,9 +324,9 @@ const Home = () => {
                                         <Typography variant="body2" sx={{ fontSize: "19px" }}><strong>PM 10:</strong> {device.pm10} µg/m³</Typography>
                                         <Typography variant="body2" sx={{ fontSize: "19px" }}><strong>CO2:</strong> {device.co2} ppm</Typography>
                                         <Typography variant="body2" sx={{ fontSize: "19px" }}><strong>TVOC:</strong> {device.tvoc} ppb</Typography>
-                                        <Typography variant="body2" sx={{ fontSize: "19px" }}><strong>Temp:</strong> {device.temperature}°C</Typography>
-                                        <Typography variant="body2" sx={{ fontSize: "19px" }}><strong>Humidity:</strong> {device.humidity}%</Typography>
-                                        <Typography variant="body2" sx={{ fontSize: "19px" }}><strong>Last Updated:</strong> {formatTimestamp(device.timestamp)}</Typography>
+                                        <Typography variant="body2" sx={{ fontSize: "19px" }}><strong>Temp:</strong> {device.temperature} °C</Typography>
+                                        <Typography variant="body2" sx={{ fontSize: "19px" }}><strong>Humidity:</strong> {device.humidity} %</Typography>
+                                        <Typography variant="body2" sx={{ fontSize: "19px" }}><strong>Last Updated:</strong> {formatTimestamp(device.timestamp)} </Typography>
                                     </CardContent>
                                 </Card>
                             </Grid>
