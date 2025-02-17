@@ -1391,8 +1391,8 @@ const AdminHome = () => {
                 <DialogContent>
                     {/* แสดง timestamps ที่ได้จาก API */}
                     {timestamps.length > 0 ? (
-                        <div>
-                            <p><strong>Available Data:</strong></p>
+                        <div style={TStyle}>
+                            <p style={{ marginTop: "0px"}}>Available Data:</p>
                             <ul>
                                 {timestamps.map((timestamp, index) => (
                                     <li key={index}>{timestamp}</li>
@@ -1400,7 +1400,7 @@ const AdminHome = () => {
                             </ul>
                         </div>
                     ) : (
-                        <p>No data found for this device.</p>
+                        <p style={TStyle}>No data found for this device.</p>
                     )}
                     <TextField
                         label="Months to Delete"
@@ -1413,7 +1413,8 @@ const AdminHome = () => {
                             setMonthsToDelete(value < 1 ? 1 : value); // ป้องกันค่าต่ำกว่า 1
                         }}
                         InputProps={{ style: { fontSize: "20px" } }} 
-                        InputLabelProps={{ style: { fontSize: "20px" } }} 
+                        InputLabelProps={{ style: { fontSize: "20px" } }}
+                        sx={{ marginTop: "30px" }} 
                     />
                     {error && (
                         <p style={{ color: "red", marginTop: "10px", marginBottom: "0" }}>
