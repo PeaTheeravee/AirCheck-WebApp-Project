@@ -738,6 +738,7 @@ const AdminHome = () => {
                             color="success"
                             onClick={toggleCreateDialog}
                             style={{ marginBottom: "10px" }}
+                            sx={{ fontSize: "18px", padding: "8px 16px"}}
                         >
                             Create Account
                         </Button>
@@ -793,7 +794,8 @@ const AdminHome = () => {
                                                         variant="contained"
                                                         color="warning"
                                                         onClick={() => toggleUpdateDialog(user.id, user.username, user.first_name, user.last_name)}
-                                                        style={{ marginRight: "10px" }}
+                                                        style={{ marginRight: "20px" }}
+                                                        sx={{ fontSize: "18px", padding: "8px 16px"}}
                                                     >
                                                         Update
                                                     </Button>
@@ -804,7 +806,8 @@ const AdminHome = () => {
                                                             variant="contained"
                                                             color="warning"
                                                             onClick={() => toggleChangeSomeonePasswordDialog(user.id, user.username)}
-                                                            style={{ marginRight: "10px" }}
+                                                            style={{ marginRight: "20px" }}
+                                                            sx={{ fontSize: "18px", padding: "8px 16px"}}
                                                         >
                                                             Change Password
                                                         </Button>
@@ -816,6 +819,7 @@ const AdminHome = () => {
                                                             variant="contained"
                                                             color="error"
                                                             onClick={() => toggleDeleteDialog(user.id, user.username)}
+                                                            sx={{ fontSize: "18px", padding: "8px 16px"}}
                                                         >
                                                             Delete
                                                         </Button>
@@ -853,6 +857,7 @@ const AdminHome = () => {
                             color="success"
                             onClick={toggleCreateDeviceDialog}
                             style={{ marginBottom: "10px" }}
+                            sx={{ fontSize: "18px", padding: "8px 16px"}}
                         >
                             Create Device
                         </Button>
@@ -921,6 +926,7 @@ const AdminHome = () => {
                                                         color="warning"
                                                         onClick={() => toggleUpdateDeviceDialog(device.api_key, device.device_name, device.location, device.device_settime)}
                                                         style={{ marginRight: "10px" }}
+                                                        sx={{ fontSize: "18px", padding: "8px 16px"}}
                                                     >
                                                         Update
                                                     </Button>
@@ -930,6 +936,7 @@ const AdminHome = () => {
                                                         color="error"
                                                         onClick={() => toggleDeleteDeviceDialog(device.api_key, device.device_name)}
                                                         style={{ marginRight: "10px" }}
+                                                        sx={{ fontSize: "18px", padding: "8px 16px"}}
                                                     >
                                                         Delete
                                                     </Button>
@@ -939,6 +946,7 @@ const AdminHome = () => {
                                                         color="error"
                                                         onClick={() => toggleDeleteDataDialog(device.api_key, device.device_name)}
                                                         style={{ marginRight: "10px" }}
+                                                        sx={{ fontSize: "18px", padding: "8px 16px"}}
                                                     >
                                                         Delete Data
                                                     </Button>
