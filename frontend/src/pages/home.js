@@ -364,23 +364,21 @@ const Home = () => {
                 </DialogTitle>
 
                 {/* ปุ่ม Toggle สลับระหว่าง Score Data / Daily Averages */}
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-                    <div>
-                        <Button 
-                            variant={activeTab === "score" ? "contained" : "outlined"} 
-                            onClick={() => setActiveTab("score")}
-                            sx={{ fontSize: "18px", padding: "8px 16px", marginRight: "20px" }}
-                        >
-                            Score Data
-                        </Button>
-                        <Button 
-                            variant={activeTab === "average" ? "contained" : "outlined"} 
-                            onClick={() => setActiveTab("average")}
-                            sx={{ fontSize: "18px", padding: "8px 16px"}}
-                        >
-                            Daily Averages
-                        </Button>
-                    </div>
+                <div style={{ display: "flex", marginBottom: "10px" }}>
+                    <Button 
+                        variant={activeTab === "score" ? "contained" : "outlined"} 
+                        onClick={() => setActiveTab("score")}
+                        sx={{ fontSize: "18px", padding: "8px 16px", marginRight: "20px" }}
+                    >
+                        Score Data
+                    </Button>
+                    <Button 
+                        variant={activeTab === "average" ? "contained" : "outlined"} 
+                        onClick={() => setActiveTab("average")}
+                        sx={{ fontSize: "18px", padding: "8px 16px"}}
+                    >
+                        Daily Averages
+                    </Button>            
                 </div>
 
                 {/* แสดงเฉพาะเมื่อเลือก "Daily Averages" */}
