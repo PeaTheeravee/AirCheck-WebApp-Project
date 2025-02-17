@@ -90,6 +90,7 @@ const AdminHome = () => {
     const toggleUserDetailsDialog = () => setIsUserDetailsDialogOpen(!isUserDetailsDialogOpen);
     
     const toggleChangePasswordYourselfDialog = () => {
+        setPasswordData({ currentPassword: "", newPassword: "" }); // รีเซ็ตค่ารหัสผ่าน
         setShowPassword({ current: false, new: false }); // รีเซ็ตให้เป็นซ่อนรหัสเสมอ
         setIsChangePasswordYourselfDialogOpen(!isChangePasswordYourselfDialogOpen)
     };
@@ -100,6 +101,7 @@ const AdminHome = () => {
     };
 
     const toggleChangeSomeonePasswordDialog = (userId = null, username = "") => {
+        setPasswordData({ newPassword: "", confirmNewPassword: "" }); // รีเซ็ตค่ารหัสผ่าน
         setTargetUserId(userId); // เก็บ userId ใน state
         setTargetUserName(username);
         setShowPassword({ new: false, confirm: false }); // รีเซ็ตให้เป็นซ่อนรหัสเสมอ

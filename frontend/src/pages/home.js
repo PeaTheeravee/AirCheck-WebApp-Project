@@ -81,6 +81,10 @@ const Home = () => {
     });
     
     const formatTimestamp = (timestamp) => {
+        if (!timestamp || isNaN(new Date(timestamp).getTime())) {
+            return "----";
+        }
+    
         const date = new Date(timestamp);
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, "0"); // เติม 0 ถ้าตัวเลขเป็นหลักเดียว
@@ -206,13 +210,13 @@ const Home = () => {
         const matchingShowdetect = showdetects.find(show => show.api_key === device.api_key);
         return {
             ...device,
-            pm2_5: matchingShowdetect ? matchingShowdetect.pm2_5 : "N/A",
-            pm10: matchingShowdetect ? matchingShowdetect.pm10 : "N/A",
-            co2: matchingShowdetect ? matchingShowdetect.co2 : "N/A",
-            tvoc: matchingShowdetect ? matchingShowdetect.tvoc : "N/A",
-            humidity: matchingShowdetect ? matchingShowdetect.humidity : "N/A",
-            temperature: matchingShowdetect ? matchingShowdetect.temperature : "N/A",
-            timestamp: matchingShowdetect ? matchingShowdetect.timestamp : "N/A",
+            pm2_5: matchingShowdetect ? matchingShowdetect.pm2_5 : "----",
+            pm10: matchingShowdetect ? matchingShowdetect.pm10 : "----",
+            co2: matchingShowdetect ? matchingShowdetect.co2 : "----",
+            tvoc: matchingShowdetect ? matchingShowdetect.tvoc : "----",
+            humidity: matchingShowdetect ? matchingShowdetect.humidity : "----",
+            temperature: matchingShowdetect ? matchingShowdetect.temperature : "----",
+            timestamp: matchingShowdetect,
         };
     });
 
@@ -235,6 +239,8 @@ const Home = () => {
 
     useEffect(() => {
         if (isScoreDialogOpen && targetApiKey) {
+            setScoreData(null);
+            setDailyAverages([]);
             fetchScoreData();
             fetchDailyAverages();
             setSelectedYear(new Date().getFullYear()); // รีเซ็ตเป็นปีปัจจุบัน
@@ -499,7 +505,7 @@ const Home = () => {
                                 </Table>
                             </TableContainer>
                         ) : (
-                            <Typography sx={{ fontSize: "25px" }}>Loading...</Typography>
+                            <Typography sx={{ fontSize: "25px" }}>No Data Available</Typography>
                         )
                     ) : (
                         // แสดง Daily Averages Graph
