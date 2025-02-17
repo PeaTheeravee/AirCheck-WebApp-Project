@@ -459,9 +459,9 @@ const Home = () => {
                                 <Table>
                                     <TableHead>
                                         <TableRow>
-                                            <TableCell sx={{ fontSize: "25px", fontWeight: "bold" }}>Parameter</TableCell>
-                                            <TableCell sx={{ fontSize: "25px", fontWeight: "bold" }}>Quality Level</TableCell>
-                                            <TableCell sx={{ fontSize: "25px", fontWeight: "bold" }}>Fixed Value</TableCell>
+                                            <TableCell sx={{ fontSize: "25px"}}>Parameter</TableCell>
+                                            <TableCell sx={{ fontSize: "25px"}}>Quality</TableCell>
+                                            <TableCell sx={{ fontSize: "25px"}}>Fixed Value</TableCell>
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>

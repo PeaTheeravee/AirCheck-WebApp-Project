@@ -23,6 +23,13 @@ import {
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import "./decorate.css";
 
+const HtableStyle = {
+    fontSize: "25px", 
+};
+const TtableStyle = {
+    fontSize: "20px", 
+};
+
 const AdminHome = () => {
     const navigate = useNavigate();
     const [isDialogOpen] = useState(false);
@@ -768,11 +775,11 @@ const AdminHome = () => {
                             <Table>
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell>User ID</TableCell>
-                                        <TableCell>Username</TableCell>
-                                        <TableCell>First Name</TableCell>
-                                        <TableCell>Last Name</TableCell>
-                                        <TableCell>Actions</TableCell>
+                                        <TableCell style={HtableStyle}>User ID</TableCell>
+                                        <TableCell style={HtableStyle}>Username</TableCell>
+                                        <TableCell style={HtableStyle}>First Name</TableCell>
+                                        <TableCell style={HtableStyle}>Last Name</TableCell>
+                                        <TableCell style={HtableStyle}>Actions</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -785,10 +792,10 @@ const AdminHome = () => {
                                     ) : filteredUsers.length > 0 ? (
                                         filteredUsers.map((user) => (
                                             <TableRow key={user.id}>
-                                                <TableCell>{user.id}</TableCell>
-                                                <TableCell>{user.username}</TableCell>
-                                                <TableCell>{user.first_name}</TableCell>
-                                                <TableCell>{user.last_name}</TableCell>
+                                                <TableCell style={TtableStyle}>{user.id}</TableCell>
+                                                <TableCell style={TtableStyle}>{user.username}</TableCell>
+                                                <TableCell style={TtableStyle}>{user.first_name}</TableCell>
+                                                <TableCell style={TtableStyle}>{user.last_name}</TableCell>
                                                 <TableCell>
                                                     <Button
                                                         variant="contained"
@@ -829,7 +836,7 @@ const AdminHome = () => {
                                         ))
                                     ) : (
                                         <TableRow>
-                                            <TableCell colSpan={5} align="center">
+                                            <TableCell style={TtableStyle} colSpan={5} align="center">
                                                 No users found.
                                             </TableCell>
                                         </TableRow>
@@ -887,13 +894,13 @@ const AdminHome = () => {
                             <Table>
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell>Device ID</TableCell>
-                                        <TableCell>Device Name</TableCell>
-                                        <TableCell>Location</TableCell>
-                                        <TableCell>Status</TableCell>
-                                        <TableCell>Set Time (min)</TableCell>
-                                        <TableCell>Added By</TableCell>
-                                        <TableCell>Actions</TableCell>
+                                        <TableCell style={HtableStyle}>Device ID</TableCell>
+                                        <TableCell style={HtableStyle}>Device Name</TableCell>
+                                        <TableCell style={HtableStyle}>Location</TableCell>
+                                        <TableCell style={HtableStyle}>Status</TableCell>
+                                        <TableCell style={HtableStyle}>Set Time (min)</TableCell>
+                                        <TableCell style={HtableStyle}>Added By</TableCell>
+                                        <TableCell style={HtableStyle}>Actions</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -906,20 +913,19 @@ const AdminHome = () => {
                                     ) : filteredDevices.length > 0 ? (
                                         filteredDevices.map((device) => (
                                             <TableRow key={device.api_key}>
-                                                <TableCell>
+                                                <TableCell style={TtableStyle}>
                                                     {device.api_key}
                                                     <IconButton 
                                                         onClick={() => navigator.clipboard.writeText(device.api_key)}
-                                                        style={{ marginLeft: "10px" }}
                                                     >
                                                         📋
                                                     </IconButton>                                               
                                                 </TableCell>
-                                                <TableCell>{device.device_name}</TableCell>
-                                                <TableCell>{device.location}</TableCell>
-                                                <TableCell>{device.device_status}</TableCell>
-                                                <TableCell>{device.device_settime}</TableCell>
-                                                <TableCell>{device.user_id}</TableCell>
+                                                <TableCell style={TtableStyle}>{device.device_name}</TableCell>
+                                                <TableCell style={TtableStyle}>{device.location}</TableCell>
+                                                <TableCell style={TtableStyle}>{device.device_status}</TableCell>
+                                                <TableCell style={TtableStyle}>{device.device_settime}</TableCell>
+                                                <TableCell style={TtableStyle}>{device.user_id}</TableCell>
                                                 <TableCell>
                                                     <Button
                                                         variant="contained"
@@ -956,7 +962,7 @@ const AdminHome = () => {
                                         ))
                                     ) : (
                                         <TableRow>
-                                            <TableCell colSpan={7} align="center">
+                                            <TableCell style={TtableStyle} colSpan={7} align="center">
                                                 No devices found.
                                             </TableCell>
                                         </TableRow>
