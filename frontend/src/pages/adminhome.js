@@ -1015,7 +1015,7 @@ const AdminHome = () => {
                             <p style={TStyle}>Last Name: {userData.last_name}</p>
                         </>
                     ) : (
-                        <p>Loading...</p>
+                        <p style={TStyle}>Loading...</p>
                     )}
                 </DialogContent>
                 <DialogActions>
