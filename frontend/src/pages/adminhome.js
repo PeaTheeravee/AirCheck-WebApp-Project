@@ -25,9 +25,14 @@ import "./decorate.css";
 
 const HStyle = {
     fontSize: "25px", 
+    borderBottom: "2px solid black",
 }; 
 const TStyle = {
     fontSize: "20px", 
+    borderBottom: "2px solid black",
+};
+const BStyle = {
+    borderBottom: "2px solid black",
 };
 
 const AdminHome = () => {
@@ -759,7 +764,7 @@ const AdminHome = () => {
                             margin="normal"
                             value={searchTerm}
                             onChange={handleSearch}
-                            sx={{ marginTop: 3, marginBottom: 3, }}
+                            sx={{ marginTop: 3, marginBottom: 3, "& fieldset": { borderWidth: "3px" }}}
                             InputLabelProps={{
                                 style: { fontSize: "25px" }, 
                             }}
@@ -798,7 +803,7 @@ const AdminHome = () => {
                                                 <TableCell style={TStyle}>{user.username}</TableCell>
                                                 <TableCell style={TStyle}>{user.first_name}</TableCell>
                                                 <TableCell style={TStyle}>{user.last_name}</TableCell>
-                                                <TableCell>
+                                                <TableCell style={BStyle}>
                                                     <Button
                                                         variant="contained"
                                                         color="warning"
@@ -878,7 +883,7 @@ const AdminHome = () => {
                             margin="normal"
                             value={deviceSearchTerm}
                             onChange={handleDeviceSearch}
-                            sx={{ marginTop: 3, marginBottom: 3, }}
+                            sx={{ marginTop: 3, marginBottom: 3, "& fieldset": { borderWidth: "3px" }}}
                             InputLabelProps={{
                                 style: { fontSize: "25px" }, 
                             }}
@@ -932,7 +937,7 @@ const AdminHome = () => {
                                                 </TableCell>
                                                 <TableCell style={TStyle}>{device.device_settime}</TableCell>
                                                 <TableCell style={TStyle}>{device.user_id}</TableCell>
-                                                <TableCell>
+                                                <TableCell style={BStyle}>
                                                     <Button
                                                         variant="contained"
                                                         color="warning"

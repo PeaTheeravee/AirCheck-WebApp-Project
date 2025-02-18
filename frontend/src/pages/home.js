@@ -37,6 +37,15 @@ import {
 } from "recharts";
 import "./decorate.css";
 
+const HStyle = {
+    fontSize: "25px",
+    borderBottom: "2px solid black", 
+}; 
+const TStyle = {
+    fontSize: "20px",
+    borderBottom: "2px solid black", 
+};
+
 const Home = () => {
     const navigate = useNavigate();
     const [isScoreDialogOpen, setIsScoreDialogOpen] = useState(false);
@@ -273,7 +282,7 @@ const Home = () => {
                     margin="normal"
                     value={searchTerm}
                     onChange={handleSearch}
-                    sx={{ marginTop: 3, marginBottom: 3, }}
+                    sx={{ marginTop: 3, marginBottom: 3, "& fieldset": { borderWidth: "3px" }}}
                     InputLabelProps={{
                         style: { fontSize: "25px" }, 
                     }}
@@ -469,41 +478,41 @@ const Home = () => {
                                 <Table>
                                     <TableHead>
                                         <TableRow>
-                                            <TableCell sx={{ fontSize: "25px"}}>Parameter</TableCell>
-                                            <TableCell sx={{ fontSize: "25px"}}>Quality</TableCell>
-                                            <TableCell sx={{ fontSize: "25px"}}>Fixed Value</TableCell>
+                                            <TableCell style={HStyle}>Parameter</TableCell>
+                                            <TableCell style={HStyle}>Quality</TableCell>
+                                            <TableCell style={HStyle}>Fixed Value</TableCell>
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
                                         <TableRow>
-                                            <TableCell sx={{ fontSize: "20px" }}>PM2.5</TableCell>
-                                            <TableCell sx={{ fontSize: "20px" }}>{scoreData.pm2_5_quality_level}</TableCell>
-                                            <TableCell sx={{ fontSize: "20px" }}>{scoreData.pm2_5_fix}</TableCell>
+                                            <TableCell style={TStyle}>PM2.5</TableCell>
+                                            <TableCell style={TStyle}>{scoreData.pm2_5_quality_level}</TableCell>
+                                            <TableCell style={TStyle}>{scoreData.pm2_5_fix}</TableCell>
                                         </TableRow>
                                         <TableRow>
-                                            <TableCell sx={{ fontSize: "20px" }}>PM10</TableCell>
-                                            <TableCell sx={{ fontSize: "20px" }}>{scoreData.pm10_quality_level}</TableCell>
-                                            <TableCell sx={{ fontSize: "20px" }}>{scoreData.pm10_fix}</TableCell>
+                                            <TableCell style={TStyle}>PM10</TableCell>
+                                            <TableCell style={TStyle}>{scoreData.pm10_quality_level}</TableCell>
+                                            <TableCell style={TStyle}>{scoreData.pm10_fix}</TableCell>
                                         </TableRow>
                                         <TableRow>
-                                            <TableCell sx={{ fontSize: "20px" }}>CO2</TableCell>
-                                            <TableCell sx={{ fontSize: "20px" }}>{scoreData.co2_quality_level}</TableCell>
-                                            <TableCell sx={{ fontSize: "20px" }}>{scoreData.co2_fix}</TableCell>
+                                            <TableCell style={TStyle}>CO2</TableCell>
+                                            <TableCell style={TStyle}>{scoreData.co2_quality_level}</TableCell>
+                                            <TableCell style={TStyle}>{scoreData.co2_fix}</TableCell>
                                         </TableRow>
                                         <TableRow>
-                                            <TableCell sx={{ fontSize: "20px" }}>TVOC</TableCell>
-                                            <TableCell sx={{ fontSize: "20px" }}>{scoreData.tvoc_quality_level}</TableCell>
-                                            <TableCell sx={{ fontSize: "20px" }}>{scoreData.tvoc_fix}</TableCell>
+                                            <TableCell style={TStyle}>TVOC</TableCell>
+                                            <TableCell style={TStyle}>{scoreData.tvoc_quality_level}</TableCell>
+                                            <TableCell style={TStyle}>{scoreData.tvoc_fix}</TableCell>
                                         </TableRow>
                                         <TableRow>
-                                            <TableCell sx={{ fontSize: "20px" }}>Humidity</TableCell>
-                                            <TableCell sx={{ fontSize: "20px" }}>{scoreData.humidity_quality_level}</TableCell>
-                                            <TableCell sx={{ fontSize: "20px" }}>{scoreData.humidity_fix}</TableCell>
+                                            <TableCell style={TStyle}>Humidity</TableCell>
+                                            <TableCell style={TStyle}>{scoreData.humidity_quality_level}</TableCell>
+                                            <TableCell style={TStyle}>{scoreData.humidity_fix}</TableCell>
                                         </TableRow>
                                         <TableRow>
-                                            <TableCell sx={{ fontSize: "20px" }}>Temperature</TableCell>
-                                            <TableCell sx={{ fontSize: "20px" }}>{scoreData.temperature_quality_level}</TableCell>
-                                            <TableCell sx={{ fontSize: "20px" }}>{scoreData.temperature_fix}</TableCell>
+                                            <TableCell style={TStyle}>Temperature</TableCell>
+                                            <TableCell style={TStyle}>{scoreData.temperature_quality_level}</TableCell>
+                                            <TableCell style={TStyle}>{scoreData.temperature_fix}</TableCell>
                                         </TableRow>
                                     </TableBody>
                                 </Table>
