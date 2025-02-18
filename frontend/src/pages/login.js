@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Box, TextField, Button, Typography } from "@mui/material";
 
 const Login = () => {
     const [username, setUsername] = useState("");
@@ -38,25 +39,63 @@ const Login = () => {
     };    
 
     return (
-        <div>
-            <h1>Login</h1>
-            <form onSubmit={handleLogin}>
-                <input
-                    type="text"
-                    placeholder="Username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                />
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                />
-                <button type="submit">Login</button>
-            </form>
-            {error && <p style={{ color: "red" }}>{error}</p>}
-        </div>
+        <Box 
+            sx={{ 
+                display: "flex", 
+                flexDirection: "column", 
+                alignItems: "center", 
+                justifyContent: "center", 
+                height: "100vh" 
+            }}
+        >
+            <Box 
+                sx={{ 
+                    p: 4, 
+                    border: "1px solid #ccc", 
+                    borderRadius: "8px", 
+                    boxShadow: 3, 
+                    width: 300, 
+                    textAlign: "center" 
+                }}
+            >
+                <Typography variant="h5" mb={2}>Login</Typography>
+                <form onSubmit={handleLogin}>
+                    <TextField
+                        label="Username"
+                        variant="outlined"
+                        fullWidth
+                        margin="normal"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                    />
+                    <TextField
+                        label="Password"
+                        type="password"
+                        variant="outlined"
+                        fullWidth
+                        margin="normal"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                    />
+
+                    {error && (
+                        <p style={{ color: "red", marginTop: "10px", fontSize: "20px" }}>
+                            {error}
+                        </p>
+                    )}
+                    
+                    <Button 
+                        type="submit" 
+                        variant="contained" 
+                        color="primary" 
+                        fullWidth 
+                        sx={{ mt: 2 }}
+                    >
+                        Login
+                    </Button>
+                </form>
+            </Box>
+        </Box>
     );
 };
 
