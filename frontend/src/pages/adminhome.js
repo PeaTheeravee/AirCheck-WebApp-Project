@@ -925,7 +925,11 @@ const AdminHome = () => {
                                                 </TableCell>
                                                 <TableCell style={TStyle}>{device.device_name}</TableCell>
                                                 <TableCell style={TStyle}>{device.location}</TableCell>
-                                                <TableCell style={TStyle}>{device.device_status}</TableCell>
+                                                <TableCell style={{ 
+                                                    ...TStyle, color: device.device_status.toLowerCase() === "online" ? "green" : "red",fontWeight:"bold"
+                                                }}>
+                                                    {device.device_status}
+                                                </TableCell>
                                                 <TableCell style={TStyle}>{device.device_settime}</TableCell>
                                                 <TableCell style={TStyle}>{device.user_id}</TableCell>
                                                 <TableCell>
