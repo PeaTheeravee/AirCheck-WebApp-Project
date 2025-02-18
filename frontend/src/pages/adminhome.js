@@ -708,7 +708,7 @@ const AdminHome = () => {
     //================================================================================================
     
     return (
-        <div>
+        <div className="background">
             {/* Header */}
             <header className="header">
                 <h1 className="title" sx={{ marginBottom: "30px" }}>Admin Home</h1>

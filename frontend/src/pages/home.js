@@ -255,7 +255,7 @@ const Home = () => {
     //================================================================================================
 
     return (
-        <div>
+        <div className="background">
             {/* Header */}
             <header className="header">
                 <h1 className="title">AirCheck</h1>
