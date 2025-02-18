@@ -9,38 +9,33 @@ const Login = () => {
 
     const handleLogin = async (e) => {
         e.preventDefault();
-        setError(""); 
 
+        if (!username || !password) {
+            setError("Username and password cannot be empty.");
+            setTimeout(() => setError(""), 2000);
+            return;
+        }
+    
         try {
             const response = await fetch("http://localhost:8000/login", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                },
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
                 credentials: "include", 
-                body: new URLSearchParams({
-                    username: username,
-                    password: password,
-                }),
+                body: new URLSearchParams({ username, password }),
             });
-
+    
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.detail || "Unknown error occurred");
+                throw new Error(errorData.detail || "Login failed.");
             }
 
-            const data = await response.json();
-            
-            // ✅ อัปเดตเงื่อนไขให้รองรับทั้ง "admin" และ "superadmin"
-            if (data.role === "superadmin" || data.role === "admin") {
-                navigate("/adminhome"); 
-            } else {
-                setError("Access denied. Only admins are allowed.");
-            }
+            navigate("/adminhome");
+
         } catch (err) {
             setError(err.message);
+            setTimeout(() => setError(""), 2000);
         }
-    };
+    };    
 
     return (
         <div>
