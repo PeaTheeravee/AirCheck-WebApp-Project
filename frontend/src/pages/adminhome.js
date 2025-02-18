@@ -25,11 +25,17 @@ import "./decorate.css";
 
 const HStyle = {
     fontSize: "25px", 
-    borderBottom: "2px solid black",
 }; 
 const TStyle = {
     fontSize: "20px", 
-    borderBottom: "2px solid black",
+};
+const AHStyle = {
+    fontSize: "25px",
+    borderBottom: "2px solid black", 
+}; 
+const ATStyle = {
+    fontSize: "20px",
+    borderBottom: "2px solid black", 
 };
 const BStyle = {
     borderBottom: "2px solid black",
@@ -782,11 +788,11 @@ const AdminHome = () => {
                             <Table>
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell style={HStyle}>User ID</TableCell>
-                                        <TableCell style={HStyle}>Username</TableCell>
-                                        <TableCell style={HStyle}>First Name</TableCell>
-                                        <TableCell style={HStyle}>Last Name</TableCell>
-                                        <TableCell style={HStyle}>Actions</TableCell>
+                                        <TableCell style={AHStyle}>User ID</TableCell>
+                                        <TableCell style={AHStyle}>Username</TableCell>
+                                        <TableCell style={AHStyle}>First Name</TableCell>
+                                        <TableCell style={AHStyle}>Last Name</TableCell>
+                                        <TableCell style={AHStyle}>Actions</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -799,10 +805,10 @@ const AdminHome = () => {
                                     ) : filteredUsers.length > 0 ? (
                                         filteredUsers.map((user) => (
                                             <TableRow key={user.id}>
-                                                <TableCell style={TStyle}>{user.id}</TableCell>
-                                                <TableCell style={TStyle}>{user.username}</TableCell>
-                                                <TableCell style={TStyle}>{user.first_name}</TableCell>
-                                                <TableCell style={TStyle}>{user.last_name}</TableCell>
+                                                <TableCell style={ATStyle}>{user.id}</TableCell>
+                                                <TableCell style={ATStyle}>{user.username}</TableCell>
+                                                <TableCell style={ATStyle}>{user.first_name}</TableCell>
+                                                <TableCell style={ATStyle}>{user.last_name}</TableCell>
                                                 <TableCell style={BStyle}>
                                                     <Button
                                                         variant="contained"
@@ -843,7 +849,7 @@ const AdminHome = () => {
                                         ))
                                     ) : (
                                         <TableRow>
-                                            <TableCell style={TStyle} colSpan={5} align="center">
+                                            <TableCell style={ATStyle} colSpan={5} align="center">
                                                 No users found.
                                             </TableCell>
                                         </TableRow>
@@ -901,13 +907,13 @@ const AdminHome = () => {
                             <Table>
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell style={HStyle}>Device ID</TableCell>
-                                        <TableCell style={HStyle}>Device Name</TableCell>
-                                        <TableCell style={HStyle}>Location</TableCell>
-                                        <TableCell style={HStyle}>Status</TableCell>
-                                        <TableCell style={HStyle}>Set Time (min)</TableCell>
-                                        <TableCell style={HStyle}>Added By</TableCell>
-                                        <TableCell style={HStyle}>Actions</TableCell>
+                                        <TableCell style={AHStyle}>Device ID</TableCell>
+                                        <TableCell style={AHStyle}>Device Name</TableCell>
+                                        <TableCell style={AHStyle}>Location</TableCell>
+                                        <TableCell style={AHStyle}>Status</TableCell>
+                                        <TableCell style={AHStyle}>Set Time (min)</TableCell>
+                                        <TableCell style={AHStyle}>Added By</TableCell>
+                                        <TableCell style={AHStyle}>Actions</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -920,7 +926,7 @@ const AdminHome = () => {
                                     ) : filteredDevices.length > 0 ? (
                                         filteredDevices.map((device) => (
                                             <TableRow key={device.api_key}>
-                                                <TableCell style={TStyle}>
+                                                <TableCell style={ATStyle}>
                                                     {device.api_key}
                                                     <IconButton 
                                                         onClick={() => navigator.clipboard.writeText(device.api_key)}
@@ -928,15 +934,15 @@ const AdminHome = () => {
                                                         📋
                                                     </IconButton>                                               
                                                 </TableCell>
-                                                <TableCell style={TStyle}>{device.device_name}</TableCell>
-                                                <TableCell style={TStyle}>{device.location}</TableCell>
+                                                <TableCell style={ATStyle}>{device.device_name}</TableCell>
+                                                <TableCell style={ATStyle}>{device.location}</TableCell>
                                                 <TableCell style={{ 
-                                                    ...TStyle, color: device.device_status.toLowerCase() === "online" ? "green" : "red",fontWeight:"bold"
+                                                    ...ATStyle, color: device.device_status.toLowerCase() === "online" ? "green" : "red",fontWeight:"bold"
                                                 }}>
                                                     {device.device_status}
                                                 </TableCell>
-                                                <TableCell style={TStyle}>{device.device_settime}</TableCell>
-                                                <TableCell style={TStyle}>{device.user_id}</TableCell>
+                                                <TableCell style={ATStyle}>{device.device_settime}</TableCell>
+                                                <TableCell style={ATStyle}>{device.user_id}</TableCell>
                                                 <TableCell style={BStyle}>
                                                     <Button
                                                         variant="contained"
@@ -973,7 +979,7 @@ const AdminHome = () => {
                                         ))
                                     ) : (
                                         <TableRow>
-                                            <TableCell style={TStyle} colSpan={7} align="center">
+                                            <TableCell style={ATStyle} colSpan={7} align="center">
                                                 No devices found.
                                             </TableCell>
                                         </TableRow>
