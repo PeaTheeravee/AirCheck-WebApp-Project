@@ -397,7 +397,7 @@ const AdminHome = () => {
                 throw new Error(errorData.detail || "Logout failed.");
             }
 
-            navigate("/");
+            navigate("/home");
         } catch (err) {
             setError(err.message);
             setTimeout(() => setError(""), 2000);
