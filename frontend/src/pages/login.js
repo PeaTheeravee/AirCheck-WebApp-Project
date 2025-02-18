@@ -59,7 +59,7 @@ const Login = () => {
                 }}
             >
                 <Typography variant="h5" mb={2}>Login</Typography>
-                <form onSubmit={handleLogin}>
+                <form>
                     <TextField
                         label="Username"
                         variant="outlined"
@@ -67,6 +67,9 @@ const Login = () => {
                         margin="normal"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
+                        InputProps={{ style: { fontSize: "20px" } }} 
+                        InputLabelProps={{ style: { fontSize: "20px" } }} 
+                        sx={{ marginBottom: "10px" }}
                     />
                     <TextField
                         label="Password"
@@ -76,6 +79,8 @@ const Login = () => {
                         margin="normal"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
+                        InputProps={{ style: { fontSize: "20px" } }} 
+                        InputLabelProps={{ style: { fontSize: "20px" } }} 
                     />
 
                     {error && (
@@ -86,10 +91,8 @@ const Login = () => {
                     
                     <Button 
                         type="submit" 
-                        variant="contained" 
-                        color="primary" 
-                        fullWidth 
-                        sx={{ mt: 2 }}
+                        onClick={handleLogin} 
+                        sx={{ fontSize: "18px" }}
                     >
                         Login
                     </Button>
