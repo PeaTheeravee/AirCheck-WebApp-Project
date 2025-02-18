@@ -3,7 +3,7 @@ header {
     justify-content: space-between;
     align-items: center;
     padding: 10px;
-    background-color: #282c34;
+    background-color: #052463;
     color: white;
 }
 
@@ -28,7 +28,7 @@ header {
 }
 
 .title {
-    font-size: 41px; 
+    font-size: 35px; 
     font-weight: bold; 
-    padding: 10px;
+    margin-left: 20px;
 }

@@ -258,7 +258,7 @@ const Home = () => {
         <div>
             {/* Header */}
             <header className="header">
-                <h1 className="title">Welcome to My Application!</h1>
+                <h1 className="title">AirCheck</h1>
                 <button className="profile-icon" onClick={() => navigate("/login")}>
                     <AccountCircleIcon fontSize="large" />
                 </button>
@@ -314,6 +314,14 @@ const Home = () => {
                                         flexDirection: "column",
                                         alignItems: "center",
                                         padding: "10px",
+                                        border: "2px solid #80d0ff", 
+                                        borderRadius: "10px", 
+                                        transition: "background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease",
+                                        "&:hover": {
+                                            background: "#B3E5FC", 
+                                            transform: "scale(1.05)",
+                                            boxShadow: "0px 6px 12px rgba(0, 0, 0, 0.2)"
+                                        }
                                     }}
                                     onClick={() => toggleScoreDialog(device.api_key, device.device_name)}
                                 >
