@@ -314,11 +314,11 @@ const Home = () => {
                                         flexDirection: "column",
                                         alignItems: "center",
                                         padding: "10px",
-                                        border: "2px solid #80d0ff", 
+                                        border: "3px solid #052463", 
                                         borderRadius: "10px", 
                                         transition: "background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease",
                                         "&:hover": {
-                                            background: "#B3E5FC", 
+                                            background: "#E0F7FA", 
                                             transform: "scale(1.05)",
                                             boxShadow: "0px 6px 12px rgba(0, 0, 0, 0.2)"
                                         }
