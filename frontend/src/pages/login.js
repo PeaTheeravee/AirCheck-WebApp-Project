@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, TextField, Button, Typography } from "@mui/material";
+import backgroundImage from "../assets/background.jpg"; // ✅ Import รูป
 
 const Login = () => {
     const [username, setUsername] = useState("");
@@ -45,7 +46,11 @@ const Login = () => {
                 flexDirection: "column", 
                 alignItems: "center", 
                 justifyContent: "center", 
-                height: "100vh" 
+                height: "100vh",
+                background: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${backgroundImage})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundAttachment: "fixed",
             }}
         >
             <Box 
@@ -55,7 +60,8 @@ const Login = () => {
                     borderRadius: "8px", 
                     boxShadow: 3, 
                     width: 300, 
-                    textAlign: "center" 
+                    textAlign: "center",
+                    backgroundColor: "rgba(255, 255, 255, 0.8)" // ✅ ทำให้กล่องโปร่งแสง
                 }}
             >
                 <Typography variant="h5" mb={2}>Login</Typography>
