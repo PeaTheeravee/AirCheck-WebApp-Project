@@ -54,3 +54,9 @@ superadmin = DBUser(
 5. docker run -d --name D2-server -e POSTGRES_PASSWORD=123456 -p 5432:5432 postgres:16
 6. docker run --name D2-PGadmin -p 5050:80 -e PGADMIN_DEFAULT_EMAIL=6410110238@psu.ac.th -e PGADMIN_DEFAULT_PASSWORD=147896325 -d dpage/pgadmin4
 7. .\scripts\run-api  
+
+
+สำหรับทดสอบ Docker-compose
+D:\University\Y4-2\ArduinoProject\Main\wed\try3arduino\backend>docker-compose up --build -d
+
+D:\University\Y4-2\ArduinoProject\Main\wed\try3arduino\backend>docker-compose down

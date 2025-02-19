@@ -17,7 +17,7 @@ services:
 
   postgres:
     image: postgres:16
-    container_name: D2-server
+    container_name: D2-server-test
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 123456
@@ -29,7 +29,7 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4:latest
-    container_name: D2-PGadmin
+    container_name: D2-PGadmin-test
     environment:
       PGADMIN_DEFAULT_EMAIL: 6410110238@psu.ac.th
       PGADMIN_DEFAULT_PASSWORD: 147896325
