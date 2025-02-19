@@ -3,7 +3,7 @@ version: '3.8'
 services:
   backend:
     build: .
-    container_name: notebook-backend
+    container_name: notebook-backend-test
     user: root
     ports:
       - "8000:8000"
