@@ -1,13 +1,20 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, TextField, Button, Typography } from "@mui/material";
-import backgroundImage from "../assets/background.jpg"; // ✅ Import รูป
+import { Box, TextField, Button, Typography, IconButton, InputAdornment } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material"; 
+import backgroundImage from "../assets/background.jpg"; 
 
 const Login = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false); 
+
     const [error, setError] = useState("");
     const navigate = useNavigate();
+
+    const handleTogglePassword = () => {
+        setShowPassword((prev) => !prev);
+    };
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -61,7 +68,7 @@ const Login = () => {
                     boxShadow: 3, 
                     width: 300, 
                     textAlign: "center",
-                    backgroundColor: "rgba(255, 255, 255, 0.8)" // ✅ ทำให้กล่องโปร่งแสง
+                    backgroundColor: "rgba(255, 255, 255, 0.8)" 
                 }}
             >
                 <Typography variant="h5" mb={2}>Login</Typography>
@@ -79,14 +86,23 @@ const Login = () => {
                     />
                     <TextField
                         label="Password"
-                        type="password"
+                        type={showPassword ? "text" : "password"} // ✅ เปลี่ยน type เป็น 'text' เมื่อ showPassword เป็น true
                         variant="outlined"
                         fullWidth
                         margin="normal"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        InputProps={{ style: { fontSize: "20px" } }} 
-                        InputLabelProps={{ style: { fontSize: "20px" } }} 
+                        InputProps={{
+                            style: { fontSize: "20px" },
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton onClick={handleTogglePassword}>  
+                                        {showPassword ? <Visibility /> : <VisibilityOff />}
+                                    </IconButton>
+                                </InputAdornment>
+                            ),
+                        }}
+                        InputLabelProps={{ style: { fontSize: "20px" } }}
                     />
 
                     {error && (
