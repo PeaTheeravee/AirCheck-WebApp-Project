@@ -3,7 +3,7 @@ header {
     justify-content: space-between;
     align-items: center;
     padding: 10px;
-    background-color: #052463;
+    background-color: #3751c4;
     color: white;
 }
 
@@ -27,10 +27,15 @@ header {
     box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.2); 
 }
 
-.title {
-    font-size: 35px; 
-    font-weight: bold; 
+.logo {
+    height: 80px; 
+    width: auto;
     margin-left: 20px;
+}
+
+.logologin {
+    height: 150px; 
+    width: auto;
 }
 
 .background {

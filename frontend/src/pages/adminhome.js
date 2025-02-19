@@ -734,7 +734,14 @@ const AdminHome = () => {
         <div className="background">
             {/* Header */}
             <header className="header">
-                <h1 className="title" sx={{ marginBottom: "30px" }}>Admin Home</h1>
+            <img 
+                src={require('../assets/logo.png')} 
+                alt="AirCheck" 
+                className="logo" 
+                style={{ cursor: "pointer"}} 
+                onClick={() => navigate("/home")} 
+            />
+
                 <button className="profile-icon" onClick={setIsUserDetailsDialogOpen}>
                     <AccountCircleIcon fontSize="large" />
                 </button>

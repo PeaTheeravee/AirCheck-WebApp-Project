@@ -66,12 +66,14 @@ const Login = () => {
                     border: "1px solid #ccc", 
                     borderRadius: "8px", 
                     boxShadow: 3, 
-                    width: 300, 
+                    width: 500, 
                     textAlign: "center",
                     backgroundColor: "rgba(255, 255, 255, 0.8)" 
                 }}
             >
-                <Typography variant="h5" mb={2}>Login</Typography>
+                <Typography>
+                    <img src={require('../assets/logo.png')} alt="AirCheck" className="logologin" />
+                </Typography>
                 <form>
                     <TextField
                         label="Username"

@@ -267,7 +267,7 @@ const Home = () => {
         <div className="background">
             {/* Header */}
             <header className="header">
-                <h1 className="title">AirCheck</h1>
+                <img src={require('../assets/logo.png')} alt="AirCheck" className="logo" />
                 <button className="profile-icon" onClick={() => navigate("/login")}>
                     <AccountCircleIcon fontSize="large" />
                 </button>
