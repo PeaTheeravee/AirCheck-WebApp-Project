@@ -15,6 +15,19 @@ services:
       - .:/app
     command: poetry run uvicorn "notebook.main:create_app" --host 0.0.0.0 --port 8000 --reload
 
+  frontend:
+    build:
+      context: ../frontend  # ใช้ Dockerfile ที่อยู่ใน frontend
+    container_name: frontend-test
+    ports:
+      - "3000:80"  # เปิด port 3000 สำหรับ frontend (React)
+    environment:
+      - REACT_APP_API_URL=http://backend:8000  # เชื่อมกับ backend ที่ port 8000
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app  # เชื่อมโยงโค้ดของ frontend
+
   postgres:
     image: postgres:16
     container_name: D2-server-test
