@@ -34,6 +34,13 @@ async def create_device(
             status_code=400, detail="There is already a device with the same name."
         )
 
+    # ตรวจสอบว่า location มีอยู่แล้วในระบบหรือไม่
+    existing_location = await session.exec(select(DBDevice).where(DBDevice.location == device.location))
+    if existing_location.one_or_none():
+        raise HTTPException(
+            status_code=400, detail="There is already a device in the same location."
+        )
+    
     # เพิ่มข้อมูลผู้ใช้ในอุปกรณ์
     data = device.model_dump()
     data['user_id'] = current_user.id
