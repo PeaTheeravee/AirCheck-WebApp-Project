@@ -69,7 +69,7 @@ const AdminHome = () => {
     const [newDeviceData, setNewDeviceData] = useState({ device_name: "", location: ""});
     const [monthsToDelete, setMonthsToDelete] = useState(1);
 
-    const [showPassword, setShowPassword] = useState({ current: false, new: false });
+    const [showPassword, setShowPassword] = useState({ current: false, new: false, create: false, });
     const [isUserDetailsDialogOpen, setIsUserDetailsDialogOpen] = useState(false);
     const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
     const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
@@ -109,6 +109,7 @@ const AdminHome = () => {
 
     const toggleCreateDialog = () => {
         setNewUser({ username: "", firstName: "", lastName: "", password: "" }); 
+        setShowPassword({ new: false, confirm: false }); // รีเซ็ตให้เป็นซ่อนรหัสเสมอ
         setIsCreateDialogOpen(!isCreateDialogOpen);
     };
 
@@ -1073,12 +1074,21 @@ const AdminHome = () => {
                     />
                     <TextField
                         label="Password"
-                        type="password"
+                        type={showPassword.create ? "text" : "password"}
                         fullWidth
                         margin="dense"
                         value={newUser.password}
                         onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-                        InputProps={{ style: { fontSize: "20px" } }} 
+                        InputProps={{
+                            style: { fontSize: "20px" },
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton onClick={() => handleTogglePassword("create")}>
+                                        {showPassword.create ? <Visibility /> : <VisibilityOff />}
+                                    </IconButton>
+                                </InputAdornment>
+                            ),
+                        }}
                         InputLabelProps={{ style: { fontSize: "20px" } }} 
                     />
                     {error && (

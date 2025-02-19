@@ -40,6 +40,13 @@ async def create(
             detail="A user with the same last_name already exists.",
         )
 
+    # ตรวจสอบรหัสผ่านต้องมากกว่าหรือเท่ากับ 8 ตัว
+    if len(user_create.password) < 8:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password must be longer than 8 characters.",
+        )
+    
     # สร้างผู้ใช้ใหม่โดยตั้ง role เป็น "admin"
     user = DBUser(
         username=user_create.username,
