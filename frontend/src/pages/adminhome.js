@@ -48,6 +48,7 @@ const AdminHome = () => {
 
     const [role, setRole] = useState("");
     const [userData, setUserData] = useState(null);
+    
     const [users, setUsers] = useState([]);
     const [devices, setDevices] = useState([]);
 
@@ -174,7 +175,13 @@ const AdminHome = () => {
                 method: "GET",
                 credentials: "include",
             });
+
             if (!response.ok) {
+                // หากเป็นสถานะ 401 Unauthorized
+                if (response.status === 401) {
+                    navigate("/login"); // เด้งไปหน้า login ทันที
+                    return;
+                }
                 const errorData = await response.json();
                 throw new Error(errorData.detail || "Failed to fetch user details.");
             }
@@ -397,7 +404,11 @@ const AdminHome = () => {
                 throw new Error(errorData.detail || "Logout failed.");
             }
 
+            // รีเซ็ตค่าต่างๆ หลัง Logout
+            setUserData(null);
+            setRole("");
             navigate("/home");
+
         } catch (err) {
             setError(err.message);
             setTimeout(() => setError(""), 2000);
