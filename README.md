@@ -22,10 +22,10 @@ user_id คือ บัญชีเราที่ Login
   "password": "password"
 }
 {
-  "username": "adminTheeravee",
-  "first_name": "Admin",
-  "last_name": "PeaKub",
-  "password": "238238"
+  "username": "admin2",
+  "first_name": "Firstname2",
+  "last_name": "Lastname2",
+  "password": "password2"
 }
 
 superadmin = DBUser(

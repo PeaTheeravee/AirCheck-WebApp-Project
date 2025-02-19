@@ -177,8 +177,8 @@ const AdminHome = () => {
             });
 
             if (!response.ok) {
-                // หากเป็นสถานะ 401 Unauthorized
-                if (response.status === 401) {
+                // หากเป็นสถานะ 400 หรือ 401
+                if (response.status === 401 || response.status === 400) {
                     navigate("/login"); // เด้งไปหน้า login ทันที
                     return;
                 }
