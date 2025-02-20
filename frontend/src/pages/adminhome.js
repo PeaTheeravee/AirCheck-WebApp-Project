@@ -819,7 +819,7 @@ const AdminHome = () => {
                                 <TableBody>
                                     {loading ? (
                                         <TableRow>
-                                            <TableCell colSpan={4} align="center">
+                                            <TableCell colSpan={4} align="center" style={TStyle}>
                                                 Loading...
                                             </TableCell>
                                         </TableRow>
@@ -940,7 +940,7 @@ const AdminHome = () => {
                                 <TableBody>
                                     {deviceLoading ? (
                                         <TableRow>
-                                            <TableCell colSpan={4} align="center">
+                                            <TableCell colSpan={4} align="center" style={TStyle}>
                                                 Loading...
                                             </TableCell>
                                         </TableRow>
