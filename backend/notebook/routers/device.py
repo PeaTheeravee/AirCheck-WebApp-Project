@@ -239,7 +239,7 @@ async def delete_data_by_month(
     detects = detect_result.all()
 
     if not daily_averages and not detects:
-        raise HTTPException(status_code=404, detail="No daily average or detect data found for the provided API Key.")
+        raise HTTPException(status_code=404, detail="The daily average data for this device is not available.")
 
     # จัดกลุ่มข้อมูล daily_average ตามเดือน
     grouped_daily_avg = {}
