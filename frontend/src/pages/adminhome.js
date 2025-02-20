@@ -1182,7 +1182,7 @@ const AdminHome = () => {
             {/* Pop-Up Change Someone Password */}
             <Dialog open={isChangeSomeonePasswordDialogOpen} onClose={toggleChangeSomeonePasswordDialog}>
                 <DialogTitle style={HStyle}>
-                    The user password you changed is <strong>{targetUserName}</strong>
+                    The password you changed for the user is <strong>{targetUserName}</strong>
                 </DialogTitle>
                 <DialogContent>
                     <TextField
