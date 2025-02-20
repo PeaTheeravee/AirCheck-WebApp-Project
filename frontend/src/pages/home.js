@@ -47,6 +47,8 @@ const TStyle = {
 };
 
 const Home = () => {
+    const API_BASE_URL = "http://localhost:8000";
+
     const navigate = useNavigate();
     const [isScoreDialogOpen, setIsScoreDialogOpen] = useState(false);
 
@@ -104,7 +106,7 @@ const Home = () => {
     const fetchDevices = useCallback(async () => {
         setLoading(true);
         try {
-            const response = await fetch(`http://localhost:8000/devices/all?page=${currentPage + 1}&size=${pageSize}`, {
+            const response = await fetch(`${API_BASE_URL}/devices/all?page=${currentPage + 1}&size=${pageSize}`, {
                 method: "GET",
                 credentials: "include",
             });
@@ -127,7 +129,7 @@ const Home = () => {
     // ฟังก์ชันดึงข้อมูล showdetects
     const fetchShowdetects = useCallback(async () => {
         try {
-            const response = await fetch(`http://localhost:8000/showdetect/all?page=${currentPage + 1}&size=${pageSize}`, {
+            const response = await fetch(`${API_BASE_URL}/showdetect/all?page=${currentPage + 1}&size=${pageSize}`, {
                 method: "GET",
                 credentials: "include",
             });
@@ -148,7 +150,7 @@ const Home = () => {
     // ฟังก์ชันดึงข้อมูล score
     const fetchScoreData = useCallback(async () => {
         try {
-            const response = await fetch(`http://localhost:8000/scores/${targetApiKey}`, {
+            const response = await fetch(`${API_BASE_URL}/scores/${targetApiKey}`, {
                 method: "GET",
                 credentials: "include",
             });
@@ -165,7 +167,7 @@ const Home = () => {
     // ฟังก์ชันดึงข้อมูล ค่าเฉลี่ยรายวัน
     const fetchDailyAverages = useCallback(async () => {
         try {
-            const response = await fetch(`http://localhost:8000/avg/daily_averages/${targetApiKey}`, {
+            const response = await fetch(`${API_BASE_URL}/avg/daily_averages/${targetApiKey}`, {
                 method: "GET",
                 credentials: "include",
             });

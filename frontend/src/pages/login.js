@@ -5,6 +5,8 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import backgroundImage from "../assets/background.jpg"; 
 
 const Login = () => {
+    const API_BASE_URL = "http://localhost:8000";
+
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false); 
@@ -26,7 +28,7 @@ const Login = () => {
         }
     
         try {
-            const response = await fetch("http://localhost:8000/login", {
+            const response = await fetch(`${API_BASE_URL}/login`, {
                 method: "POST",
                 headers: { "Content-Type": "application/x-www-form-urlencoded" },
                 credentials: "include", 
@@ -68,7 +70,7 @@ const Login = () => {
                     boxShadow: 3, 
                     width: 500, 
                     textAlign: "center",
-                    backgroundColor: "rgba(255, 255, 255, 0.8)" 
+                    backgroundColor: "rgba(255, 255, 255, 0.6)" 
                 }}
             >
                 <Typography>

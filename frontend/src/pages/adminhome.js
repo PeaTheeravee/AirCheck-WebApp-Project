@@ -42,6 +42,8 @@ const BStyle = {
 };
 
 const AdminHome = () => {
+    const API_BASE_URL = "http://localhost:8000";
+
     const navigate = useNavigate();
     const [isDialogOpen] = useState(false);
     const [activeTab, setActiveTab] = useState("devices"); // ควบคุมตารางที่แสดง
@@ -170,15 +172,15 @@ const AdminHome = () => {
     //================================================================================================
 
     // ดึงข้อมูลผู้ใช้ที่ล็อกอินอยู่
-    const fetchUserData = async () => {
+    const fetchUserData = useCallback(async () => {
         try {
-            const response = await fetch("http://localhost:8000/users/me", {
+            const response = await fetch(`${API_BASE_URL}/users/me`, {
                 method: "GET",
                 credentials: "include",
             });
 
             if (!response.ok) {
-                // หากเป็นสถานะ 400 หรือ 401
+                // หากเป็นสถานะ 400(ผู้ใช้ไม่ได้ active) หรือ 401 (ผู้ใช้ไม่ได้ login)
                 if (response.status === 401 || response.status === 400) {
                     navigate("/login"); // เด้งไปหน้า login ทันที
                     return;
@@ -194,7 +196,7 @@ const AdminHome = () => {
             setError(err.message);
             setTimeout(() => setError(""), 2000); 
         }
-    };
+    }, [navigate]);
 
     // ฟังก์ชันสำหรับสร้างผู้ใช้ใหม่
     const handleCreateAccount = async () => {
@@ -205,7 +207,7 @@ const AdminHome = () => {
         }
     
         try {
-            const response = await fetch("http://localhost:8000/users/create", {
+            const response = await fetch(`${API_BASE_URL}/users/create`, {
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },
@@ -253,7 +255,7 @@ const AdminHome = () => {
         }
 
         try {
-            const response = await fetch("http://localhost:8000/users/change_password", {
+            const response = await fetch(`${API_BASE_URL}/users/change_password`, {
                 method: "PUT",
                 credentials: "include",
                 headers: {
@@ -295,7 +297,7 @@ const AdminHome = () => {
         }
     
         try {
-            const response = await fetch(`http://localhost:8000/users/${targetUserId}/change_password`, {
+            const response = await fetch(`${API_BASE_URL}/users/${targetUserId}/change_password`, {
                 method: "PUT",
                 credentials: "include",
                 headers: {
@@ -331,7 +333,7 @@ const AdminHome = () => {
     // ฟังก์ชันสำหรับลบผู้ใช้
     const handleDeleteUser = async (userId) => {
         try {
-            const response = await fetch(`http://localhost:8000/users/${targetUserId}`, {
+            const response = await fetch(`${API_BASE_URL}/users/${targetUserId}`, {
                 method: "DELETE",
                 credentials: "include",
             });
@@ -362,7 +364,7 @@ const AdminHome = () => {
         }
 
         try {
-            const response = await fetch(`http://localhost:8000/users/${targetUserId}/update`, {
+            const response = await fetch(`${API_BASE_URL}/users/${targetUserId}/update`, {
                 method: "PUT",
                 credentials: "include",
                 headers: {
@@ -395,7 +397,7 @@ const AdminHome = () => {
     // ฟังก์ชันสำหรับ logout
     const handleLogout = async () => {
         try {
-            const response = await fetch("http://localhost:8000/logout", {
+            const response = await fetch(`${API_BASE_URL}/logout`, {
                 method: "POST",
                 credentials: "include",
             });
@@ -421,7 +423,7 @@ const AdminHome = () => {
         setLoading(true); // เริ่มโหลดข้อมูล
         try {
             const response = await fetch(
-                `http://localhost:8000/users/all?page=${currentPage + 1}&size=${pageSize}`,
+                `${API_BASE_URL}/users/all?page=${currentPage + 1}&size=${pageSize}`,
                 {
                     method: "GET",
                     credentials: "include",
@@ -447,7 +449,7 @@ const AdminHome = () => {
     const fetchDevices = useCallback(async () => {
         setDeviceLoading(true);
         try {
-            const response = await fetch(`http://localhost:8000/devices/all?page=${devicePage + 1}&size=${deviceSize}`, {
+            const response = await fetch(`${API_BASE_URL}/devices/all?page=${devicePage + 1}&size=${deviceSize}`, {
                 method: "GET",
                 credentials: "include",
             });
@@ -476,7 +478,7 @@ const AdminHome = () => {
         }
             
         try {
-            const response = await fetch("http://localhost:8000/devices/create", {
+            const response = await fetch(`${API_BASE_URL}/devices/create`, {
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },
@@ -518,7 +520,7 @@ const AdminHome = () => {
         }         
         
         try {
-            const response = await fetch(`http://localhost:8000/devices/update/${targetApiKey}`, {
+            const response = await fetch(`${API_BASE_URL}/devices/update/${targetApiKey}`, {
                 method: "PUT",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },
@@ -549,7 +551,7 @@ const AdminHome = () => {
     // ฟังก์ชันลบอุปกรณ์
     const handleDeleteDevice = async () => {
         try {
-            const response = await fetch(`http://localhost:8000/devices/delete/${targetApiKey}`, {
+            const response = await fetch(`${API_BASE_URL}/devices/delete/${targetApiKey}`, {
                 method: "DELETE",
                 credentials: "include",
             });
@@ -580,7 +582,7 @@ const AdminHome = () => {
         }
     
         try {
-            const response = await fetch(`http://localhost:8000/devices/delete_by_month/${targetApiKey}?months_to_delete=${monthsToDelete}`, {
+            const response = await fetch(`${API_BASE_URL}/devices/delete_by_month/${targetApiKey}?months_to_delete=${monthsToDelete}`, {
                 method: "DELETE",
                 credentials: "include",
             });
@@ -604,7 +606,7 @@ const AdminHome = () => {
     // ฟังก์ชันดึงข้อมูล timestamps ตาม API Key
     const fetchTimestamps = useCallback(async () => {
         try {
-            const response = await fetch(`http://localhost:8000/devices/timestamps/${targetApiKey}`, {
+            const response = await fetch(`${API_BASE_URL}/devices/timestamps/${targetApiKey}`, {
                 method: "GET",
                 credentials: "include",
             });
@@ -696,7 +698,7 @@ const AdminHome = () => {
     // ดึงข้อมูลผู้ใช้ตอนโหลดหน้า
     useEffect(() => {
         fetchUserData();
-    }, []);
+    }, [fetchUserData]);
     
     useEffect(() => {
         if (activeTab === "users") {
@@ -711,14 +713,14 @@ const AdminHome = () => {
         if (isDialogOpen) {
             fetchUserData();
         }
-    }, [isDialogOpen]);
+    }, [isDialogOpen,fetchUserData]);
 
     // ใช้ useEffect ดึงข้อมูลเมื่อเปิด User Details Dialog
     useEffect(() => {
         if (isUserDetailsDialogOpen) {
             fetchUserData(); // เรียกตอนเปิด Dialog
         }
-    }, [isUserDetailsDialogOpen]);
+    }, [isUserDetailsDialogOpen,fetchUserData]);
 
     // เรียก API เมื่อ Pop-Up เปิดขึ้น
     useEffect(() => {
