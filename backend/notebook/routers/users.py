@@ -40,11 +40,11 @@ async def create(
             detail="A user with the same last_name already exists.",
         )
 
-    # ตรวจสอบรหัสผ่านต้องมากกว่าหรือเท่ากับ 8 ตัว
+    # ตรวจสอบรหัสผ่านต้องไม่น้อยกว่า 8 
     if len(user_create.password) < 8:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Password must be longer than 8 characters.",
+            detail="Password must be at least 8 characters long.",
         )
     
     # สร้างผู้ใช้ใหม่โดยตั้ง role เป็น "admin"
@@ -169,6 +169,13 @@ async def change_password(
             detail="Incorrect current password.",
         )
 
+    # ตรวจสอบรหัสผ่านต้องไม่น้อยกว่า 8 ตัวอักษร
+    if len(password_update.new_password) < 8:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password must be at least 8 characters long.",
+        )
+    
     # ตั้งค่ารหัสผ่านใหม่
     await current_user.set_password(password_update.new_password)
 
@@ -194,6 +201,13 @@ async def change_password_for_others(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="New password and confirmation password do not match.",
+        )
+    
+    # ตรวจสอบว่ารหัสผ่านต้องไม่น้อยกว่า 8 ตัวอักษร
+    if len(password_update.new_password) < 8:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password must be at least 8 characters long.",
         )
     
     # ดึงข้อมูลผู้ใช้ที่ต้องการเปลี่ยนรหัสผ่าน
