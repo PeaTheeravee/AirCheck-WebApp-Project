@@ -4,9 +4,9 @@ import { Box, TextField, Button, Typography, IconButton, InputAdornment } from "
 import { Visibility, VisibilityOff } from "@mui/icons-material"; 
 import backgroundImage from "../assets/background.jpg"; 
 
-const Login = () => {
-    const API_BASE_URL = "http://localhost:8000";
+import { API_BASE_URL } from "./config";
 
+const Login = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false); 

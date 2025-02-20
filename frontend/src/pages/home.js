@@ -37,6 +37,8 @@ import {
 } from "recharts";
 import "./decorate.css";
 
+import { API_BASE_URL } from "./config";
+
 const HStyle = {
     fontSize: "25px",
     borderBottom: "2px solid black", 
@@ -47,8 +49,6 @@ const TStyle = {
 };
 
 const Home = () => {
-    const API_BASE_URL = "http://localhost:8000";
-
     const navigate = useNavigate();
     const [isScoreDialogOpen, setIsScoreDialogOpen] = useState(false);
 

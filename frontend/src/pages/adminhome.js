@@ -23,6 +23,8 @@ import {
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import "./decorate.css";
 
+import { API_BASE_URL } from "./config";
+
 const HStyle = {
     fontSize: "25px", 
 }; 
@@ -42,8 +44,6 @@ const BStyle = {
 };
 
 const AdminHome = () => {
-    const API_BASE_URL = "http://localhost:8000";
-
     const navigate = useNavigate();
     const [isDialogOpen] = useState(false);
     const [activeTab, setActiveTab] = useState("devices"); // ควบคุมตารางที่แสดง
