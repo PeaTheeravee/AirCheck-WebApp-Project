@@ -90,7 +90,7 @@ const Login = () => {
                     />
                     <TextField
                         label="Password"
-                        type={showPassword ? "text" : "password"} // ✅ เปลี่ยน type เป็น 'text' เมื่อ showPassword เป็น true
+                        type={showPassword ? "text" : "password"} 
                         variant="outlined"
                         fullWidth
                         margin="normal"

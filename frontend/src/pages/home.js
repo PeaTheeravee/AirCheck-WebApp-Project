@@ -56,7 +56,7 @@ const Home = () => {
     const [selectedParameter, setSelectedParameter] = useState("avg_pm2_5");
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); // ค่าเริ่มต้นเป็นปีปัจจุบัน
     const [selectedMonth, setSelectedMonth] = useState((new Date().getMonth() + 1).toString().padStart(2, "0")); // ค่าเริ่มต้นเป็นเดือนปัจจุบัน
-    const [availableYears, setAvailableYears] = useState([]); // ✅ เก็บรายการปีที่มีอยู่
+    const [availableYears, setAvailableYears] = useState([]); // เก็บรายการปีที่มีอยู่
 
     const [devices, setDevices] = useState([]);
     const [showdetects, setShowdetects] = useState([]);
@@ -212,7 +212,7 @@ const Home = () => {
 
     //================================================================================================
 
-    // ✅ รวมข้อมูล showdetect กับ devices
+    // รวมข้อมูล showdetect กับ devices
     const devicesWithShowdetects = filteredDevices.map(device => {
         const matchingShowdetect = showdetects.find(show => show.api_key === device.api_key);
         return {
@@ -366,7 +366,7 @@ const Home = () => {
                 />
             </div>
 
-            {/* ✅ Popup แสดงข้อมูล Score */}
+            {/* Popup แสดงข้อมูล Score */}
             <Dialog 
                 open={isScoreDialogOpen} 
                 onClose={toggleScoreDialog}
@@ -482,7 +482,7 @@ const Home = () => {
                                         <TableRow>
                                             <TableCell style={HStyle}>Parameter</TableCell>
                                             <TableCell style={HStyle}>Quality</TableCell>
-                                            <TableCell style={HStyle}>Fixed Value</TableCell>
+                                            <TableCell style={HStyle}>Basic troubleshooting</TableCell>
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>

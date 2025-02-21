@@ -725,7 +725,7 @@ const AdminHome = () => {
     // เรียก API เมื่อ Pop-Up เปิดขึ้น
     useEffect(() => {
         if (isDeleteDataDialogOpen && targetApiKey) {
-            setTimestamps([]); // ✅ รีเซ็ต timestamps ก่อนโหลดใหม่
+            setTimestamps([]); // รีเซ็ต timestamps ก่อนโหลดใหม่
             fetchTimestamps();
         }
     }, [isDeleteDataDialogOpen, targetApiKey, fetchTimestamps]);
