@@ -3,7 +3,7 @@
 เว็บแอปพลิเคชันตรวจวัดคุณภาพอากาศด้วยอุปกรณ์ IOT โปรเจครายวิชา 240-404 Cooperative Education 4th Year 2/2567 พัฒนาโดยใช้ React เป็น Frontend และ FastAPI เป็น Backend
 
 # Slide Presentation 
-https://drive.google.com/file/d/1sJNg1SfGyt8weLj_ZBwsT178cjC7YJ5S/view?usp=drive_link
+https://drive.google.com/file/d/1sJNg1SfGyt8weLj_ZBwsT178cjC7YJ5S/view?usp=sharing
 
 <img width="1540" height="800" alt="Image" src="https://github.com/user-attachments/assets/3c0eb2d7-55b4-4aa5-a74c-aa2ef7a304de" />
 
